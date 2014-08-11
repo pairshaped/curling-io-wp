@@ -14,4 +14,4 @@ The routes / pages will be:
 We also need an embeddable widget for the sidebar:
 [http://widgets.tothebutton.com/stats/scoreboard_mini.html](http://widgets.tothebutton.com/stats/scoreboard_mini.html)
 
-[http://widgets.tothebutton.com/stats/scoreboard_mini.html](http://widgets.tothebutton.com/)
+[http://widgets.tothebutton.com](http://widgets.tothebutton.com/)
