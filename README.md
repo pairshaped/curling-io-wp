@@ -12,11 +12,11 @@ The routes / pages will be:
 * /stats/games/[id]/boxscore
 
 Here are some real corresponding pages which you can hit via iframe:
-* http://curling.dev/stats/competitions?access_key=O5s2XesQLts
-* http://curling.dev/stats/competitions/1201-curling-canada-cup/teams?access_key=O5s2XesQLts
-* http://curling.dev/stats/competitions/1201-curling-canada-cup/standings?access_key=O5s2XesQLts
-* http://curling.dev/stats/competitions/1201-curling-canada-cup/scoreboard?access_key=O5s2XesQLts
-* http://curling.dev/stats/games/2401?access_key=O5s2XesQLts
+* http://tothebutton.com/stats/competitions?access_key=O5s2XesQLts
+* http://tothebutton.com/stats/competitions/1201-curling-canada-cup/teams?access_key=O5s2XesQLts
+* http://tothebutton.com/stats/competitions/1201-curling-canada-cup/standings?access_key=O5s2XesQLts
+* http://tothebutton.com/stats/competitions/1201-curling-canada-cup/scoreboard?access_key=O5s2XesQLts
+* http://tothebutton.com/stats/games/2401?access_key=O5s2XesQLts
 
 We also need an embeddable widget for the sidebar:
 [http://widgets.tothebutton.com/stats/scoreboard_mini.html](http://widgets.tothebutton.com/stats/scoreboard_mini.html)
