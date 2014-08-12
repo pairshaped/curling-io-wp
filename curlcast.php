@@ -62,26 +62,7 @@ if(!class_exists('curlcast'))
 							'type' 		=> 'text'
 							)
 						)
-					)/*,
-				'templates' => array(
-					'title' => __('Templates', 'curlcast'),
-					'settings' =>  array(
-						'curlcast_template_widget' => array (
-							'name' 		=> __('Widget', 'curlcast'),
-							'helptext'	=> __('Template for widget', 'curlcast'),
-							'default'	=> '',
-							'required'	=> '',
-							'type' 		=> 'textarea'
-							),
-						'curlcast_template_page' => array (
-							'name' 		=> __('Page', 'curlcast'),
-							'helptext'	=> __('Template for page', 'curlcast'),
-							'default'	=> '',
-							'required'	=> '',
-							'type' 		=> 'textarea'
-							)
-						)
-					)*/
+					)
 				);
 
 			//Add settings page
@@ -95,7 +76,7 @@ if(!class_exists('curlcast'))
 				add_action('init', array('curlcast', 'main'), 1);
 				add_filter('query_vars', array('curlcast', 'query_vars'), 10);
 				add_action('admin_notices', array('curlcast', 'admin_notice'));
-				//add_action('admin_notices', array('curlcast', 'check_for_new_version'));
+
 				add_action('template_redirect', array('curlcast', 'template_redirect'), 11);
 				add_action('wp_loaded', array('curlcast', 'flush_rules'));
 				add_action('widgets_init', array('curlcast', 'load_widget'));
@@ -117,7 +98,6 @@ if(!class_exists('curlcast'))
 					add_option($option, $params['default']);
 					}
 				}
-			add_option('curlcast_lastcheck', 0);
 			}
 
 		/**
@@ -418,24 +398,6 @@ if(!class_exists('curlcast'))
 				{
 				return __('Settings have been updated', 'curlcast');
 				}
-			}
-
-		/**
-		 * Auto updates
-		 */
-		function check_for_new_version()
-			{
-			$last_check = get_option('curlcast_lastcheck');
-			$last_check = intval($last_check);
-    		if($last_check + 86400 > time()) return;
-
-    		$latest_version = file_get_contents(WP_CURLCAST_URL_CHECK);
-
-    		if($latest_version !== WP_CURLCAST_VERSION)
-    			{
-    			echo '<div class="error fade"><p>'.sprintf(__('There\'s a new version of Curlcast available! You should <a href="%1$s">upgrade now</a>', 'curlcast'), WP_CURLCAST_URL_UPDATE).'</p></div>';
-    			}
-    		update_option('curlcast_lastcheck', time());
 			}
 
 		/**
