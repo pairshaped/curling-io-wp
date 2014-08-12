@@ -8,6 +8,10 @@ Author: Alex Ulko
 if(!class_exists('curlcast'))
 	{
 	define('WP_CURLCAST_VERSION', '1.0.0');
+
+	define('WP_CURLCAST_PAGE_URL', 'http://tothebutton.com/stats');
+	define('WP_CURLCAST_WIDGET_URL', 'http://widgets.tothebutton.com/stats/scoreboard_mini.html');
+
 	define('WP_CURLCAST_URL_CHECK', 'http://curlcast.ulko.net/check.php');
 	define('WP_CURLCAST_URL_UPDATE', 'http://curlcast.ulko.net/update.php');
 
@@ -37,8 +41,8 @@ if(!class_exists('curlcast'))
 									)
 								),
 						'curlcast_api_key' => array (
-							'name' 		=> __('API Key', 'curlcast'),
-							'helptext'	=> __('Key for API requests', 'curlcast'),
+							'name' 		=> __('Access Key', 'curlcast'),
+							'helptext'	=> __('Key for requests', 'curlcast'),
 							'default'	=> '',
 							'required'	=> 'yes',
 							'type' 		=> 'text'
@@ -50,15 +54,15 @@ if(!class_exists('curlcast'))
 							'required'	=> 'yes',
 							'type' 		=> 'text'
 							),
-						'curlcast_page_slug' => array (
-							'name' 		=> __('Page slug', 'curlcast'),
-							'helptext'	=> __('Page slug used for routing', 'curlcast'),
+						'curlcast_page_prefix' => array (
+							'name' 		=> __('Page prefix', 'curlcast'),
+							'helptext'	=> __('Page prefix used for routing', 'curlcast'),
 							'default'	=> 'stats',
 							'required'	=> 'yes',
 							'type' 		=> 'text'
 							)
 						)
-					),
+					)/*,
 				'templates' => array(
 					'title' => __('Templates', 'curlcast'),
 					'settings' =>  array(
@@ -77,8 +81,10 @@ if(!class_exists('curlcast'))
 							'type' 		=> 'textarea'
 							)
 						)
-					)
+					)*/
 				);
+			self::$curlcast_template_widget = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: {height}px;"></iframe>';
+			self::$curlcast_template_page = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: 800px;"></iframe>';
 
 			//Add settings page
 			add_action('admin_menu', array('curlcast', 'admin_menu'), 1);
@@ -168,8 +174,8 @@ if(!class_exists('curlcast'))
 		 */
 		function main()
 			{
-			$page_slug = get_option('curlcast_page_slug');
-			add_rewrite_rule($page_slug.'/(.*)$', 'index.php?curlcast_page=$matches[1]', 'top');
+			$page_prefix = get_option('curlcast_page_prefix');
+			add_rewrite_rule($page_prefix.'/(.*)$', 'index.php?curlcast_page=$matches[1]', 'top');
 			}
 
 		/**
@@ -178,8 +184,8 @@ if(!class_exists('curlcast'))
 		function flush_rules()
 			{
 			$rules = get_option('rewrite_rules');
-			$page_slug = get_option('curlcast_page_slug');
-			if(!isset($rules[$page_slug.'/(.*)$']))
+			$page_prefix = get_option('curlcast_page_prefix');
+			if(!isset($rules[$page_prefix.'/(.*)$']))
 				{
 				global $wp_rewrite;
 				$wp_rewrite->flush_rules(false);
@@ -222,9 +228,11 @@ if(!class_exists('curlcast'))
 		function process_routing($curlcast_array)
 			{
 			$access_key = get_option('curlcast_api_key');
-			$url = 'http://tothebutton.com/stats/'.implode('/', $curlcast_array).'?access_key='.$access_key;
+			$page_prefix = get_option('curlcast_page_prefix');
+			$url = WP_CURLCAST_PAGE_URL.'/'.implode('/', $curlcast_array).'?access_key='.$access_key.'&prefix='.$page_prefix;
 
-			$template = stripslashes(get_option('curlcast_template_page'));
+			//$template = stripslashes(get_option('curlcast_template_page'));
+			$template = self::$curlcast_template_page;
 			$template = str_replace('{url}', $url, $template);
 
 			return $template;
@@ -265,13 +273,16 @@ if(!class_exists('curlcast'))
 
     		if($message) echo $message.'<br/>';
 
-    		echo '<h2 class="nav-tab-wrapper">';
-			foreach(self::$tabs as $tab => $settings)
-				{
-				$class = ( $tab == $current ) ? ' nav-tab-active' : '';
-				echo '<a class="nav-tab'.$class.'" href="?page=curlcast/curlcast.php&tab='.$tab.'">'.$settings['title'].'</a>';
-				}
-			echo '</h2>';
+    		if(count(self::$tabs) > 1)
+    			{
+	    		echo '<h2 class="nav-tab-wrapper">';
+				foreach(self::$tabs as $tab => $settings)
+					{
+					$class = ( $tab == $current ) ? ' nav-tab-active' : '';
+					echo '<a class="nav-tab'.$class.'" href="?page=curlcast/curlcast.php&tab='.$tab.'">'.$settings['title'].'</a>';
+					}
+				echo '</h2>';
+    			}
 
 
 			foreach(self::$tabs as $tab => $settings)
@@ -434,9 +445,11 @@ if(!class_exists('curlcast'))
 
 				$height = $instance['height'];
 				$access_key = get_option('curlcast_api_key');
-				$url = 'http://widgets.tothebutton.com/stats/scoreboard_mini.html?access_key='.$access_key;
+				$page_prefix = get_option('curlcast_page_prefix');
+				$url = WP_CURLCAST_WIDGET_URL.'?access_key='.$access_key.'&prefix='.$page_prefix;
 
-				$template = stripslashes(get_option('curlcast_template_widget'));
+				//$template = stripslashes(get_option('curlcast_template_widget'));
+				$template = self::$curlcast_template_widget;
 				$template = str_replace('{url}', $url, $template);
 				$template = str_replace('{height}', $height, $template);
 
