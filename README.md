@@ -21,4 +21,4 @@ Here are some real corresponding pages which you can hit via iframe:
 We also need an embeddable widget for the sidebar:
 [http://widgets.tothebutton.com/stats/scoreboard_mini.html](http://widgets.tothebutton.com/stats/scoreboard_mini.html)
 
-[http://widgets.tothebutton.com](http://widgets.tothebutton.com/)
+[http://tothebutton.com/stats](http://tothebutton.com/stats)
