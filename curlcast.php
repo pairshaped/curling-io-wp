@@ -20,6 +20,8 @@ if(!class_exists('curlcast'))
 	class curlcast
 		{
 		static $tabs;
+		static $curlcast_template_widget = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: {height}px;"></iframe>';
+		static $curlcast_template_page = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: 800px;"></iframe>';
 
 		/**
 		Init all actions and hooks
@@ -48,11 +50,11 @@ if(!class_exists('curlcast'))
 							'type' 		=> 'text'
 							),
 						'curlcast_page_id' => array (
-							'name' 		=> __('Page ID', 'curlcast'),
-							'helptext'	=> __('Page ID used for routing', 'curlcast'),
+							'name' 		=> __('Page', 'curlcast'),
+							'helptext'	=> __('Page used for plugin routing', 'curlcast'),
 							'default'	=> '',
 							'required'	=> 'yes',
-							'type' 		=> 'text'
+							'type' 		=> 'dropdown_pages'
 							),
 						'curlcast_page_prefix' => array (
 							'name' 		=> __('Page prefix', 'curlcast'),
@@ -83,8 +85,6 @@ if(!class_exists('curlcast'))
 						)
 					)*/
 				);
-			self::$curlcast_template_widget = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: {height}px;"></iframe>';
-			self::$curlcast_template_page = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: 800px;"></iframe>';
 
 			//Add settings page
 			add_action('admin_menu', array('curlcast', 'admin_menu'), 1);
@@ -101,6 +101,7 @@ if(!class_exists('curlcast'))
 				add_action('template_redirect', array('curlcast', 'template_redirect'), 11);
 				add_action('wp_loaded', array('curlcast', 'flush_rules'));
 				add_action('widgets_init', array('curlcast', 'load_widget'));
+				//add_shortcode('curlcast', array('curlcast', 'shortcode'));
 				}
 			}
 
@@ -268,7 +269,7 @@ if(!class_exists('curlcast'))
 			if(!$current) $current = 'settings';
 
 			echo '<div class="wrap">
-					<h2>Curlcast</h2>
+					<h2>Curlcast Settings</h2>
 					<br />';
 
     		if($message) echo $message.'<br/>';
@@ -353,6 +354,23 @@ if(!class_exists('curlcast'))
 
 					case 'textarea':
 						$edit = '<textarea id="'.htmlspecialchars($option).'" name="'.htmlspecialchars($option).'" style="width:100%;height:70px;">'.htmlspecialchars(stripslashes($value)).'</textarea><p style="margin:10px 0;color:#aaa"><i>'.$help.'</i></p>';
+						break;
+
+					case 'dropdown_pages':
+
+						$args = array(
+							'depth' => 0,
+							'child_of' => 0,
+							'selected' => $value,
+							'echo' => 0,
+							'name' => $option,
+							'id' => '',
+							'show_option_none' => '',
+							'show_option_no_change' => '',
+							'option_none_value' => ''
+							);
+						$edit = wp_dropdown_pages($args);
+						$edit .= '<i style="color:#aaa">'.$help.'</i>';
 						break;
 					}
 
@@ -449,7 +467,7 @@ if(!class_exists('curlcast'))
 				$url = WP_CURLCAST_WIDGET_URL.'?access_key='.$access_key.'&prefix='.$page_prefix;
 
 				//$template = stripslashes(get_option('curlcast_template_widget'));
-				$template = self::$curlcast_template_widget;
+				$template = curlcast::$curlcast_template_widget;
 				$template = str_replace('{url}', $url, $template);
 				$template = str_replace('{height}', $height, $template);
 
