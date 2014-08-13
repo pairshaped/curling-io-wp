@@ -18,11 +18,11 @@ if(!class_exists('curlcast'))
 	class curlcast
 		{
 		static $tabs;
-		static $curlcast_template_widget = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: {height}px;"></iframe>';
-		static $curlcast_template_page = '<iframe src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: 800px;"></iframe>';
+		static $curlcast_template_widget = '<iframe id="stats-frame" src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: {height}px;"></iframe><script>document.domain = "tothebutton.com";</script>';
+		static $curlcast_template_page = '<iframe id="stats-frame" src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: 800px;"></iframe><script>document.domain = "tothebutton.com";</script>';
 
 		/**
-		Init all actions and hooks
+		* Create all actions and hooks
 		*/
 		function init()
 			{
@@ -80,12 +80,12 @@ if(!class_exists('curlcast'))
 				add_action('template_redirect', array('curlcast', 'template_redirect'), 11);
 				add_action('wp_loaded', array('curlcast', 'flush_rules'));
 				add_action('widgets_init', array('curlcast', 'load_widget'));
-				//add_shortcode('curlcast', array('curlcast', 'shortcode'));
+				add_shortcode('curlcast', array('curlcast', 'shortcode'));
 				}
 			}
 
 		/**
-		Install
+		* Install plugin
 		*/
 		function install()
 			{
@@ -101,14 +101,14 @@ if(!class_exists('curlcast'))
 			}
 
 		/**
-		Uninstall
+		* Uninstall plugin
 		*/
 		function uninstall()
 			{
 			}
 
 		/**
-		Admin plugin page
+		* Admin plugin page
 		*/
 		function admin_menu()
 	    	{
@@ -174,6 +174,9 @@ if(!class_exists('curlcast'))
 
 		/**
 		 * Parse query vars
+		 *
+		 * @param array
+		 * @return array
 		 */
 		function query_vars($query_vars)
 			{
@@ -183,6 +186,9 @@ if(!class_exists('curlcast'))
 
 		/**
 		 * Display
+		 *
+		 * @param array
+		 * @return html
 		 */
 		function template_redirect($params = array())
 			{
@@ -197,13 +203,15 @@ if(!class_exists('curlcast'))
 
 				$curlcast_array = explode('/',trim($curlcast_page,'/'));
 				$wp_query->post->post_content = self::process_routing($curlcast_array);
-				$withcomments = false;
 				}
 			}
 
 
 		/**
 		 * Process page routing
+		 *
+		 * @param array
+		 * @return html
 		 */
 		function process_routing($curlcast_array)
 			{
@@ -219,6 +227,15 @@ if(!class_exists('curlcast'))
 			}
 
 		/**
+		 * Shortcode
+		 */
+		function shortcode()
+			{
+			$curlcast_array = array('competitions');
+			return self::process_routing($curlcast_array);
+			}
+
+		/**
 		 * Init widget
 		 */
 		function load_widget()
@@ -228,6 +245,8 @@ if(!class_exists('curlcast'))
 
 		/**
 		 * Settings page
+		 *
+		 * @return html
 		 */
 		function settings()
 			{
@@ -279,6 +298,9 @@ if(!class_exists('curlcast'))
 
 		/**
 		 * Render form
+		 *
+		 * @param array
+		 * @return html
 		 */
 		function settings_form($settings)
 			{
@@ -372,6 +394,9 @@ if(!class_exists('curlcast'))
 
 		/**
 		 * Save settings
+		 *
+		 * @param array
+		 * @return string
 		 */
 		function update_settings($saved)
 			{
@@ -490,30 +515,35 @@ if(!class_exists('curlcast'))
 			{
 			/**
 			* The plugin current version
+			*
 			* @var string
 			*/
 			public $current_version;
 
 			/**
 			* The plugin remote update path
+			*
 			* @var string
 			*/
 			public $update_path;
 
 			/**
 			* Plugin Slug (plugin_directory/plugin_file.php)
+			*
 			* @var string
 			*/
 			public $plugin_slug;
 
 			/**
 			* Plugin name (plugin_file)
+			*
 			* @var string
 			*/
 			public $slug;
 
 			/**
 			* Initialize a new instance of the WordPress Auto-Update class
+			*
 			* @param string $current_version
 			* @param string $update_path
 			* @param string $plugin_slug
@@ -583,6 +613,7 @@ if(!class_exists('curlcast'))
 
 			/**
 			* Return the remote version
+			*
 			* @return string $remote_version
 			*/
 			public function getRemote_version()
@@ -597,6 +628,7 @@ if(!class_exists('curlcast'))
 
 			/**
 			* Get information about the remote version
+			*
 			* @return bool|object
 			*/
 			public function getRemote_information()
@@ -611,6 +643,7 @@ if(!class_exists('curlcast'))
 
 			/**
 			* Return the status of the plugin licensing
+			*
 			* @return boolean $remote_license
 			*/
 			public function getRemote_license()
@@ -626,7 +659,7 @@ if(!class_exists('curlcast'))
 
 
 	/**
-	Init plugin
+	* Init plugin
 	*/
 	function curlcast_main()
 		{
