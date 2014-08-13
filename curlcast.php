@@ -144,7 +144,7 @@ if (!class_exists('curlcast')) {
       add_menu_page('Curlcast Options', 'Curlcast', 8, __FILE__, array(
         'curlcast',
         'settings'
-      ), plugins_url('curlcast/settings.gif'));
+      ), plugins_url('settings.gif', __FILE__));
     }
 
     /**
