@@ -1,5 +1,5 @@
-# Install snotes
-# You will need to:
+# Install notes
+## You will need to:
 - Copy "curlcast" dir to "wp-content\plugins\" or istall using zip archive
 Replace config options:
 * define('WP_CURLCAST_PAGE_URL', 'http://tothebutton.com/stats');
