@@ -211,7 +211,7 @@ if(!class_exists('curlcast'))
 		 */
 		function enqueue_styles()
 			{
-			wp_enqueue_style('curlcast-style', plugins_url('curlcast.css', __FILE__ ));
+			wp_enqueue_style('curlcast-style', plugins_url('curlcast-stats.css', __FILE__ ));
 			}
 
 
@@ -225,7 +225,8 @@ if(!class_exists('curlcast'))
 			{
 			$access_key = get_option('curlcast_api_key');
 			$page_prefix = get_option('curlcast_page_prefix');
-			$url = WP_CURLCAST_PAGE_URL.'/'.implode('/', $curlcast_array).'?access_key='.$access_key.'&prefix='.$page_prefix;
+			$base_url = get_site_url().'/'.$page_prefix;
+			$url = WP_CURLCAST_PAGE_URL.'/'.implode('/', $curlcast_array).'?access_key='.urlencode($access_key).'&base_url='.urlencode($base_url);
 
 			$section = array_pop($curlcast_array);
 			$section = preg_replace("/[^a-z0-9]+/", '', $section);
@@ -238,7 +239,7 @@ if(!class_exists('curlcast'))
 			$template = file_get_contents($template_file);
 			$template = str_replace('{url}', $url, $template);
 
-			$template .= '<script src="'.plugins_url('curlcast.js', __FILE__).'"></script>';
+			$template .= '<script src="'.plugins_url('curlcast-stats.js', __FILE__).'"></script>';
 
 			return $template;
 			}
@@ -477,7 +478,8 @@ if(!class_exists('curlcast'))
 				$height = $instance['height'];
 				$access_key = get_option('curlcast_api_key');
 				$page_prefix = get_option('curlcast_page_prefix');
-				$url = WP_CURLCAST_WIDGET_URL.'?access_key='.$access_key.'&prefix='.$page_prefix;
+				$base_url = get_site_url().'/'.$page_prefix;
+				$url = WP_CURLCAST_WIDGET_URL.'?access_key='.urlencode($access_key).'&base_url='.urlencode($base_url);
 
 				$template = file_get_contents(plugin_dir_path(__FILE__).'templates/scoreboard_mini.php');
 				$template = str_replace('{url}', $url, $template);
