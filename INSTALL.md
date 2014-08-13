@@ -1,5 +1,5 @@
-# Install notes
-## You will need to:
+## Install notes
+
 Copy "curlcast" dir to "wp-content\plugins\" or istall using zip archive
 
 Replace config options:
