@@ -16,4 +16,4 @@ with your own.
 
 Copy **update.php** to your server, put **update.zip** with a new version right next to it. 
 
-**update.zip** contains "curlcast" dir with all files inside this dir, not in root of archive.
+**update.zip** contains **curlcast** dir with all files inside this dir, not in root of archive.
