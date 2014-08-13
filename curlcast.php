@@ -18,8 +18,6 @@ if(!class_exists('curlcast'))
 	class curlcast
 		{
 		static $tabs;
-		static $curlcast_template_widget = '<iframe id="stats-frame" src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: {height}px;"></iframe><script>document.domain = "tothebutton.com";</script>';
-		static $curlcast_template_page = '<iframe id="stats-frame" src="{url}" frameborder="0" border="0" cellspacing="0" style="border-style: none;width: 100%; height: 800px;"></iframe><script>document.domain = "tothebutton.com";</script>';
 
 		/**
 		* Create all actions and hooks
@@ -80,6 +78,7 @@ if(!class_exists('curlcast'))
 				add_action('template_redirect', array('curlcast', 'template_redirect'), 11);
 				add_action('wp_loaded', array('curlcast', 'flush_rules'));
 				add_action('widgets_init', array('curlcast', 'load_widget'));
+
 				add_shortcode('curlcast', array('curlcast', 'shortcode'));
 				}
 			}
@@ -203,7 +202,16 @@ if(!class_exists('curlcast'))
 
 				$curlcast_array = explode('/',trim($curlcast_page,'/'));
 				$wp_query->post->post_content = self::process_routing($curlcast_array);
+				add_action('wp_enqueue_scripts', array('curlcast', 'enqueue_styles'));
 				}
+			}
+
+		/**
+		 * Add header styles
+		 */
+		function enqueue_styles()
+			{
+			wp_enqueue_style('curlcast-style', plugins_url('curlcast.css', __FILE__ ));
 			}
 
 
@@ -219,9 +227,18 @@ if(!class_exists('curlcast'))
 			$page_prefix = get_option('curlcast_page_prefix');
 			$url = WP_CURLCAST_PAGE_URL.'/'.implode('/', $curlcast_array).'?access_key='.$access_key.'&prefix='.$page_prefix;
 
-			//$template = stripslashes(get_option('curlcast_template_page'));
-			$template = self::$curlcast_template_page;
+			$section = array_pop($curlcast_array);
+			$section = preg_replace("/[^a-z0-9]+/", '', $section);
+			$template_file = plugin_dir_path(__FILE__).'templates/'.$section.'.php';
+			if(!file_exists($template_file))
+				{
+				$section = 'competitions';
+				$template_file = plugin_dir_path(__FILE__).'templates/'.$section.'.php';
+				}
+			$template = file_get_contents($template_file);
 			$template = str_replace('{url}', $url, $template);
+
+			$template .= '<script src="'.plugins_url('curlcast.js', __FILE__).'"></script>';
 
 			return $template;
 			}
@@ -462,8 +479,7 @@ if(!class_exists('curlcast'))
 				$page_prefix = get_option('curlcast_page_prefix');
 				$url = WP_CURLCAST_WIDGET_URL.'?access_key='.$access_key.'&prefix='.$page_prefix;
 
-				//$template = stripslashes(get_option('curlcast_template_widget'));
-				$template = curlcast::$curlcast_template_widget;
+				$template = file_get_contents(plugin_dir_path(__FILE__).'templates/scoreboard_mini.php');
 				$template = str_replace('{url}', $url, $template);
 				$template = str_replace('{height}', $height, $template);
 
