@@ -1,1 +1,9 @@
-<iframe id="stats-frame" src="{url}" frameborder="0" border="0" cellspacing="0"></iframe>
+<div id="teams"></div>
+
+<!-- The core React library -->
+<script src="/wp-curlcast/wp-content/plugins/curlcast/js/react-with-addons.min.js"></script>
+<!-- In-browser JSX transformer, remove when pre-compiling JSX. -->
+<script src="/wp-curlcast/wp-content/plugins/curlcast/js/JSXTransformer.js"></script>
+
+<script src="/wp-curlcast/wp-content/plugins/curlcast/js/teams.js" type="text/jsx"></script>
+
