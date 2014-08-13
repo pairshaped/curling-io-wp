@@ -129,6 +129,22 @@ if (!class_exists('curlcast')) {
           add_option($option, $params['default']);
         }
       }
+      global $user_ID;
+      $page = array(
+        'post_type' => 'page',
+        'post_name' => 'stats',
+        'post_content' => '[curlcast]',
+        'post_parent' => 0,
+        'post_author' => $user_ID,
+        'post_status' => 'publish',
+        'post_title' => 'Curlcast Stats',
+        'comment_status' => 'closed'
+        );
+      $pageid = wp_insert_post($page);
+      if ($pageid == 0) {
+      } else {
+      update_option('curlcast_page_id',$pageid);
+      }
     }
 
     /**
@@ -176,7 +192,7 @@ if (!class_exists('curlcast')) {
      */
     function main() {
       $page_prefix = get_option('curlcast_page_prefix');
-      add_rewrite_rule($page_prefix . '/(.*)$', 'index.php?curlcast_page=$matches[1]', 'top');
+      add_rewrite_rule('('.$page_prefix . '/?(.*?)$)', 'index.php?curlcast_page=$matches[1]', 'top');
       self::auto_update();
     }
 
@@ -186,7 +202,8 @@ if (!class_exists('curlcast')) {
     function flush_rules() {
       $rules       = get_option('rewrite_rules');
       $page_prefix = get_option('curlcast_page_prefix');
-      if (!isset($rules[$page_prefix . '/(.*)$'])) {
+
+      if (!isset($rules['('.$page_prefix . '/?(.*?)$)']) or 1) {
         global $wp_rewrite;
         $wp_rewrite->flush_rules(false);
       }
@@ -213,19 +230,23 @@ if (!class_exists('curlcast')) {
       global $post_type, $wp_query, $post, $withcomments;
 
       $curlcast_page = $wp_query->query_vars['curlcast_page'];
+
       if ($curlcast_page != '') {
         $page_id  = get_option('curlcast_page_id');
+        $page_prefix = get_option('curlcast_page_prefix');
+
         $wp_query = new WP_Query(array(
           'page_id' => $page_id
         ));
+        $template = get_template_directory().DS.get_page_template_slug($page_id);
+		$wp_query->query_vars['curlcast_page'] = preg_replace("/^$page_prefix\/?/", '', $curlcast_page);
 
-
-        $curlcast_array               = explode('/', trim($curlcast_page, '/'));
-        $wp_query->post->post_content = self::process_routing($curlcast_array);
         add_action('wp_enqueue_scripts', array(
           'curlcast',
           'enqueue_styles'
         ));
+        include($template);
+        exit;
       }
     }
 
@@ -268,9 +289,9 @@ if (!class_exists('curlcast')) {
      * Shortcode
      */
     function shortcode() {
-      $curlcast_array = array(
-        'competitions'
-      );
+      global $wp_query;
+      $curlcast_page = $wp_query->query_vars['curlcast_page'];
+      $curlcast_array = explode('/', trim($curlcast_page, '/'));
       return self::process_routing($curlcast_array);
     }
 
