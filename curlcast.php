@@ -18,6 +18,15 @@ if(!class_exists('curlcast'))
 	class curlcast
 		{
 		static $tabs;
+		static $templates = array(
+			'^competitions$' 	=> 'competitions.php',
+			'^games' 			=> 'boxscore.php',
+			'teams$' 			=> 'teams.php',
+			'standings$' 		=> 'standings.php',
+			'scoreboard$' 		=> 'scoreboard.php',
+			'widget' 			=> 'scoreboard_mini.php',
+			'default' 			=> 'competitions.php'
+			);
 
 		/**
 		* Create all actions and hooks
@@ -228,14 +237,15 @@ if(!class_exists('curlcast'))
 			$base_url = get_site_url().'/'.$page_prefix;
 			$url = WP_CURLCAST_PAGE_URL.'/'.implode('/', $curlcast_array).'?access_key='.urlencode($access_key).'&base_url='.urlencode($base_url);
 
-			$section = array_pop($curlcast_array);
-			$section = preg_replace("/[^a-z0-9]+/", '', $section);
-			$template_file = plugin_dir_path(__FILE__).'templates/'.$section.'.php';
-			if(!file_exists($template_file))
+			foreach(self::$templates as $pattern => $section)
 				{
-				$section = 'competitions';
-				$template_file = plugin_dir_path(__FILE__).'templates/'.$section.'.php';
+				if(preg_match("/$pattern/", implode('/',$curlcast_array)))
+					{
+					break;
+					}
 				}
+			$template_file = plugin_dir_path(__FILE__).'templates/'.$section;
+
 			$template = file_get_contents($template_file);
 			$template = str_replace('{url}', $url, $template);
 
@@ -481,7 +491,8 @@ if(!class_exists('curlcast'))
 				$base_url = get_site_url().'/'.$page_prefix;
 				$url = WP_CURLCAST_WIDGET_URL.'?access_key='.urlencode($access_key).'&base_url='.urlencode($base_url);
 
-				$template = file_get_contents(plugin_dir_path(__FILE__).'templates/scoreboard_mini.php');
+				$template_file = curlcast::$templates['widget'];
+				$template = file_get_contents(plugin_dir_path(__FILE__).'templates/'.$template_file);
 				$template = str_replace('{url}', $url, $template);
 				$template = str_replace('{height}', $height, $template);
 
