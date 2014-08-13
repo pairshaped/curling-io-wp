@@ -1,6 +1,6 @@
 ## Install notes
 
-Copy "curlcast" dir to "wp-content\plugins\" or istall using zip archive
+Copy **curlcast** dir to **wp-content/plugins** or istall using zip archive
 
 Replace config options:
 
@@ -14,5 +14,5 @@ and
 
 with your own.
 
-Copy update.php to your server, put update.zip with a new version next to it. 
-update.zip contains "curlcast" dir with all files inside this dir, not in root of archive.
+Copy **update.php** to your server, put **update.zip** with a new version right next to it. 
+**update.zip** contains "curlcast" dir with all files inside this dir, not in root of archive.
