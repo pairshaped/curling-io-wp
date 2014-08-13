@@ -20,7 +20,7 @@ if (isset($_POST['action']))
 			'another_section' => 'New version',
 			'changelog' => 'Dropdown added'
 			);
-			$obj->download_link = 'http://localhost/update.php';
+			$obj->download_link = 'http://curlcast.ulko.net/update.php';
 			echo serialize($obj);
 		case 'license':
 			echo 'false';
