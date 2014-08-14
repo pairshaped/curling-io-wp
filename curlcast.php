@@ -276,7 +276,8 @@ if (!class_exists('curlcast')) {
     function process_routing($curlcast_array) {
       $access_key  = get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
-      $url         = WP_CURLCAST_PAGE_URL . '/' . implode('/', $curlcast_array) . '.js?access_key=' . urlencode($access_key);
+      $base_url    = get_site_url().'/'.$page_prefix;
+      $url         = WP_CURLCAST_PAGE_URL . '/' . implode('/', $curlcast_array) . '?access_key=' . urlencode($access_key) . '&base_url=' . urlencode($base_url);
 
       foreach (self::$templates as $pattern => $section) {
         if (preg_match("/$pattern/", implode('/', $curlcast_array))) {
@@ -284,13 +285,11 @@ if (!class_exists('curlcast')) {
         }
       }
       $template = '<script src="' . plugins_url('build/js/app.js', __FILE__) . '"></script>';
-      $template .= '<script src="' . plugins_url('build/js/components.js', __FILE__) . '" type="text/jsx"></script>';
 
       $template_file = plugin_dir_path(__FILE__) . 'build/views/' . $section;
 
       $template .= file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
-      $template = str_replace('{access_key}', urlencode($access_key), $template);
 
       return $template;
     }
@@ -513,10 +512,12 @@ if (!class_exists('curlcast')) {
       $height      = $instance['height'];
       $access_key  = get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
-      $url         = WP_CURLCAST_WIDGET_URL . '?access_key=' . urlencode($access_key);
+      $base_url    = get_site_url() . '/' . $page_prefix;
+      $url         = WP_CURLCAST_WIDGET_URL . '?access_key=' . urlencode($access_key) . '&base_url=' . urlencode($base_url);
 
+      $template = '<script src="' . plugins_url('build/js/app.js', __FILE__) . '"></script>';
       $template_file = curlcast::$templates['widget'];
-      $template      = file_get_contents(plugin_dir_path(__FILE__) . 'build/views/' . $template_file);
+      $template .= file_get_contents(plugin_dir_path(__FILE__) . 'build/views/' . $template_file);
       $template      = str_replace('{url}', $url, $template);
       $template      = str_replace('{height}', $height, $template);
 
