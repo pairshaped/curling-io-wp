@@ -254,7 +254,7 @@ if (!class_exists('curlcast')) {
      * Add header styles
      */
     function enqueue_styles() {
-      wp_enqueue_style('curlcast-style', plugins_url('curlcast-stats.css', __FILE__));
+      wp_enqueue_style('curlcast-style', plugins_url('build/css/app.css', __FILE__));
     }
 
 
@@ -275,12 +275,12 @@ if (!class_exists('curlcast')) {
           break;
         }
       }
-      $template_file = plugin_dir_path(__FILE__) . 'templates/' . $section;
+      $template_file = plugin_dir_path(__FILE__) . 'build/views/' . $section;
 
       $template = file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
 
-      $template .= '<script src="' . plugins_url('curlcast-stats.js', __FILE__) . '"></script>';
+      $template .= '<script src="' . plugins_url('build/js/app.js', __FILE__) . '"></script>';
 
       return $template;
     }
@@ -507,7 +507,7 @@ if (!class_exists('curlcast')) {
       $url         = WP_CURLCAST_WIDGET_URL . '?access_key=' . urlencode($access_key) . '&base_url=' . urlencode($base_url);
 
       $template_file = curlcast::$templates['widget'];
-      $template      = file_get_contents(plugin_dir_path(__FILE__) . 'templates/' . $template_file);
+      $template      = file_get_contents(plugin_dir_path(__FILE__) . 'build/views/' . $template_file);
       $template      = str_replace('{url}', $url, $template);
       $template      = str_replace('{height}', $height, $template);
 
