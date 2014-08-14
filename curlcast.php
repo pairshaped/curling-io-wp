@@ -192,7 +192,7 @@ if (!class_exists('curlcast')) {
      */
     function main() {
       $page_prefix = get_option('curlcast_page_prefix');
-      add_rewrite_rule('('.$page_prefix . '/?(.*?)$)', 'index.php?curlcast_page=$matches[1]', 'top');
+      add_rewrite_rule($page_prefix . '/(.*?)$', 'index.php?curlcast_page=$matches[1]', 'top');
       self::auto_update();
     }
 
@@ -203,7 +203,7 @@ if (!class_exists('curlcast')) {
       $rules       = get_option('rewrite_rules');
       $page_prefix = get_option('curlcast_page_prefix');
 
-      if (!isset($rules['('.$page_prefix . '/?(.*?)$)']) or 1) {
+      if (!isset($rules[$page_prefix . '/(.*?)$']) or 1) {
         global $wp_rewrite;
         $wp_rewrite->flush_rules(false);
       }
@@ -227,26 +227,36 @@ if (!class_exists('curlcast')) {
      * @return html
      */
     function template_redirect($params = array()) {
-      global $post_type, $wp_query, $post, $withcomments;
+      global $wp_query;
 
       $curlcast_page = $wp_query->query_vars['curlcast_page'];
 
+      $page_id  = get_option('curlcast_page_id');
       if ($curlcast_page != '') {
-        $page_id  = get_option('curlcast_page_id');
         $page_prefix = get_option('curlcast_page_prefix');
+        $template = get_template_directory().DS.get_page_template_slug($page_id);
 
         $wp_query = new WP_Query(array(
           'page_id' => $page_id
         ));
-        $template = get_template_directory().DS.get_page_template_slug($page_id);
-		$wp_query->query_vars['curlcast_page'] = preg_replace("/^$page_prefix\/?/", '', $curlcast_page);
+        $wp_query->queried_object = $wp_query->post;
+        $wp_query->queried_object_id = $page_id;
+        $wp_query->posts = array($wp_query->post);
 
-        add_action('wp_enqueue_scripts', array(
+		$wp_query->query_vars['curlcast_page'] = $curlcast_page;
+
+    	add_action('wp_enqueue_scripts', array(
           'curlcast',
           'enqueue_styles'
         ));
-        include($template);
+
+        load_template($template);
         exit;
+      } elseif($wp_query->is_page == true && $wp_query->post->ID == $page_id) {
+       add_action('wp_enqueue_scripts', array(
+          'curlcast',
+          'enqueue_styles'
+        ));
       }
     }
 
