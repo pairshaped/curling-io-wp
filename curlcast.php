@@ -290,6 +290,7 @@ if (!class_exists('curlcast')) {
 
       $template .= file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
+      $template = str_replace('{access_key}', urlencode($access_key), $template);
 
       return $template;
     }

@@ -12,7 +12,7 @@ var CurlcastTeam = React.createClass({
 var CurlcastTeams = React.createClass({
   fetchData: function() {
     jQuery.ajax({
-      url: this.props.url,
+      url: "http://curling.dev/stats/competitions/" + this.props.competition_id + "/teams?access_key=" + this.props.access_key,
       dataType: 'jsonp',
       success: function(data) {
         this.setState({
@@ -51,3 +51,4 @@ var CurlcastTeams = React.createClass({
     );
   }
 });
+console.log("teams");
