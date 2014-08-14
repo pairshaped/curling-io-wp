@@ -1,8 +1,5 @@
-# A sample Guardfile
-# More info at https://github.com/guard/guard#readme
-
-guard :sprockets, destination: 'build/js', asset_paths: ['src/js'] do
-  watch 'src/js/app.js'
+guard :sprockets, destination: 'build/js', asset_paths: 'src/js', root_file: ['app.js', 'components.js'] do
+  watch %r{^src/js/.*}
 end
 
 # Guard::Compass
