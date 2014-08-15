@@ -510,7 +510,6 @@ if (!class_exists('curlcast')) {
         echo $args['before_title'] . $title . $args['after_title'];
       }
 
-      $height      = $instance['height'];
       $access_key  = get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url() . '/' . $page_prefix;
@@ -520,8 +519,6 @@ if (!class_exists('curlcast')) {
       $template_file = curlcast::$templates['widget'];
       $template .= file_get_contents(plugin_dir_path(__FILE__) . 'templates/' . $template_file);
       $template      = str_replace('{url}', $url, $template);
-      $template      = str_replace('{height}', $height, $template);
-
 
       echo $template;
 
@@ -533,19 +530,13 @@ if (!class_exists('curlcast')) {
     public function form($instance) {
       if ($instance) {
         $title  = $instance['title'];
-        $height = $instance['height'];
       } else {
         $title  = __('Scoreboard mini', 'curlcast');
-        $height = 300;
       }
 ?>
         <p>
           <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
           <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
-        </p>
-        <p>
-          <label for="<?php echo $this->get_field_id('height'); ?>"><?php _e('Height:'); ?></label>
-          <input class="widefat" id="<?php echo $this->get_field_id('height'); ?>" name="<?php echo $this->get_field_name('height'); ?>" type="text" value="<?php echo esc_attr($height); ?>" />
         </p>
 <?php
     }
@@ -556,7 +547,6 @@ if (!class_exists('curlcast')) {
     public function update($new_instance, $old_instance) {
       $instance           = $old_instance;
       $instance['title']  = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
-      $instance['height'] = intval($new_instance['height']);
       return $instance;
     }
   }
