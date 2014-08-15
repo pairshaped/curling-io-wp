@@ -116,6 +116,11 @@ if (!class_exists('curlcast')) {
           'curlcast',
           'shortcode'
         ));
+
+        add_action('wp_enqueue_scripts', array(
+          'curlcast',
+          'enqueue_styles'
+        ));
       }
     }
 
@@ -246,18 +251,8 @@ if (!class_exists('curlcast')) {
 
 		$wp_query->query_vars['curlcast_page'] = $curlcast_page;
 
-    	add_action('wp_enqueue_scripts', array(
-          'curlcast',
-          'enqueue_styles'
-        ));
-
         load_template($template);
         exit;
-      } elseif($wp_query->is_page == true && $wp_query->post->ID == $page_id) {
-       add_action('wp_enqueue_scripts', array(
-          'curlcast',
-          'enqueue_styles'
-        ));
       }
     }
 
@@ -265,7 +260,9 @@ if (!class_exists('curlcast')) {
      * Add header styles
      */
     function enqueue_styles() {
-      wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
+      if(!is_admin()) {
+        wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
+      }
     }
 
     /**
