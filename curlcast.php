@@ -8,9 +8,10 @@ Author: Pairshaped Inc.
 if (!class_exists('curlcast')) {
   define('WP_CURLCAST_VERSION', '1.0.0');
 
-  define('WP_CURLCAST_PAGE_URL', 'http://tothebutton.com/stats');
-  define('WP_CURLCAST_WIDGET_URL', 'http://tothebutton.com/stats/scoreboard_mini.html');
-  define('WP_CURLCAST_UPDATE_URL', 'http://tothebutton.com/stats/update.php');
+  #define('WP_CURLCAST_BASE_URL', 'http://tothebutton.com/stats');
+  define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
+  define('WP_CURLCAST_WIDGET_URL', WP_CURLCAST_BASE_URL . '/competitions/scoreboard_mini.html');
+  define('WP_CURLCAST_UPDATE_URL', WP_CURLCAST_BASE_URL . '/update.php');
 
   defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
@@ -277,7 +278,7 @@ if (!class_exists('curlcast')) {
       $access_key  = get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url().'/'.$page_prefix;
-      $url         = WP_CURLCAST_PAGE_URL . '/' . implode('/', $curlcast_array) . '?access_key=' . urlencode($access_key) . '&base_url=' . urlencode($base_url);
+      $url         = WP_CURLCAST_BASE_URL . '/' . implode('/', $curlcast_array) . '?access_key=' . urlencode($access_key) . '&base_url=' . urlencode($base_url);
 
       foreach (self::$templates as $pattern => $section) {
         if (preg_match("/$pattern/", implode('/', $curlcast_array))) {
