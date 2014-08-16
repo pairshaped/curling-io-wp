@@ -5,20 +5,33 @@
 The plugin will create several specific pages and routes, and allow the administrator to specify an API key on a configuration page.
 
 The routes / pages will be:
-* /stats/competitions
-* /stats/competitions/[id]/teams
-* /stats/competitions/[id]/standings
-* /stats/competitions/[id]/scoreboard
-* /stats/games/[id]/boxscore
+* /stats/
+* /stats/competitions/
+* /stats/competitions/scoreboard_mini
+* /stats/competitions/[id]/teams/
+* /stats/competitions/[id]/standings/
+* /stats/competitions/[id]/scoreboard/
+* /stats/games/[id]/boxscore/
 
-Here are some real corresponding pages which you can hit via iframe:
-* http://tothebutton.com/stats/competitions?access_key=SMqQStXP7bE
-* http://tothebutton.com/stats/competitions/1201-curling-canada-cup/teams?access_key=SMqQStXP7bE
-* http://tothebutton.com/stats/competitions/1201-curling-canada-cup/standings?access_key=SMqQStXP7bE
-* http://tothebutton.com/stats/competitions/1201-curling-canada-cup/scoreboard?access_key=SMqQStXP7bE
-* http://tothebutton.com/stats/games/2401?access_key=SMqQStXP7bE
-
-We also need an embeddable widget for the sidebar:
-[http://widgets.tothebutton.com/stats/scoreboard_mini.html](http://widgets.tothebutton.com/stats/scoreboard_mini.html)
+The scoreboard_mini is an embeddable widget with a minimum size of 280px.
 
 [http://tothebutton.com/stats](http://tothebutton.com/stats)
+
+## Installation
+
+### From Github
+```
+cd [wp-install-dir]/wp-content/plugins
+git clone https://github.com/pairshaped/curlcast-wordpress.git curlcast
+```
+
+### From zip archive
+1. Download the latest release archive from: [https://github.com/pairshaped/curlcast-wordpress/releases](https://github.com/pairshaped/curlcast-wordpress/releases)
+2. Move / copy it into your [wp-install-dir]/wp-content/plugins
+3. Unzip it
+4. Rename it's directory from "curlcast-wordpress" to just "curlcast"
+
+## Autoupdate
+
+* Copy **update.php** to your server, put **update.zip** with a new version right next to it.
+* **update.zip** contains **curlcast** dir with all files inside this dir, not in root of archive.
