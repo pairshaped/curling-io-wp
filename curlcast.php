@@ -147,14 +147,11 @@ if (!class_exists('curlcast')) {
           'comment_status' => 'closed'
           );
         $page_id = wp_insert_post($page);
+        update_option('curlcast_page_id',$page_id);
         add_post_meta($page_id, '_wp_page_template', 'default');
         $page_data = get_post($page_id, ARRAY_A);
         $slug = $page_data['post_name'];
         update_option('curlcast_page_prefix',$slug);
-      }
-      if ($page_id == 0) {
-      } else {
-      update_option('curlcast_page_id',$page_id);
       }
     }
 
