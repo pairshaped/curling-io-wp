@@ -247,7 +247,9 @@ if (!class_exists('curlcast')) {
       $page_id  = get_option('curlcast_page_id');
       if ($curlcast_page != '') {
         $page_prefix = get_option('curlcast_page_prefix');
-        $template = get_template_directory().DS.get_page_template_slug($page_id);
+        $template = get_page_template_slug($page_id);
+        if(!$template) $template = 'page.php';
+        $template = get_template_directory().DS.$template;
 
         $wp_query = new WP_Query(array(
           'page_id' => $page_id
