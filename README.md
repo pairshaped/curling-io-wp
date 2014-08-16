@@ -31,3 +31,16 @@ git clone https://github.com/pairshaped/curlcast-wordpress.git curlcast
 2. Move / copy it into your [wp-install-dir]/wp-content/plugins
 3. Unzip it
 4. Rename it's directory from "curlcast-wordpress" to just "curlcast"
+
+### After install
+1. Log into your wordpress admin panel.
+2. Go to Settings > Permalinks
+3. Select any of the common settings options and save. It doesn't matter which you select. This just ensures the creation of an .htaccess file which we need in order to handle the custom routes.
+4. Go to Curlcast (left menu bar).
+5. Enter the access key for your organization and save it. All of the access keys can be seen here: [http://tothebutton.com/stats/orgs](http://tothebutton.com/stats/orgs)
+6. Done. Go ahead and hit http://yourwpsite.com/stats
+
+The scoreboard widget will be listed in the widgets section of the wordpress admin. This should be placed in an area that supports at least IAB medium box guidelines (300px wide) as anything smaller will look funky.
+
+
+
