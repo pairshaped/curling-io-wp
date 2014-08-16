@@ -128,8 +128,6 @@ if (!class_exists('curlcast')) {
      * Install plugin
      */
     function install() {
-      global $wpdb;
-      //$wpdb->query("");
       foreach (self::$tabs as $tab => $settings) {
         foreach ($settings['settings'] as $option => $params) {
           add_option($option, $params['default']);
@@ -164,6 +162,11 @@ if (!class_exists('curlcast')) {
      * Uninstall plugin
      */
     function uninstall() {
+      foreach (self::$tabs as $tab => $settings) {
+        foreach ($settings['settings'] as $option => $params) {
+          delete_option($option);
+        }
+      }
     }
 
     /**
@@ -329,8 +332,6 @@ if (!class_exists('curlcast')) {
      * @return html
      */
     function settings() {
-      global $wpdb;
-
       $message = '';
       if (!empty($_POST['submit'])) {
         $message = self::update_settings($_POST);
