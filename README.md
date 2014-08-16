@@ -19,7 +19,7 @@ The scoreboard_mini is an embeddable widget with a minimum size of 280px.
 
 ## Installation
 
-### From Github
+### Using Git (Recommended)
 ```
 cd [wp-install-dir]/wp-content/plugins
 git clone https://github.com/pairshaped/curlcast-wordpress.git curlcast
