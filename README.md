@@ -15,7 +15,8 @@ The routes / pages will be:
 
 The scoreboard_mini is an embeddable widget with a minimum size of 280px.
 
-[http://tothebutton.com/stats](http://tothebutton.com/stats)
+Here are the pages that the iframes pull in:
+[http://tothebutton.com/stats/orgs](http://tothebutton.com/stats/orgs)
 
 ## Installation
 
