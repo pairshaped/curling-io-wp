@@ -30,8 +30,3 @@ git clone https://github.com/pairshaped/curlcast-wordpress.git curlcast
 2. Move / copy it into your [wp-install-dir]/wp-content/plugins
 3. Unzip it
 4. Rename it's directory from "curlcast-wordpress" to just "curlcast"
-
-## Autoupdate
-
-* Copy **update.php** to your server, put **update.zip** with a new version right next to it.
-* **update.zip** contains **curlcast** dir with all files inside this dir, not in root of archive.
