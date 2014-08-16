@@ -135,8 +135,8 @@ if (!class_exists('curlcast')) {
           add_option($option, $params['default']);
         }
       }
-      $pageid = get_option('curlcast_page_id');
-      if(!$pageid) {
+      $page_id = get_option('curlcast_page_id');
+      if(!$page_id) {
         global $user_ID;
         $page = array(
           'post_type' => 'page',
@@ -148,12 +148,15 @@ if (!class_exists('curlcast')) {
           'post_title' => 'Curlcast Stats',
           'comment_status' => 'closed'
           );
-        $pageid = wp_insert_post($page);
-        add_post_meta($pageid, '_wp_page_template', 'default');
+        $page_id = wp_insert_post($page);
+        add_post_meta($page_id, '_wp_page_template', 'default');
+        $page_data = get_post($page_id, ARRAY_A);
+        $slug = $page_data['post_name'];
+        update_option('curlcast_page_prefix',$slug);
       }
-      if ($pageid == 0) {
+      if ($page_id == 0) {
       } else {
-      update_option('curlcast_page_id',$pageid);
+      update_option('curlcast_page_id',$page_id);
       }
     }
 
