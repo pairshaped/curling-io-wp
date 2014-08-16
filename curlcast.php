@@ -120,7 +120,7 @@ if (!class_exists('curlcast')) {
         add_action('wp_enqueue_scripts', array(
           'curlcast',
           'enqueue_styles'
-        ));
+        ), 100);
       }
     }
 
@@ -262,7 +262,7 @@ if (!class_exists('curlcast')) {
     function enqueue_styles() {
       if(!is_admin()) {
         wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
-        wp_enqueue_script('curlcast-script', plugins_url('js/jquery.postmessage.js', __FILE__));
+        wp_enqueue_script('jquery.postmessage', plugins_url('js/jquery.postmessage.js', __FILE__));
         wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
       }
     }
