@@ -277,7 +277,14 @@ if (!class_exists('curlcast')) {
       $access_key  = get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url().'/'.$page_prefix;
-      $url         = WP_CURLCAST_BASE_URL . '/' . implode('/', $curlcast_array) . '?access_key=' . urlencode($access_key) . '&base_url=' . urlencode($base_url);
+
+      $params = array();
+      $params['access_key'] = $access_key;
+      $params['base_url'] = $base_url;
+      $params = array_merge($params, $_GET);
+	  $query = http_build_query($params);
+
+      $url = WP_CURLCAST_BASE_URL . '/' . implode('/', $curlcast_array) . '?'.$query;
 
       foreach (self::$templates as $pattern => $section) {
         if (preg_match("/$pattern/", implode('/', $curlcast_array))) {
