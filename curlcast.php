@@ -11,7 +11,7 @@ if (!class_exists('curlcast')) {
   define('WP_CURLCAST_BASE_URL', 'http://tothebutton.com/stats');
   #define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
   define('WP_CURLCAST_WIDGET_URL', WP_CURLCAST_BASE_URL . '/competitions/scoreboard_mini.html');
-  define('WP_CURLCAST_UPDATE_URL', WP_CURLCAST_BASE_URL . '/update.php');
+  define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.tothebutton.com/update.php');
 
   defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
@@ -247,20 +247,7 @@ if (!class_exists('curlcast')) {
 
       $page_id  = get_option('curlcast_page_id');
       if ($curlcast_page != '') {
-        $page_prefix = get_option('curlcast_page_prefix');
-        $template = get_page_template_slug($page_id);
-        if(!$template) $template = 'page.php';
-        $template = get_template_directory().DS.$template;
-
-        $wp_query = new WP_Query(array(
-          'page_id' => $page_id
-        ));
-        $wp_query->queried_object = $wp_query->post;
-        $wp_query->queried_object_id = $page_id;
-        $wp_query->posts = array($wp_query->post);
-
 		$wp_query->query_vars['curlcast_page'] = $curlcast_page;
-
       }
     }
 
