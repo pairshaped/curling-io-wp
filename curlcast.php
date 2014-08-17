@@ -2,11 +2,11 @@
 /*
 Plugin Name: Curlcast Stats
 Description: Displays Curlcast Stats.
-Version: 1.1
+Version: 1.0.2
 Author: Pairshaped Inc.
 */
 if (!class_exists('curlcast')) {
-  define('WP_CURLCAST_VERSION', '1.1');
+  define('WP_CURLCAST_VERSION', '1.0.2');
 
   define('WP_CURLCAST_BASE_URL', 'http://tothebutton.com/stats');
   #define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
@@ -205,7 +205,8 @@ if (!class_exists('curlcast')) {
      */
     function main() {
       $page_prefix = get_option('curlcast_page_prefix');
-      add_rewrite_rule($page_prefix . '/(.*?)$', 'index.php?curlcast_page=$matches[1]', 'top');
+      $page_id = get_option('curlcast_page_id');
+      add_rewrite_rule($page_prefix . '/(.*?)$', 'index.php?page_id='.$page_id.'&curlcast_page=$matches[1]', 'top');
       self::auto_update();
     }
 
@@ -260,8 +261,6 @@ if (!class_exists('curlcast')) {
 
 		$wp_query->query_vars['curlcast_page'] = $curlcast_page;
 
-        load_template($template);
-        exit;
       }
     }
 
