@@ -2,11 +2,11 @@
 /*
 Plugin Name: Curlcast Stats
 Description: Displays Curlcast Stats.
-Version: 1.0.0
+Version: 1.1
 Author: Pairshaped Inc.
 */
 if (!class_exists('curlcast')) {
-  define('WP_CURLCAST_VERSION', '1.0.0');
+  define('WP_CURLCAST_VERSION', '1.1');
 
   define('WP_CURLCAST_BASE_URL', 'http://tothebutton.com/stats');
   #define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
