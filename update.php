@@ -3,9 +3,9 @@ $version = '1.0.2';
 $description = 'The new version of the Curlcast plugin';
 $changelog = '';
 
-if (isset($_GET['action']))
+if (isset($_POST['action']))
 	{
-	switch ($_GET['action'])
+	switch ($_POST['action'])
 		{
 		case 'version':
 			echo $version;
