@@ -8,8 +8,8 @@ Author: Pairshaped Inc.
 if (!class_exists('curlcast')) {
   define('WP_CURLCAST_VERSION', '1.0.3');
 
-  #define('WP_CURLCAST_BASE_URL', 'http://tothebutton.com/stats');
-  define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
+  define('WP_CURLCAST_BASE_URL', 'http://tothebutton.com/stats');
+  #define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
   define('WP_CURLCAST_WIDGET_URL', WP_CURLCAST_BASE_URL . '/competitions/scoreboard_mini.html');
   define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.tothebutton.com/update.php');
 
