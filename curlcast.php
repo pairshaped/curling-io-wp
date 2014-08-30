@@ -709,5 +709,3 @@ if (!class_exists('curlcast')) {
 
   curlcast_main();
 }
-
-?>
