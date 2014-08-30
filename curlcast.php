@@ -9,15 +9,15 @@ if (!class_exists('curlcast')) {
   define('WP_CURLCAST_VERSION', '1.0.5');
 
   # Production
-  define('WP_CURLCAST_BASE_URL', 'http://curlcast.ca/stats');
+  define('WP_CURLCAST_BASE_URL', 'http://curlcast.ca/stats/organizations');
 
   # Staging
-  #define('WP_CURLCAST_BASE_URL', 'http://curlcast-staging.ca/stats');
+  #define('WP_CURLCAST_BASE_URL', 'http://curlcast-staging.ca/stats/organizations');
 
   # Dev
-  #define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
+  #define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats/organizations');
 
-  define('WP_CURLCAST_WIDGET_URL', WP_CURLCAST_BASE_URL . '/competitions/scoreboard_mini.html');
+  define('WP_CURLCAST_WIDGET_URL', 'competitions/scoreboard_mini.html');
   define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast.ca/update.php');
 
   defined('DS') or define('DS', DIRECTORY_SEPARATOR);
@@ -281,12 +281,13 @@ if (!class_exists('curlcast')) {
       $base_url    = get_site_url().'/'.$page_prefix;
 
       $params = array();
-      $params['access_key'] = $access_key;
       $params['base_url'] = $base_url;
+
       $params = array_merge($params, $_GET);
       $query = http_build_query($params);
+      if($curlcast_array[0] === '') $curlcast_array = array('competitions');
 
-      $url = WP_CURLCAST_BASE_URL . '/' . implode('/', $curlcast_array) . '?'.$query;
+      $url = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . implode('/', $curlcast_array) . '?'.$query;
 
       foreach (self::$templates as $pattern => $section) {
         if (preg_match("/$pattern/", implode('/', $curlcast_array))) {
@@ -517,7 +518,7 @@ if (!class_exists('curlcast')) {
       $access_key  = get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url() . '/' . $page_prefix;
-      $url         = WP_CURLCAST_WIDGET_URL . '?access_key=' . urlencode($access_key) . '&base_url=' . urlencode($base_url);
+      $url         = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . WP_CURLCAST_WIDGET_URL . '?base_url=' . urlencode($base_url);
 
       $template_file = curlcast::$templates['widget'];
       $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/' . $template_file);
