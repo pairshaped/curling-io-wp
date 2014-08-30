@@ -9,7 +9,7 @@ set :keep_releases, 5
 set :deploy_to, "/var/www/wordpress"
 set :user, "deploy"
 
-server 'tothebutton.com', :app, :web, :db, :primary => true
+server 'curlcast-staging.ca', :app, :web, :db, :primary => true
 
 # clean up old releases
 after "deploy:restart", "deploy:cleanup"
