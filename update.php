@@ -42,3 +42,4 @@ else
   header('Content-Disposition: attachment; filename="update.zip"');
   readfile('update.zip');
   }
+?>
