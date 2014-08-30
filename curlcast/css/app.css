@@ -1,0 +1,12 @@
+#stats-frame {
+  width: 100%;
+  min-width: 300px;
+  min-height: 500px;
+}
+
+#stats-frame.mini {
+  max-width: 400px;
+  min-width: 300px;
+  min-height: 350px;
+  overflow-x: hidden;
+}
