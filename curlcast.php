@@ -2,16 +2,23 @@
 /*
 Plugin Name: Curlcast Stats
 Description: Displays Curlcast Stats.
-Version: 1.0.4
+Version: 1.0.5
 Author: Pairshaped Inc.
 */
 if (!class_exists('curlcast')) {
-  define('WP_CURLCAST_VERSION', '1.0.4');
+  define('WP_CURLCAST_VERSION', '1.0.5');
 
-  define('WP_CURLCAST_BASE_URL', 'http://tothebutton.com/stats');
+  # Production
+  define('WP_CURLCAST_BASE_URL', 'http://curlcast.ca/stats');
+
+  # Staging
+  #define('WP_CURLCAST_BASE_URL', 'http://curlcast-staging.ca/stats');
+
+  # Dev
   #define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats');
+
   define('WP_CURLCAST_WIDGET_URL', WP_CURLCAST_BASE_URL . '/competitions/scoreboard_mini.html');
-  define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.tothebutton.com/update.php');
+  define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast.ca/update.php');
 
   defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
