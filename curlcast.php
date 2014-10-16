@@ -2,11 +2,11 @@
 /*
 Plugin Name: Curlcast Stats
 Description: Displays Curlcast Stats.
-Version: 1.0.6
+Version: 1.1.0
 Author: Pairshaped Inc.
 */
 if (!class_exists('curlcast')) {
-  define('WP_CURLCAST_VERSION', '1.0.6');
+  define('WP_CURLCAST_VERSION', '1.1.0');
 
   # Production
   define('WP_CURLCAST_BASE_URL', 'http://curlcast.ca/stats/organizations');
@@ -17,7 +17,7 @@ if (!class_exists('curlcast')) {
   # Dev
   # define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats/organizations');
 
-  define('WP_CURLCAST_WIDGET_URL', 'competitions/scoreboard_mini.html');
+  define('WP_CURLCAST_WIDGET_URL', 'competitions/scoreboard_mini.js');
   define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast-staging.ca/update.php');
 
   defined('DS') or define('DS', DIRECTORY_SEPARATOR);
@@ -265,7 +265,7 @@ if (!class_exists('curlcast')) {
       if(!is_admin()) {
         wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
         // wp_enqueue_script('jquery.postmessage', plugins_url('js/jquery.postmessage.min.js', __FILE__));
-        // wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
+        wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
       }
     }
 
@@ -298,6 +298,7 @@ if (!class_exists('curlcast')) {
 
       $template = file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
+      $template = str_replace('{path_prefix}', $page_prefix, $template);
 
       return $template;
     }
@@ -523,6 +524,7 @@ if (!class_exists('curlcast')) {
       $template_file = curlcast::$templates['widget'];
       $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/' . $template_file);
       $template = str_replace('{url}', $url, $template);
+      $template = str_replace('{path_prefix}', $page_prefix, $template);
 
       echo $template;
 

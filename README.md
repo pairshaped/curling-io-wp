@@ -24,7 +24,7 @@ Here are the pages that the iframes pull in:
 ### Using Git (Recommended)
 ```
 cd [wp-install-dir]/wp-content/plugins
-git clone https://github.com/pairshaped/curlcast-wordpress.git
+git clone git@github.com:pairshaped/curlcast-wordpress.git
 ```
 
 ### From zip archive
