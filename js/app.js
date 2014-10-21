@@ -22395,7 +22395,7 @@ module.exports = warning;
 
 
 (function() {
-  var Competition, Draw, Game, GamePositionName, GamePositionScore, Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
+  var Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
 
@@ -22427,17 +22427,68 @@ module.exports = warning;
     },
     render: function() {
       return div({
-        id: 'curlcast_accordion',
+        id: 'curlcast_scoreboard',
         className: 'panel-group'
-      }, this.state.competitions.map((function(_this) {
-        return function(competition) {
-          return Competition({
-            key: competition.id,
-            competition: competition,
-            pathPrefix: _this.props.pathPrefix
-          });
-        };
-      })(this)));
+      });
+    }
+  });
+
+  window.CurlcastScoreboard = Scoreboard;
+
+}).call(this);
+(function() {
+  var Competition, Draw, Game, GamePositionName, GamePositionScore, Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
+
+  _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
+
+  Scoreboard = React.createClass({
+    getInitialState: function() {
+      return {
+        competitions: []
+      };
+    },
+    loadDataFromServer: function() {
+      return jQuery.ajax({
+        url: this.props.url,
+        dataType: 'jsonp',
+        success: (function(_this) {
+          return function(results) {
+            return _this.setState({
+              competitions: results
+            });
+          };
+        })(this),
+        error: function() {
+          return console.log("there was an error");
+        }
+      });
+    },
+    componentWillMount: function() {
+      this.loadDataFromServer();
+      return setInterval(this.loadDataFromServer, this.props.pollInterval);
+    },
+    render: function() {
+      if (this.state.competitions.length === 0) {
+        return div(null, p(null, strong(null, "There are no active competitions.")), p(null, a({
+          href: "/" + this.props.pathPrefix + "/competitions",
+          dangerouslySetInnerHTML: {
+            __html: "Recent Competitions &raquo;"
+          }
+        })));
+      } else {
+        return div({
+          id: 'curlcast_accordion',
+          className: 'panel-group'
+        }, this.state.competitions.map((function(_this) {
+          return function(competition) {
+            return Competition({
+              key: competition.id,
+              competition: competition,
+              pathPrefix: _this.props.pathPrefix
+            });
+          };
+        })(this)));
+      }
     }
   });
 
@@ -22529,28 +22580,28 @@ module.exports = warning;
 
   GamePositionName = React.createClass({
     render: function() {
-      var name, short_name, team_path, _ref1;
-      _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path;
+      var name, result, short_name, team_path, _ref1;
+      _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, result = _ref1.result;
       return td({
         className: "game-name"
       }, team_path !== null ? a({
         href: "/" + this.props.pathPrefix + team_path,
         title: name
-      }, short_name) : name);
+      }, result === 'won' ? strong(null, short_name) : short_name) : name);
     }
   });
 
   GamePositionScore = React.createClass({
     render: function() {
-      var total;
-      total = this.props.game_position.total;
+      var result, total, _ref1;
+      _ref1 = this.props.game_position, total = _ref1.total, result = _ref1.result;
       return td({
         className: "game-score"
-      }, total);
+      }, result === 'won' ? strong(null, total) : total);
     }
   });
 
-  window.Scoreboard = Scoreboard;
+  window.CurlcastScoreboardWidget = Scoreboard;
 
 }).call(this);
 
