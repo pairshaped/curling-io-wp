@@ -22444,6 +22444,7 @@ module.exports = warning;
   Scoreboard = React.createClass({
     getInitialState: function() {
       return {
+        placeholderMessage: "Loading competitions...",
         competitions: []
       };
     },
@@ -22454,6 +22455,7 @@ module.exports = warning;
         success: (function(_this) {
           return function(results) {
             return _this.setState({
+              placeholderMessage: "There are no active competitions.",
               competitions: results
             });
           };
@@ -22469,7 +22471,7 @@ module.exports = warning;
     },
     render: function() {
       if (this.state.competitions.length === 0) {
-        return div(null, p(null, strong(null, "There are no active competitions.")), p(null, a({
+        return div(null, p(null, strong(null, this.state.placeholderMessage)), p(null, a({
           href: "/" + this.props.pathPrefix + "/competitions",
           dangerouslySetInnerHTML: {
             __html: "Recent Competitions &raquo;"
