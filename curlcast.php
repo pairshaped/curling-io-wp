@@ -15,7 +15,7 @@ if (!class_exists('curlcast')) {
   # define('WP_CURLCAST_BASE_URL', 'http://curlcast-staging.ca/stats/organizations');
 
   # Dev
-  # define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats/organizations');
+  # define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
 
   define('WP_CURLCAST_WIDGET_URL', 'competitions/scoreboard_mini.js');
   define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast-staging.ca/update.php');
