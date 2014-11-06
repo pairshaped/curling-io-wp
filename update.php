@@ -1,12 +1,10 @@
 <?php
-$version = '1.1.3';
+$version = '1.1.4';
 $description = 'The new version of the Curlcast plugin';
 $changelog = '';
 
-if (isset($_POST['action']))
-  {
-  switch ($_POST['action'])
-    {
+if (isset($_POST['action'])) {
+  switch ($_POST['action']) {
     case 'version':
       echo $version;
       break;
@@ -32,13 +30,11 @@ if (isset($_POST['action']))
     case 'license':
       echo 'false';
       break;
-    }
   }
-else
-  {
+} else {
   header('Cache-Control: public');
   header('Content-Description: File Transfer');
   header('Content-Type: application/zip');
   header('Content-Disposition: attachment; filename="update.zip"');
   readfile('update.zip');
-  }
+}
