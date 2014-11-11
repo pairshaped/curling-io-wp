@@ -26,7 +26,7 @@ if (!class_exists('curlcast')) {
     static $tabs;
     static $templates = array(
       '^competitions$' => 'competitions.php',
-      '^games' => 'boxscore.php',
+      'games' => 'boxscore.php',
       'teams$' => 'teams.php',
       'standings$' => 'standings.php',
       'scoreboard$' => 'scoreboard.php',
@@ -289,6 +289,7 @@ if (!class_exists('curlcast')) {
 
       $url = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . implode('/', $curlcast_array);
       if ( end($curlcast_array) == 'scoreboard' ) $url .= '.js';
+      if ( in_array( "games", $curlcast_array ) ) $url .= '.js';
       $url .= '?'.$query;
 
       foreach (self::$templates as $pattern => $section) {

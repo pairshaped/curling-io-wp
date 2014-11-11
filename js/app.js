@@ -22912,7 +22912,6 @@ module.exports = warning;
     },
     fixLinks: function() {
       var pathPrefix;
-      console.log("Scoreboard::fixLinks", this.props);
       pathPrefix = this.props.pathPrefix;
       return jQuery(this.getDOMNode()).find("a").each(function() {
         var i, pieces, url, _i;
@@ -22925,16 +22924,13 @@ module.exports = warning;
           pieces.shift();
         }
         pieces.unshift(pathPrefix);
-        console.log(pieces);
         return jQuery(this).attr("href", pieces.join("/"));
       });
     },
     componentDidUpdate: function() {
-      console.log("Scoreboard::componentDidUpdate");
       return this.fixLinks();
     },
     componentDidMount: function() {
-      console.log("Scoreboard::componentDidMount");
       return this.fixLinks();
     },
     render: function() {
@@ -23081,7 +23077,7 @@ module.exports = warning;
         }
       }
       return tr({}, td({}, position.team != null ? a({
-        href: position.team.url
+        href: position.team.url || "#team-url"
       }, span({
         className: 'hidden-xs'
       }, position.team.name), span({
@@ -23424,8 +23420,28 @@ module.exports = warning;
         })(this)
       });
     },
+    fixLinks: function() {
+      var pathPrefix;
+      pathPrefix = this.props.pathPrefix;
+      return jQuery(this.getDOMNode()).find("a").each(function() {
+        var i, pieces, url, _i;
+        url = jQuery(this).attr("href");
+        if (url.substr(0, 21) !== '/stats/organizations/') {
+          return;
+        }
+        pieces = url.substr(1).split("/");
+        for (i = _i = 0; _i <= 2; i = ++_i) {
+          pieces.shift();
+        }
+        pieces.unshift(pathPrefix);
+        return jQuery(this).attr("href", pieces.join("/"));
+      });
+    },
     componentWillMount: function() {
       return this.loadDataFromServer();
+    },
+    componentDidUpdate: function() {
+      return this.fixLinks();
     },
     render: function() {
       var competition, competitions, draws, game, more_competitions_url, navigation, pathPrefix, _ref4;
