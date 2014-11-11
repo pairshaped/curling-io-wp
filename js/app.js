@@ -22395,14 +22395,460 @@ module.exports = warning;
 
 
 (function() {
-  var Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
+  var OrganizationLink, OrganizationNavigation, a, div, strong, _ref;
 
-  _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
+  _ref = React.DOM, a = _ref.a, div = _ref.div, strong = _ref.strong;
+
+  OrganizationLink = React.createClass({
+    render: function() {
+      var active_class, title, url, _ref1;
+      _ref1 = this.props.competition, title = _ref1.title, url = _ref1.url;
+      active_class = '';
+      if (this.props.active === true) {
+        active_class = ' active';
+      }
+      return a({
+        className: "list-group-item" + active_class,
+        href: url || "#missing"
+      }, title);
+    }
+  });
+
+  OrganizationNavigation = React.createClass({
+    render: function() {
+      var competitions, current_competition, more_competitions_url, _ref1;
+      _ref1 = this.props, competitions = _ref1.competitions, current_competition = _ref1.current_competition, more_competitions_url = _ref1.more_competitions_url;
+      return div({
+        className: 'list-group',
+        ref: 'linkParent'
+      }, competitions.map(function(competition) {
+        return OrganizationLink({
+          key: competition.id,
+          competition: competition,
+          active: competition.access_key === current_competition
+        });
+      }), a({
+        className: 'list-group-item',
+        href: more_competitions_url
+      }, strong({}, 'More Competitions')));
+    }
+  });
+
+  window.OrganizationNavigation = OrganizationNavigation;
+
+}).call(this);
+(function() {
+  var CompetitionNavigation, a, button, div, li, nav, span, ul, _ref;
+
+  _ref = React.DOM, nav = _ref.nav, div = _ref.div, button = _ref.button, span = _ref.span, ul = _ref.ul, li = _ref.li, a = _ref.a;
+
+  CompetitionNavigation = React.createClass({
+    render: function() {
+      var navigation, short_name, title, _ref1;
+      _ref1 = this.props.competition, title = _ref1.title, short_name = _ref1.short_name;
+      navigation = this.props.navigation;
+      return nav({
+        className: 'navbar navbar-default',
+        role: 'navigation'
+      }, div({
+        className: 'navbar-header'
+      }, button({
+        className: 'navbar-toggle',
+        'data-target': '#curlcast-navigation',
+        'data-toggle': 'collapse',
+        type: 'button'
+      }, span({
+        className: 'sr-only'
+      }, 'Toggle navigation'), span({
+        className: 'icon-bar'
+      }), span({
+        className: 'icon-bar'
+      }), span({
+        className: 'icon-bar'
+      })), span({
+        className: 'navbar-brand'
+      }, short_name || title)), div({
+        className: 'collapse navbar-collapse',
+        id: 'curlcast-navigation'
+      }, ul({
+        className: 'nav navbar-nav'
+      }, li({
+        className: 'active'
+      }, a({
+        href: navigation.scoreboard || '#scoreboard'
+      }, 'Scoreboard')), li({}, a({
+        href: navigation.standings_draw || '#standings_draw'
+      }, 'Standings / Draw')), li({}, a({
+        href: navigation.teams || '#teams'
+      }, 'Teams')), li({
+        className: 'visible-xs'
+      }, a({
+        href: navigation.more_competitions || '#more_competitions'
+      }, 'More Competitions')))));
+    }
+  });
+
+  window.CompetitionNavigation = CompetitionNavigation;
+
+}).call(this);
+(function() {
+  var Competition, CompetitionDay, CompetitionDayList, DrawContentList, DrawList, DrawListItem, DrawSheetItem, DrawSheetList, DrawSheetPosition, Scoreboard, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
+
+  _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, nav = _ref.nav, button = _ref.button, span = _ref.span, strong = _ref.strong;
+
+  _ref1 = React.DOM, table = _ref1.table, thead = _ref1.thead, tbody = _ref1.tbody, tr = _ref1.tr, td = _ref1.td, th = _ref1.th;
+
+  _ref2 = React.DOM, h6 = _ref2.h6, h4 = _ref2.h4, h3 = _ref2.h3;
+
+  _ref3 = React.DOM, ul = _ref3.ul, li = _ref3.li;
+
+  CompetitionDay = React.createClass({
+    changeDraw: function() {
+      this.props.changeDraw(this.props.day);
+      return false;
+    },
+    render: function() {
+      var active_class, date, day, _ref4;
+      _ref4 = this.props.day, date = _ref4.date, day = _ref4.day;
+      active_class = '';
+      if (this.props.active === true) {
+        active_class = ' active';
+      }
+      return li({
+        className: "text-center" + active_class
+      }, a({
+        href: "#day-" + date + "-" + day,
+        onClick: this.changeDraw
+      }, date, br({}), day));
+    }
+  });
+
+  CompetitionDayList = React.createClass({
+    render: function() {
+      var changeDraw, day, days, filter, _ref4;
+      _ref4 = this.props, days = _ref4.days, filter = _ref4.filter, day = _ref4.day, changeDraw = _ref4.changeDraw;
+      return ul({
+        className: 'pagination'
+      }, days.map(function(day_item) {
+        return CompetitionDay({
+          key: day_item.id,
+          day: day_item,
+          active: day.id === day_item.id,
+          changeDraw: changeDraw
+        });
+      }));
+    }
+  });
+
+  DrawListItem = React.createClass({
+    changeDraw: function() {
+      this.props.changeDraw(this.props.day, this.props.draw);
+      return false;
+    },
+    render: function() {
+      var active_class, draw;
+      draw = this.props.draw;
+      active_class = '';
+      if (this.props.active === true) {
+        active_class = 'active';
+      }
+      return li({
+        className: active_class
+      }, a({
+        href: "#draw" + draw.label,
+        role: 'tab',
+        onClick: this.changeDraw
+      }, "Draw " + draw.label, br({}), draw.starts_at));
+    }
+  });
+
+  DrawList = React.createClass({
+    render: function() {
+      var changeDraw, day, draw, draws, _ref4;
+      _ref4 = this.props, draws = _ref4.draws, changeDraw = _ref4.changeDraw, day = _ref4.day;
+      draw = this.props.draw;
+      return ul({
+        className: 'nav nav-tabs',
+        role: 'tablist'
+      }, draws.map(function(draw_item) {
+        return DrawListItem({
+          key: draw_item.id,
+          draw: draw_item,
+          day: day,
+          active: draw_item.id === draw.id,
+          changeDraw: changeDraw
+        });
+      }));
+    }
+  });
+
+  DrawSheetPosition = React.createClass({
+    render: function() {
+      var boxscore, end_scores, ends, game, lsfe, position, score, total, _i, _j, _len, _ref4, _ref5, _results;
+      _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
+      lsfe = '';
+      if (position.first_hammer === true) {
+        lsfe = '*';
+      }
+      end_scores = position.end_scores || [];
+      total = '';
+      if (position.end_scores != null) {
+        total = 0;
+        for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
+          score = end_scores[_i];
+          total += parseInt(score.score) || 0;
+        }
+      }
+      return tr({}, td({}, position.team != null ? a({
+        href: position.team.url
+      }, position.team.name) : 'TBD'), td({
+        className: 'lsfe'
+      }, "" + lsfe), (function() {
+        _results = [];
+        for (var _j = 0, _ref5 = ends - 1; 0 <= _ref5 ? _j <= _ref5 : _j >= _ref5; 0 <= _ref5 ? _j++ : _j--){ _results.push(_j); }
+        return _results;
+      }).apply(this).map(function(endscore, key) {
+        return td({
+          key: key,
+          className: 'end-score'
+        }, end_scores[endscore].score || '');
+      }), td({
+        className: 'total'
+      }, total || ''), boxscore === true ? td({
+        rowSpan: '2',
+        className: 'hidden-xs'
+      }, strong({}, game.state), br({}), a({
+        href: game.boxscore_url || '#boxscore-missing'
+      }, 'Boxscore')) : void 0);
+    }
+  });
+
+  DrawSheetItem = React.createClass({
+    render: function() {
+      var competition, num_ends, sheet, _i, _ref4, _results;
+      _ref4 = this.props, competition = _ref4.competition, sheet = _ref4.sheet;
+      num_ends = Math.max(competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length);
+      return div({
+        className: 'row'
+      }, div({
+        className: 'col-xs-12'
+      }, div({
+        className: 'table-responsive'
+      }, table({
+        className: 'table table-bordered table-condensed'
+      }, thead({}, tr({}, th({}, sheet.name), th({
+        className: 'lsfe'
+      }, span({
+        className: 'hidden-xs'
+      }, 'LSFE')), (function() {
+        _results = [];
+        for (var _i = 1; 1 <= num_ends ? _i <= num_ends : _i >= num_ends; 1 <= num_ends ? _i++ : _i--){ _results.push(_i); }
+        return _results;
+      }).apply(this).map(function(endscore, key) {
+        return th({
+          className: 'end-score',
+          key: key
+        }, "" + endscore);
+      }), th({
+        className: 'total'
+      }, span({
+        className: 'hidden-xs'
+      }, 'TOT'), span({
+        className: 'visible-xs'
+      }, 'T')), th({
+        className: 'hidden-xs',
+        width: '10%'
+      }, ''))), tbody({}, DrawSheetPosition({
+        position: sheet.game_positions[0],
+        ends: num_ends,
+        game: sheet.game,
+        boxscore: true
+      }), DrawSheetPosition({
+        position: sheet.game_positions[1],
+        ends: num_ends,
+        game: sheet.game
+      }))))));
+    }
+  });
+
+  DrawSheetList = React.createClass({
+    render: function() {
+      var active_class, competition, draw, _ref4;
+      _ref4 = this.props, draw = _ref4.draw, competition = _ref4.competition;
+      active_class = '';
+      if (this.props.active === true) {
+        active_class = ' in active';
+      }
+      return div({
+        className: "tab-pane fade" + active_class,
+        id: "draw" + draw.id
+      }, div({
+        className: 'spacer'
+      }), draw.draw_sheets.map(function(sheet, key) {
+        return DrawSheetItem({
+          key: key,
+          draw: draw,
+          sheet: sheet,
+          competition: competition
+        });
+      }));
+    }
+  });
+
+  DrawContentList = React.createClass({
+    render: function() {
+      var competition, draw, draws, _ref4;
+      _ref4 = this.props, draws = _ref4.draws, competition = _ref4.competition, draw = _ref4.draw;
+      return div({
+        className: 'tab-content'
+      }, draws.map(function(draw_item) {
+        return DrawSheetList({
+          key: draw_item.id,
+          draw: draw_item,
+          competition: competition,
+          active: draw.id === draw_item.id
+        });
+      }));
+    }
+  });
+
+  Competition = React.createClass({
+    getInitialState: function() {
+      return {
+        day: null,
+        draw: null
+      };
+    },
+    changeDraw: function(day, draw) {
+      if (draw == null) {
+        draw = null;
+      }
+      return this.setState({
+        day: day,
+        draw: draw || day.draws[0]
+      });
+    },
+    determineDay: function(date_filter_timestamp, days) {
+      var d, day, _i, _len;
+      day = this.state.day || this.props.day || null;
+      if (day == null) {
+        for (_i = 0, _len = days.length; _i < _len; _i++) {
+          d = days[_i];
+          if (d.starts_at_timestamp === date_filter_timestamp) {
+            this.state.day = d;
+            return;
+          }
+        }
+        return this.state.day = days[0];
+      } else {
+        return this.state.day = day;
+      }
+    },
+    determineDraw: function() {
+      var d, day, draw, last, next, now, _i, _len, _ref4;
+      day = this.state.day;
+      draw = this.state.draw || this.props.draw;
+      if (draw == null) {
+        now = (new Date()).getTime();
+        next = false;
+        last = null;
+        _ref4 = day.draws;
+        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+          d = _ref4[_i];
+          if (next === true) {
+            if (now > d.starts_at_timestamp) {
+              this.state.draw = last;
+            } else {
+              this.state.draw = d;
+            }
+            draw = this.state.draw;
+            return;
+          }
+          if (d.starts_at_timestamp > now) {
+            next = true;
+          }
+          last = d;
+        }
+        return this.state.draw = day.draws[0];
+      } else {
+        return this.state.draw = draw;
+      }
+    },
+    render: function() {
+      var competition, day, days, draw, location_str, more_competitions_url, scoreboard, _ref4, _ref5, _ref6;
+      _ref4 = this.props, competition = _ref4.competition, days = _ref4.days, scoreboard = _ref4.scoreboard, more_competitions_url = _ref4.more_competitions_url;
+      _ref5 = this.state, day = _ref5.day, draw = _ref5.draw;
+      if (day == null) {
+        this.determineDay(scoreboard.date_filter_timestamp, days);
+      }
+      if (draw == null) {
+        this.determineDraw();
+      }
+      _ref6 = this.state, day = _ref6.day, draw = _ref6.draw;
+      location_str = '';
+      if ((scoreboard.location != null) && (scoreboard.venue != null)) {
+        location_str = [scoreboard.venue, scoreboard.location].join(', ');
+      }
+      if ((day != null) && (draw != null)) {
+        return div({
+          className: 'col-sm-9 col-xs-12'
+        }, window.CompetitionNavigation({
+          competition: competition,
+          navigation: scoreboard.navigation || {},
+          pathPrefix: this.props.pathPrefix
+        }), div({
+          className: 'row'
+        }, div({
+          className: 'col-xs-12 col-sm-10'
+        }, div({
+          className: 'row'
+        }, div({
+          className: 'col-xs-12'
+        }, p({}, location_str, br({}), scoreboard.starts_on, ' to ', scoreboard.ends_on), CompetitionDayList({
+          days: days,
+          day: day,
+          changeDraw: this.changeDraw
+        }), h3({
+          className: 'hidden-xs'
+        }, day.starts_on), h4({
+          className: 'visible-xs'
+        }, day.starts_on)))), div({
+          className: 'col-sm-2 hidden-xs'
+        }, h6({
+          className: 'text-right'
+        }, 'Current Time', br({}), scoreboard.time_now)), div({
+          className: 'col-xs-12'
+        }, div({
+          className: 'row'
+        }, div({
+          className: 'col-xs-12'
+        }, DrawList({
+          competition: competition,
+          draws: day.draws,
+          day: day,
+          draw: draw,
+          changeDraw: this.changeDraw
+        }), DrawContentList({
+          competition: competition,
+          draws: day.draws,
+          day: day,
+          draw: draw
+        }), p({}, 'LSFE: Last shot in the first end'))))));
+      } else {
+        return div({
+          className: 'col-xs-12'
+        }, 'Loading Competition...');
+      }
+    }
+  });
 
   Scoreboard = React.createClass({
     getInitialState: function() {
       return {
-        competitions: []
+        scoreboard: null,
+        days: [],
+        competitions: [],
+        competition: null
       };
     },
     loadDataFromServer: function() {
@@ -22411,25 +22857,114 @@ module.exports = warning;
         dataType: 'jsonp',
         success: (function(_this) {
           return function(results) {
+            var comp, d, days, draw, id, k, last_day, last_day_id, obj, _i, _j, _len, _len1, _ref4, _ref5;
+            days = [];
+            last_day_id = -1;
+            id = 0;
+            _ref4 = results.draws;
+            for (k = _i = 0, _len = _ref4.length; _i < _len; k = ++_i) {
+              draw = _ref4[k];
+              d = days[days.length - 1] || null;
+              if (d) {
+                last_day = d.day;
+              }
+              if (last_day !== draw.starts_at_day) {
+                obj = {
+                  day: draw.starts_at_day,
+                  draws: [],
+                  date: draw.starts_at_date,
+                  id: id,
+                  starts_on: draw.starts_on,
+                  starts_at_timestamp: draw.starts_at_timestamp
+                };
+                days.push(obj);
+                last_day_id = days.length - 1;
+                id++;
+              }
+              days[last_day_id].draws.push(draw);
+            }
+            _ref5 = results.competitions;
+            for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
+              comp = _ref5[_j];
+              if (comp.access_key === results.access_key) {
+                _this.setState({
+                  competition: comp
+                });
+              }
+            }
+            if (_this.state.competition == null) {
+              _this.setState({
+                competition: results.competitions[0]
+              });
+            }
             return _this.setState({
-              competitions: results
+              scoreboard: results,
+              days: days,
+              competitions: results.competitions
             });
           };
-        })(this),
-        error: function() {
-          return console.log("there was an error");
-        }
+        })(this)
       });
     },
     componentWillMount: function() {
       this.loadDataFromServer();
       return setInterval(this.loadDataFromServer, this.props.pollInterval);
     },
-    render: function() {
-      return div({
-        id: 'curlcast_scoreboard',
-        className: 'panel-group'
+    fixLinks: function() {
+      var pathPrefix;
+      console.log("Scoreboard::fixLinks", this.props);
+      pathPrefix = this.props.pathPrefix;
+      return jQuery(this.getDOMNode()).find("a").each(function() {
+        var i, pieces, url, _i;
+        url = jQuery(this).attr("href");
+        if (url.substr(0, 21) !== '/stats/organizations/') {
+          return;
+        }
+        pieces = url.substr(1).split("/");
+        for (i = _i = 0; _i <= 2; i = ++_i) {
+          pieces.shift();
+        }
+        pieces.unshift(pathPrefix);
+        console.log(pieces);
+        return jQuery(this).attr("href", pieces.join("/"));
       });
+    },
+    componentDidUpdate: function() {
+      console.log("Scoreboard::componentDidUpdate");
+      return this.fixLinks();
+    },
+    componentDidMount: function() {
+      console.log("Scoreboard::componentDidMount");
+      return this.fixLinks();
+    },
+    render: function() {
+      var competition, competitions, days, more_competitions_url, organizations, pathPrefix, scoreboard, _ref4, _ref5;
+      if (this.state.scoreboard == null) {
+        return div({
+          className: 'row'
+        }, div({
+          className: 'col-xs-12'
+        }, 'Loading Scoreboard...'));
+      }
+      pathPrefix = this.props.pathPrefix;
+      _ref4 = this.state.scoreboard, organizations = _ref4.organizations, more_competitions_url = _ref4.more_competitions_url;
+      _ref5 = this.state, competitions = _ref5.competitions, days = _ref5.days, scoreboard = _ref5.scoreboard, competition = _ref5.competition;
+      return div({
+        className: 'row'
+      }, div({
+        className: 'col-sm-3 hidden-xs',
+        id: 'organization-nav'
+      }, window.OrganizationNavigation({
+        competitions: competitions,
+        more_competitions_url: more_competitions_url,
+        current_competition: competition.access_key || '',
+        pathPrefix: pathPrefix
+      })), Competition({
+        competition: competition,
+        days: days,
+        scoreboard: scoreboard,
+        pathPrefix: pathPrefix
+      }));
     }
   });
 
@@ -22437,15 +22972,424 @@ module.exports = warning;
 
 }).call(this);
 (function() {
-  var Competition, Draw, Game, GamePositionName, GamePositionScore, Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
+  var BoxScore, BoxScoreAnalysis, BoxScoreAnalysisTeam, BoxScoreBoard, BoxScoreBoardPositions, BoxScoreContent, BoxScoreShootingPercentages, BoxScoreShootingPercentagesAthletes, BoxScoreTeamRoster, BoxScoreTeamRosterAthlete, BoxScoreTeamRosters, BreadCrumbDraw, BreadCrumbGame, BreadCrumbNavigation, a, div, h1, h6, li, ol, span, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
 
-  _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
+  _ref = React.DOM, div = _ref.div, span = _ref.span, a = _ref.a;
 
-  Scoreboard = React.createClass({
+  _ref1 = React.DOM, ol = _ref1.ol, ul = _ref1.ul, li = _ref1.li;
+
+  _ref2 = React.DOM, table = _ref2.table, thead = _ref2.thead, tr = _ref2.tr, th = _ref2.th, tbody = _ref2.tbody, td = _ref2.td;
+
+  _ref3 = React.DOM, h1 = _ref3.h1, h6 = _ref3.h6;
+
+  BreadCrumbDraw = React.createClass({
+    render: function() {
+      var active_class;
+      active_class = '';
+      if (this.props.active === true) {
+        active_class = 'active';
+      }
+      return li({
+        className: active_class
+      }, a({
+        href: this.props.draw.game_url
+      }, "Draw " + this.props.draw.label + ", " + this.props.draw.start_at_hour));
+    }
+  });
+
+  BreadCrumbGame = React.createClass({
+    render: function() {
+      var active_class;
+      active_class = '';
+      if (this.props.active === true) {
+        active_class = 'active';
+      }
+      return li({
+        className: active_class
+      }, a({
+        href: this.props.game.boxscore_url
+      }, this.props.game.display_name));
+    }
+  });
+
+  BreadCrumbNavigation = React.createClass({
+    render: function() {
+      var active_draw, active_game, draws, scoreboard_url, _ref4;
+      _ref4 = this.props, scoreboard_url = _ref4.scoreboard_url, draws = _ref4.draws, active_draw = _ref4.active_draw, active_game = _ref4.active_game;
+      if ((active_draw == null) || (active_game == null)) {
+        return span({}, "Waiting for navigation data...");
+      }
+      return ol({
+        className: 'breadcrumb'
+      }, li({}, a({
+        href: scoreboard_url || "#"
+      }, 'Scores')), li({
+        className: 'dropdown hidden-xs'
+      }, a({
+        href: active_draw.game_url
+      }, "Draw " + active_draw.label + ", " + active_draw.start_at_hour), a({
+        href: '#',
+        className: 'dropdown-toggle',
+        'data-toggle': 'dropdown'
+      }, span({
+        className: 'caret'
+      })), ul({
+        className: 'dropdown-menu',
+        role: 'menu'
+      }, draws.map(function(draw_item) {
+        return BreadCrumbDraw({
+          key: draw_item.id,
+          draw: draw_item,
+          active: draw_item.id === active_draw.id
+        });
+      }))), li({
+        className: 'dropdown active'
+      }, "" + active_game.display_name, a({
+        href: '#',
+        className: 'dropdown-toggle',
+        'data-toggle': 'dropdown'
+      }, span({
+        className: 'caret'
+      })), ul({
+        className: 'dropdown-menu',
+        role: 'menu'
+      }, active_draw.games.map(function(game_item) {
+        return BreadCrumbGame({
+          key: game_item.id,
+          game: game_item,
+          active: game_item.id === active_game.id
+        });
+      }))));
+    }
+  });
+
+  BoxScoreBoardPositions = React.createClass({
+    render: function() {
+      var end_score, end_scores, ends, game, lsfe, position, total, _i, _j, _len, _ref4, _ref5, _results;
+      _ref4 = this.props, game = _ref4.game, position = _ref4.position, ends = _ref4.ends;
+      lsfe = '';
+      if (position.first_hammer === true) {
+        lsfe = '*';
+      }
+      end_scores = position.end_scores || [];
+      total = '';
+      if (position.end_scores != null) {
+        total = 0;
+        for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
+          end_score = end_scores[_i];
+          total += parseInt(end_score.score) || 0;
+        }
+      }
+      return tr({}, td({}, position.team != null ? a({
+        href: position.team.url
+      }, span({
+        className: 'hidden-xs'
+      }, position.team.name), span({
+        className: 'visible-xs'
+      }, position.team.short_name)) : 'TBD'), td({
+        className: 'lsfe'
+      }, lsfe), (function() {
+        _results = [];
+        for (var _j = 0, _ref5 = ends - 1; 0 <= _ref5 ? _j <= _ref5 : _j >= _ref5; 0 <= _ref5 ? _j++ : _j--){ _results.push(_j); }
+        return _results;
+      }).apply(this).map(function(endscore, key) {
+        return td({
+          key: key,
+          className: 'end-score'
+        }, end_scores[endscore].score);
+      }), td({
+        className: 'total'
+      }, total || ''));
+    }
+  });
+
+  BoxScoreBoard = React.createClass({
+    render: function() {
+      var competition, draw, game, num_ends, _i, _ref4, _results;
+      if (this.props.draw == null) {
+        return span({}, "Loading Scores...");
+      }
+      _ref4 = this.props, competition = _ref4.competition, game = _ref4.game, draw = _ref4.draw;
+      num_ends = Math.max(competition.number_of_ends || (game.positions[0].end_scores || []).length, (game.positions[1].end_scores || []).length);
+      return div({
+        className: 'jumbotron'
+      }, div({
+        className: 'row'
+      }, div({
+        className: 'col-xs-12 text-center'
+      }, h6({}, this.props.draw.starts_at))), div({
+        className: 'row spacer'
+      }), div({
+        className: 'row'
+      }, div({
+        className: 'col-xs-12'
+      }, div({
+        className: 'table-responsive'
+      }, table({
+        className: 'table table-bordered table-condensed'
+      }, thead({}, tr({}, th({}, game.name), th({
+        className: 'lsfe'
+      }, span({
+        className: 'hidden-xs'
+      }, 'LSFE')), (function() {
+        _results = [];
+        for (var _i = 1; 1 <= num_ends ? _i <= num_ends : _i >= num_ends; 1 <= num_ends ? _i++ : _i--){ _results.push(_i); }
+        return _results;
+      }).apply(this).map(function(endscore, key) {
+        return th({
+          className: 'end-score',
+          key: key
+        }, "" + endscore);
+      }), th({
+        className: 'total'
+      }, span({
+        className: 'hidden-xs'
+      }, 'TOT'), span({
+        className: 'visible-xs'
+      }, 'T')))), game.positions != null ? tbody({}, BoxScoreBoardPositions({
+        position: game.positions[0],
+        ends: num_ends,
+        game: game
+      }), BoxScoreBoardPositions({
+        position: game.positions[1],
+        ends: num_ends,
+        game: game
+      })) : void 0)))));
+    }
+  });
+
+  BoxScoreTeamRosterAthlete = React.createClass({
+    render: function() {
+      return tr({}, td({}, this.props.athlete.name), td({}, this.props.athlete.position), td({
+        className: 'hidden-xs'
+      }, this.props.athlete.delivery));
+    }
+  });
+
+  BoxScoreTeamRoster = React.createClass({
+    render: function() {
+      var team;
+      team = this.props.team;
+      return div({
+        className: 'col-sm-6 col-xs-12'
+      }, table({
+        className: 'table table-bordered table-condensed table-striped'
+      }, thead({}, tr({}, th({
+        colSpan: '3'
+      }, team.name)), tr({}, th({}, "Athlete"), th({
+        width: '35%'
+      }, "Position"), th({
+        className: 'hidden-xs',
+        width: '25%'
+      }, "Delivery"))), tbody({}, team.athletes.map(function(athlete) {
+        return BoxScoreTeamRosterAthlete({
+          key: athlete.id,
+          athlete: athlete
+        });
+      }))));
+    }
+  });
+
+  BoxScoreTeamRosters = React.createClass({
+    render: function() {
+      var positions;
+      positions = this.props.positions;
+      return div({
+        className: 'row'
+      }, div({
+        className: 'col-xs-12'
+      }, h1({}, 'Team Rosters')), positions != null ? positions.map(function(position) {
+        return BoxScoreTeamRoster({
+          key: position.team.id,
+          team: position.team
+        });
+      }) : span({}, "Loading positions..."));
+    }
+  });
+
+  BoxScoreAnalysisTeam = React.createClass({
+    render: function() {
+      var team;
+      team = this.props.team;
+      return tbody({}, tr({}, td({
+        rowSpan: '2'
+      }, span({
+        className: 'hidden-xs'
+      }, team.name), span({
+        className: 'visible-xs'
+      }, team.short_name)), td({
+        rowSpan: '2'
+      }, team.games_started || 0), td({
+        rowSpan: '2'
+      }, team.number_of_ends || 0), td({}, "For"), td({}, team.lsfe_for || 0), td({}, team.blank_ends_for || 0), td({}, team.ends_for_with_points_1 || 0), td({}, team.ends_for_with_points_2 || 0), td({}, team.ends_for_with_points_3 || 0), td({}, team.ends_for_with_points_4 || 0), td({}, team.ends_for_with_points_gt_4 || 0), td({}, team.ends_for_total_points || 0), td({}, team.games_for_average_points || 0)), tr({}, td({}, "Against"), td({}, team.lsfe_against || 0), td({}, team.blank_ends_against || 0), td({}, team.ends_against_with_points_1 || 0), td({}, team.ends_against_with_points_2 || 0), td({}, team.ends_against_with_points_3 || 0), td({}, team.ends_against_with_points_4 || 0), td({}, team.ends_against_with_points_gt_4 || 0), td({}, team.ends_against_total_points || 0), td({}, team.games_against_average_points || 0)));
+    }
+  });
+
+  BoxScoreAnalysis = React.createClass({
+    render: function() {
+      var teams;
+      teams = this.props.teams;
+      return div({
+        className: 'row'
+      }, div({
+        className: 'col-xs-12'
+      }, h1({}, 'Scoring Analysis')), div({
+        className: 'col-xs-12'
+      }, div({
+        className: 'table-responsive'
+      }, table({
+        className: 'table table-bordered table-condensed table-striped table-hover'
+      }, thead({}, tr({}, th({}, 'Team'), th({}, 'Games'), th({}, 'Ends'), th({}), th({}, 'LSFE'), th({}, 'Blank Ends'), th({}, '1pt'), th({}, '2pt'), th({}, '3pt'), th({}, '4pt'), th({}, '>4pt'), th({}, 'Tot'), th({}, 'Avg'))), teams.map(function(team) {
+        return BoxScoreAnalysisTeam({
+          key: team.id,
+          team: team
+        });
+      })))));
+    }
+  });
+
+  BoxScoreShootingPercentagesAthletes = React.createClass({
+    render: function() {
+      var athlete_a, athlete_b, blank_athlete, _ref4;
+      _ref4 = this.props, athlete_a = _ref4.athlete_a, athlete_b = _ref4.athlete_b;
+      blank_athlete = {
+        position: '',
+        name: '',
+        statistics: {
+          shot_count: '',
+          total_actual: '',
+          percentage: ''
+        }
+      };
+      athlete_a || (athlete_a = blank_athlete);
+      athlete_b || (athlete_b = blank_athlete);
+      return tr({}, td({}, athlete_a.position), td({}, athlete_a.name), td({}, athlete_a.statistics.shot_count), td({}, athlete_a.statistics.total_actual), td({}, athlete_a.statistics.percentage), td({}), td({}, athlete_b.position), td({}, athlete_b.name), td({}, athlete_b.statistics.shot_count), td({}, athlete_b.statistics.total_actual), td({}, athlete_b.statistics.percentage));
+    }
+  });
+
+  BoxScoreShootingPercentages = React.createClass({
+    render: function() {
+      var i, left, num, players, position_left, position_right, ranking, right, teams, _i;
+      teams = this.props.teams;
+      left = {
+        team: teams[0],
+        counter: 0
+      };
+      right = {
+        team: teams[1],
+        counter: 0
+      };
+      ranking = ["Fourth", "Third", "Second", "Lead"];
+      players = [];
+      num = Math.max(left.team.athletes.length, right.team.athletes.length);
+      for (i = _i = 0; 0 <= num ? _i < num : _i > num; i = 0 <= num ? ++_i : --_i) {
+        position_left = position_right = -1;
+        if (left.team.athletes.length > left.counter) {
+          position_left = ranking.indexOf(left.team.athletes[left.counter].position);
+        }
+        if (right.team.athletes.length > right.counter) {
+          position_right = ranking.indexOf(teams[1].athletes[right.counter].position);
+        }
+        if (position_left === position_right && (position_left >= 0)) {
+          players.push([left.team.athletes[left.counter], right.team.athletes[right.counter]]);
+          left.counter++;
+          right.counter++;
+        } else if (position_left > position_right) {
+          players.push([left.team.athletes[left.counter], null]);
+          left.counter++;
+        } else if (position_right > position_left) {
+          players.push([null, right.team.athletes[right.counter]]);
+          right.counter++;
+        } else {
+          break;
+        }
+      }
+      return div({
+        className: 'row'
+      }, div({
+        className: 'col-xs-12'
+      }, h1({}, 'Shooting Percentages')), div({
+        className: 'col-xs-12'
+      }, div({
+        className: 'table-responsive'
+      }, table({
+        className: 'table table-bordered table-condensed table-hover'
+      }, thead({}, tr({}, th({}), th({}, teams[0].name), th({}, 'Shots'), th({}, 'Pts'), th({}, '%'), th({}), th({}), th({}, teams[1].name), th({}, 'Shots'), th({}, 'Pts'), th({}, '%'))), tbody({}, players.map(function(set, index) {
+        return BoxScoreShootingPercentagesAthletes({
+          key: index,
+          athlete_a: set[0],
+          athlete_b: set[1]
+        });
+      }))))));
+    }
+  });
+
+  BoxScoreContent = React.createClass({
+    componentDidMount: function() {},
+    render: function() {
+      var competition, competitions, d, draw, draws, g, game, navigation, position, teams, _i, _j, _k, _len, _len1, _len2, _ref4, _ref5, _ref6, _ref7;
+      _ref4 = this.props, navigation = _ref4.navigation, draws = _ref4.draws, competitions = _ref4.competitions, competition = _ref4.competition;
+      draw = game = null;
+      _ref5 = this.props.draws;
+      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+        d = _ref5[_i];
+        _ref6 = d.games;
+        for (_j = 0, _len1 = _ref6.length; _j < _len1; _j++) {
+          g = _ref6[_j];
+          if (g.active == null) {
+            continue;
+          }
+          draw = d;
+          game = g;
+          break;
+        }
+      }
+      teams = [];
+      if (game != null) {
+        _ref7 = game.positions;
+        for (_k = 0, _len2 = _ref7.length; _k < _len2; _k++) {
+          position = _ref7[_k];
+          teams.push(position.team);
+        }
+      } else {
+        return div({
+          className: 'row'
+        }, div({
+          className: 'col-xs-12'
+        }, 'Loading Boxscore...'));
+      }
+      return div({
+        className: 'row'
+      }, div({
+        className: 'col-xs-12'
+      }, BreadCrumbNavigation({
+        scoreboard_url: navigation.scoreboard,
+        draws: draws,
+        active_draw: draw,
+        active_game: game
+      }), BoxScoreBoard({
+        draw: draw,
+        game: game,
+        competition: competition
+      }), BoxScoreTeamRosters({
+        positions: game.positions
+      }), BoxScoreAnalysis({
+        teams: teams
+      }), BoxScoreShootingPercentages({
+        teams: teams
+      })));
+    }
+  });
+
+  BoxScore = React.createClass({
     getInitialState: function() {
       return {
-        placeholderMessage: "Loading competitions...",
-        competitions: []
+        game: null,
+        draws: [],
+        navigation: null,
+        competitions: [],
+        more_competitions_url: null,
+        counter: 0
       };
     },
     loadDataFromServer: function() {
@@ -22454,158 +23398,78 @@ module.exports = warning;
         dataType: 'jsonp',
         success: (function(_this) {
           return function(results) {
-            return _this.setState({
-              placeholderMessage: "There are no active competitions.",
-              competitions: results
+            var active_competition, competition, _i, _len, _ref4;
+            active_competition = {};
+            _ref4 = results.competitions;
+            for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+              competition = _ref4[_i];
+              if (competition.active == null) {
+                continue;
+              }
+              active_competition = competition;
+              break;
+            }
+            _this.replaceState({
+              game: results,
+              draws: results.draws,
+              draw_games: results.draw_games,
+              navigation: results.navigation,
+              competitions: results.competitions,
+              more_competitions_url: results.more_competitions_url,
+              competition: active_competition,
+              counter: _this.state.counter + 1
             });
+            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
           };
-        })(this),
-        error: function() {
-          return console.log("there was an error");
-        }
+        })(this)
       });
     },
     componentWillMount: function() {
-      this.loadDataFromServer();
-      return setInterval(this.loadDataFromServer, this.props.pollInterval);
+      return this.loadDataFromServer();
     },
     render: function() {
-      if (this.state.competitions.length === 0) {
-        return div(null, p(null, strong(null, this.state.placeholderMessage)), p(null, a({
-          href: "/" + this.props.pathPrefix + "/competitions",
-          dangerouslySetInnerHTML: {
-            __html: "Recent Competitions &raquo;"
-          }
-        })));
-      } else {
+      var competition, competitions, draws, game, more_competitions_url, navigation, pathPrefix, _ref4;
+      if (this.state.game == null) {
         return div({
-          id: 'curlcast_accordion',
-          className: 'panel-group'
-        }, this.state.competitions.map((function(_this) {
-          return function(competition) {
-            return Competition({
-              key: competition.id,
-              competition: competition,
-              pathPrefix: _this.props.pathPrefix
-            });
-          };
-        })(this)));
+          className: 'row'
+        }, div({
+          className: 'col-xs-12'
+        }, 'Loading Boxscore...'));
       }
-    }
-  });
-
-  Competition = React.createClass({
-    render: function() {
-      var current_draw, id, open, path, short_name, title, _ref1;
-      _ref1 = this.props.competition, id = _ref1.id, title = _ref1.title, short_name = _ref1.short_name, current_draw = _ref1.current_draw, path = _ref1.path, open = _ref1.open;
+      pathPrefix = this.props.pathPrefix;
+      _ref4 = this.state, game = _ref4.game, draws = _ref4.draws, competitions = _ref4.competitions, more_competitions_url = _ref4.more_competitions_url, competition = _ref4.competition, navigation = _ref4.navigation;
       return div({
-        className: "panel panel-default"
+        className: 'row'
       }, div({
-        className: "panel-heading"
-      }, h4({
-        className: "panel-title",
-        title: title
-      }, a({
-        "data-parent": "#curlcast_accordion",
-        "data-toggle": "collapse",
-        href: "#comp-" + id,
-        title: title
-      }, {
-        short_name: short_name
-      }))), div({
-        className: "panel-collapse collapse" + (open ? ' in' : ''),
-        id: "comp-" + id
-      }, div({
-        className: "panel-body"
-      }, div({
-        className: "row"
-      }, current_draw != null ? Draw({
-        draw: current_draw,
+        className: 'col-sm-3 hidden-xs',
+        id: 'organization-nav'
+      }, OrganizationNavigation({
+        competitions: competitions,
+        more_competitions_url: more_competitions_url,
+        current_competition: competition.access_key || '',
+        pathPrefix: pathPrefix
+      })), div({
+        className: 'col-sm-9 col-xs-12',
+        id: 'scoreboard'
+      }, CompetitionNavigation({
+        competition: competition,
+        navigation: game.navigation || {},
         pathPrefix: this.props.pathPrefix
-      }) : void 0, div({
-        className: "col-xs-12"
-      }, current_draw != null ? p(null, a({
-        href: "/" + this.props.pathPrefix + path,
-        dangerouslySetInnerHTML: {
-          __html: "Full Scoreboard &raquo;"
-        }
-      })) : p(null, "No Draws Scheduled Yet"))))));
-    }
-  });
-
-  Draw = React.createClass({
-    render: function() {
-      var games, id, label, starts, _ref1;
-      _ref1 = this.props.draw, id = _ref1.id, label = _ref1.label, starts = _ref1.starts, games = _ref1.games;
-      return div({
-        className: "col-xs-12"
-      }, p(null, strong(null, "Draw " + label + ": "), starts), games.length === 0 ? p(null, "No Games Scheduled Yet") : (p(null, "Prefix: " + this.props.pathPrefix), table({
-        className: "table table-bordered table-condensed"
-      }, games.map((function(_this) {
-        return function(game) {
-          return Game({
-            key: game.id,
-            game: game,
-            pathPrefix: _this.props.pathPrefix
-          });
-        };
-      })(this)))));
-    }
-  });
-
-  Game = React.createClass({
-    render: function() {
-      var game_positions, id, path, state, _ref1;
-      _ref1 = this.props.game, id = _ref1.id, state = _ref1.state, path = _ref1.path, game_positions = _ref1.game_positions;
-      return tbody(null, tr(null, GamePositionName({
-        key: game_positions[0].id,
-        game_position: game_positions[0],
-        pathPrefix: this.props.pathPrefix
-      }), GamePositionScore({
-        key: "score-" + game_positions[0].id,
-        game_position: game_positions[0]
-      }), td({
-        className: "game-state",
-        rowSpan: "2"
-      }, strong(null, state), br(null), a({
-        href: "/" + this.props.pathPrefix + path
-      }, "Box"))), tr(null, GamePositionName({
-        key: game_positions[1].id,
-        game_position: game_positions[1],
-        pathPrefix: this.props.pathPrefix
-      }), GamePositionScore({
-        key: "score-" + game_positions[1].id,
-        game_position: game_positions[1]
+      }), BoxScoreContent({
+        draws: draws,
+        competitions: competitions,
+        competition: competition,
+        navigation: game.navigation
       })));
     }
   });
 
-  GamePositionName = React.createClass({
-    render: function() {
-      var name, result, short_name, team_path, _ref1;
-      _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, result = _ref1.result;
-      return td({
-        className: "game-name"
-      }, team_path !== null ? a({
-        href: "/" + this.props.pathPrefix + team_path,
-        title: name
-      }, result === 'won' ? strong(null, short_name) : short_name) : name);
-    }
-  });
-
-  GamePositionScore = React.createClass({
-    render: function() {
-      var result, total, _ref1;
-      _ref1 = this.props.game_position, total = _ref1.total, result = _ref1.result;
-      return td({
-        className: "game-score"
-      }, result === 'won' ? strong(null, total) : total);
-    }
-  });
-
-  window.CurlcastScoreboardWidget = Scoreboard;
+  window.CurlcastBoxScore = BoxScore;
 
 }).call(this);
+
+
+
 
 
 

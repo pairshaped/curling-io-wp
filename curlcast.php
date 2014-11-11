@@ -287,7 +287,9 @@ if (!class_exists('curlcast')) {
       $query = http_build_query($params);
       if($curlcast_array[0] === '') $curlcast_array = array('competitions');
 
-      $url = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . implode('/', $curlcast_array) . '?'.$query;
+      $url = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . implode('/', $curlcast_array);
+      if ( end($curlcast_array) == 'scoreboard' ) $url .= '.js';
+      $url .= '?'.$query;
 
       foreach (self::$templates as $pattern => $section) {
         if (preg_match("/$pattern/", implode('/', $curlcast_array))) {
@@ -298,7 +300,7 @@ if (!class_exists('curlcast')) {
 
       $template = file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
-      $template = str_replace('{path_prefix}', $page_prefix, $template);
+      $template = str_replace('{path_prefix}', $base_url, $template);
 
       return $template;
     }
