@@ -22611,7 +22611,7 @@ module.exports = warning;
         return td({
           key: key,
           className: 'end-score'
-        }, end_scores[endscore].score || '');
+        }, end_scores[endscore].score);
       }), td({
         className: 'total'
       }, total || ''), boxscore === true ? td({

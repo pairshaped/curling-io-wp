@@ -2,11 +2,11 @@
 /*
 Plugin Name: Curlcast Stats
 Description: Displays Curlcast Stats.
-Version: 1.1.5
+Version: 1.1.6
 Author: Pair Shaped Inc.
 */
 if (!class_exists('curlcast')) {
-  define('WP_CURLCAST_VERSION', '1.1.5');
+  define('WP_CURLCAST_VERSION', '1.1.6');
 
   # Production
   define('WP_CURLCAST_BASE_URL', 'http://curlcast.ca/stats/organizations');
