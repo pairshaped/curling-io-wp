@@ -22584,18 +22584,29 @@ module.exports = warning;
 
   DrawSheetPosition = React.createClass({
     render: function() {
-      var boxscore, end_scores, ends, game, lsfe, position, score, total, _i, _j, _len, _ref4, _ref5, _results;
+      var boxscore, end_scores, ends, es, game, is_final, lsfe, position, score, total, _i, _j, _k, _len, _len1, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
         lsfe = '*';
       }
       end_scores = position.end_scores || [];
+      is_final = game.state.toLowerCase() === "final";
+      for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
+        es = end_scores[_i];
+        if (es.score == null) {
+          if (is_final) {
+            es.score = 'X';
+          }
+        } else {
+          es.score = es.score.toString();
+        }
+      }
       total = '';
       if (position.end_scores != null) {
         total = 0;
-        for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
-          score = end_scores[_i];
+        for (_j = 0, _len1 = end_scores.length; _j < _len1; _j++) {
+          score = end_scores[_j];
           total += parseInt(score.score) || 0;
         }
       }
@@ -22605,13 +22616,13 @@ module.exports = warning;
         className: 'lsfe'
       }, "" + lsfe), (function() {
         _results = [];
-        for (var _j = 0, _ref5 = ends - 1; 0 <= _ref5 ? _j <= _ref5 : _j >= _ref5; 0 <= _ref5 ? _j++ : _j--){ _results.push(_j); }
+        for (var _k = 0, _ref5 = ends - 1; 0 <= _ref5 ? _k <= _ref5 : _k >= _ref5; 0 <= _ref5 ? _k++ : _k--){ _results.push(_k); }
         return _results;
       }).apply(this).map(function(endscore, key) {
         return td({
           key: key,
           className: 'end-score'
-        }, end_scores[endscore].score || '');
+        }, end_scores[endscore].score);
       }), td({
         className: 'total'
       }, total || ''), boxscore === true ? td({
@@ -22930,9 +22941,6 @@ module.exports = warning;
     componentDidUpdate: function() {
       return this.fixLinks();
     },
-    componentDidMount: function() {
-      return this.fixLinks();
-    },
     render: function() {
       var competition, competitions, days, more_competitions_url, organizations, pathPrefix, scoreboard, _ref4, _ref5;
       if (this.state.scoreboard == null) {
@@ -23061,7 +23069,7 @@ module.exports = warning;
 
   BoxScoreBoardPositions = React.createClass({
     render: function() {
-      var end_score, end_scores, ends, game, lsfe, position, total, _i, _j, _len, _ref4, _ref5, _results;
+      var end_score, end_scores, ends, game, is_final, lsfe, position, total, _i, _j, _len, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -23069,11 +23077,19 @@ module.exports = warning;
       }
       end_scores = position.end_scores || [];
       total = '';
+      is_final = game.state.toLowerCase() === "final";
       if (position.end_scores != null) {
         total = 0;
         for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
           end_score = end_scores[_i];
           total += parseInt(end_score.score) || 0;
+          if (end_score.score == null) {
+            if (is_final === true) {
+              end_score.score = 'X';
+            }
+          } else {
+            end_score.score = end_score.score.toString();
+          }
         }
       }
       return tr({}, td({}, position.team != null ? a({
@@ -23195,10 +23211,12 @@ module.exports = warning;
       }, div({
         className: 'col-xs-12'
       }, h1({}, 'Team Rosters')), positions != null ? positions.map(function(position) {
-        return BoxScoreTeamRoster({
-          key: position.team.id,
-          team: position.team
-        });
+        if ((position.team != null) && position.team.athletes.length > 0) {
+          return BoxScoreTeamRoster({
+            key: position.team.id,
+            team: position.team
+          });
+        }
       }) : span({}, "Loading positions..."));
     }
   });
@@ -23367,13 +23385,13 @@ module.exports = warning;
         draw: draw,
         game: game,
         competition: competition
-      }), BoxScoreTeamRosters({
+      }), (game.positions[0].team != null) && (game.positions[1].team != null) ? BoxScoreTeamRosters({
         positions: game.positions
-      }), BoxScoreAnalysis({
+      }) : void 0, (game.positions[0].team != null) && (game.positions[1].team != null) ? BoxScoreAnalysis({
         teams: teams
-      }), BoxScoreShootingPercentages({
+      }) : void 0, game.shot_by_shot === true ? BoxScoreShootingPercentages({
         teams: teams
-      })));
+      }) : void 0));
     }
   });
 

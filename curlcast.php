@@ -8,14 +8,36 @@ Author: Pairshaped Inc.
 if (!class_exists('curlcast')) {
   define('WP_CURLCAST_VERSION', '1.1.4');
 
+  # Set environment
+  # Ideally, we should be setting/including this using a env.php file with the appropriate configuration
+  define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
+
+  switch(WP_CURLCAST_ENV) {
+  case 'dev':
+    define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
+    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', 'Wusv5gV69Nw');
+    break;
+  case 'staging':
+    define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
+    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', '');
+    break;
+   case 'production':
+  default:
+    # Production Options
+    define('WP_CURLCAST_BASE_URL', 'http://curlcast.ca/stats/organizations');
+    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', false);
+  }
+
   # Production
-  define('WP_CURLCAST_BASE_URL', 'http://curlcast.ca/stats/organizations');
 
   # Staging
   # define('WP_CURLCAST_BASE_URL', 'http://curlcast-staging.ca/stats/organizations');
 
   # Dev
   # define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
+
+  # Old Dev
+  # define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats/organizations');
 
   define('WP_CURLCAST_WIDGET_URL', 'competitions/scoreboard_mini.js');
   define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast-staging.ca/update.php');
@@ -276,7 +298,7 @@ if (!class_exists('curlcast')) {
      * @return html
      */
     function process_routing($curlcast_array) {
-      $access_key  = get_option('curlcast_api_key');
+      $access_key  = (defined('WP_CURLCAST_ACCESS_KEY_OVERRIDE') && WP_CURLCAST_ACCESS_KEY_OVERRIDE) ? WP_CURLCAST_ACCESS_KEY_OVERRIDE : get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url().'/'.$page_prefix;
 
