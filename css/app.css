@@ -5820,35 +5820,38 @@ body #curlcast_scoreboard-widget {
       margin-right: 0;
       margin-bottom: 0; }
   /* line 66, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  .curlcast ul.pagination li:first-child a {
+    margin-left: 1px; }
+  /* line 69, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast ul.pagination li a {
     margin: 0; }
-  /* line 71, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 74, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast table .lsfe, .curlcast table .end-score, .curlcast table .total {
     width: 5%;
     text-align: center; }
-  /* line 74, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 77, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast table .total {
     font-weight: bold; }
-  /* line 77, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 80, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast .container-fluid {
     padding: 0;
     overflow: hidden; }
-  /* line 81, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 84, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast .spacer {
     margin: 10px 0; }
 
-/* line 85, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+/* line 88, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
 #curlcast_scoreboard-widget {
   -webkit-font-smoothing: antialiased;
   min-width: 240px;
   max-width: 320px; }
-  /* line 92, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 95, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   #curlcast_scoreboard-widget .game-name {
     width: 60%; }
-  /* line 94, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 97, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   #curlcast_scoreboard-widget .game-score {
     width: 10%;
     text-align: center; }
-  /* line 97, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 100, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   #curlcast_scoreboard-widget .game-state {
     width: 20%; }
