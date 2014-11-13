@@ -22584,7 +22584,7 @@ module.exports = warning;
 
   DrawSheetPosition = React.createClass({
     render: function() {
-      var boxscore, end_scores, ends, es, game, is_final, lsfe, position, score, total, _i, _j, _k, _len, _len1, _ref4, _ref5, _results;
+      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -22602,11 +22602,19 @@ module.exports = warning;
           es.score = es.score.toString();
         }
       }
+      if (end_scores.length < ends) {
+        padding = ends - end_scores.length;
+        for (es = _j = 0; 0 <= padding ? _j <= padding : _j >= padding; es = 0 <= padding ? ++_j : --_j) {
+          end_scores.push({
+            score: ''
+          });
+        }
+      }
       total = '';
       if (position.end_scores != null) {
         total = 0;
-        for (_j = 0, _len1 = end_scores.length; _j < _len1; _j++) {
-          score = end_scores[_j];
+        for (_k = 0, _len1 = end_scores.length; _k < _len1; _k++) {
+          score = end_scores[_k];
           total += parseInt(score.score) || 0;
         }
       }
@@ -22620,7 +22628,7 @@ module.exports = warning;
         className: 'lsfe'
       }, "" + lsfe), (function() {
         _results = [];
-        for (var _k = 0, _ref5 = ends - 1; 0 <= _ref5 ? _k <= _ref5 : _k >= _ref5; 0 <= _ref5 ? _k++ : _k--){ _results.push(_k); }
+        for (var _l = 0, _ref5 = ends - 1; 0 <= _ref5 ? _l <= _ref5 : _l >= _ref5; 0 <= _ref5 ? _l++ : _l--){ _results.push(_l); }
         return _results;
       }).apply(this).map(function(endscore, key) {
         return td({
@@ -22651,7 +22659,7 @@ module.exports = warning;
         className: 'table-responsive'
       }, table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, sheet.name), th({
+      }, thead({}, tr({}, th({}, strong({}, sheet.name)), th({
         className: 'lsfe'
       }, span({
         className: 'hidden-xs'
@@ -22762,12 +22770,34 @@ module.exports = warning;
       }
       return this.changeDraw(this.props.days[0], this.props.days[0].draws[0]);
     },
+    refreshActiveDraw: function() {
+      var d, dr, _i, _j, _len, _len1, _ref4, _ref5;
+      if (!((this.state.draw != null) && (this.state.day != null))) {
+        return;
+      }
+      _ref4 = this.props.days;
+      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+        d = _ref4[_i];
+        if (d.id === this.state.day.id) {
+          _ref5 = d.draws;
+          for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
+            dr = _ref5[_j];
+            if (dr.id === this.state.draw.id) {
+              this.state.day = d;
+              this.state.draw = dr;
+              return;
+            }
+          }
+        }
+      }
+    },
     componentWillMount: function() {
       return this.discoverActiveDraw();
     },
     render: function() {
       var competition, day, days, draw, location_str, more_competitions_url, scoreboard, _ref4, _ref5;
       _ref4 = this.props, competition = _ref4.competition, days = _ref4.days, scoreboard = _ref4.scoreboard, more_competitions_url = _ref4.more_competitions_url;
+      this.refreshActiveDraw();
       _ref5 = this.state, day = _ref5.day, draw = _ref5.draw;
       location_str = '';
       if ((scoreboard.location != null) && (scoreboard.venue != null)) {
