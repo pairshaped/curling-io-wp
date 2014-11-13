@@ -22612,7 +22612,11 @@ module.exports = warning;
       }
       return tr({}, td({}, position.team != null ? a({
         href: position.team.url
-      }, position.team.name) : 'TBD'), td({
+      }, span({
+        className: 'hidden-xs'
+      }, position.team.name), span({
+        className: 'visible-xs'
+      }, position.team.short_name)) : 'TBD'), td({
         className: 'lsfe'
       }, "" + lsfe), (function() {
         _results = [];
@@ -22739,63 +22743,32 @@ module.exports = warning;
         draw: draw || day.draws[0]
       });
     },
-    determineDay: function(date_filter_timestamp, days) {
-      var d, day, _i, _len;
-      day = this.state.day || this.props.day || null;
-      if (day == null) {
-        for (_i = 0, _len = days.length; _i < _len; _i++) {
-          d = days[_i];
-          if (d.starts_at_timestamp === date_filter_timestamp) {
-            this.state.day = d;
+    discoverActiveDraw: function() {
+      var d, dr, _i, _j, _len, _len1, _ref4, _ref5;
+      if ((this.state.draw != null) && (this.state.day != null)) {
+        return;
+      }
+      _ref4 = this.props.days;
+      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+        d = _ref4[_i];
+        _ref5 = d.draws;
+        for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
+          dr = _ref5[_j];
+          if (dr.active != null) {
+            this.changeDraw(d, dr);
             return;
           }
         }
-        return this.state.day = days[0];
-      } else {
-        return this.state.day = day;
       }
+      return this.changeDraw(this.props.days[0], this.props.days[0].draws[0]);
     },
-    determineDraw: function() {
-      var d, day, draw, last, next, now, _i, _len, _ref4;
-      day = this.state.day;
-      draw = this.state.draw || this.props.draw;
-      if (draw == null) {
-        now = (new Date()).getTime();
-        next = false;
-        last = null;
-        _ref4 = day.draws;
-        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-          d = _ref4[_i];
-          if (next === true) {
-            if (now > d.starts_at_timestamp) {
-              this.state.draw = last;
-            } else {
-              this.state.draw = d;
-            }
-            draw = this.state.draw;
-            return;
-          }
-          if (d.starts_at_timestamp > now) {
-            next = true;
-          }
-          last = d;
-        }
-        return this.state.draw = day.draws[0];
-      } else {
-        return this.state.draw = draw;
-      }
+    componentWillMount: function() {
+      return this.discoverActiveDraw();
     },
     render: function() {
-      var competition, day, days, draw, location_str, more_competitions_url, scoreboard, _ref4, _ref5, _ref6;
+      var competition, day, days, draw, location_str, more_competitions_url, scoreboard, _ref4, _ref5;
       _ref4 = this.props, competition = _ref4.competition, days = _ref4.days, scoreboard = _ref4.scoreboard, more_competitions_url = _ref4.more_competitions_url;
       _ref5 = this.state, day = _ref5.day, draw = _ref5.draw;
-      if (day == null) {
-        this.determineDay(scoreboard.date_filter_timestamp, days);
-      }
-      if (draw == null) {
-        this.determineDraw();
-      }
-      _ref6 = this.state, day = _ref6.day, draw = _ref6.draw;
       location_str = '';
       if ((scoreboard.location != null) && (scoreboard.venue != null)) {
         location_str = [scoreboard.venue, scoreboard.location].join(', ');
@@ -22908,18 +22881,18 @@ module.exports = warning;
                 competition: results.competitions[0]
               });
             }
-            return _this.setState({
+            _this.setState({
               scoreboard: results,
               days: days,
               competitions: results.competitions
             });
+            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
           };
         })(this)
       });
     },
     componentWillMount: function() {
-      this.loadDataFromServer();
-      return setInterval(this.loadDataFromServer, this.props.pollInterval);
+      return this.loadDataFromServer();
     },
     fixLinks: function() {
       var pathPrefix;
