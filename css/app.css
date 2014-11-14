@@ -21,7 +21,6 @@ body #curlcast_scoreboard-widget {
   color: #333333;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 14px;
-  line-height: 1.42857;
   /*! normalize.css v3.0.1 | MIT License | git.io/normalize */ }
   /* line 9, /Users/canadianbeard/.rvm/gems/ruby-2.1.3@global/gems/bootstrap-sass-3.2.0.2/assets/stylesheets/bootstrap/_normalize.scss */
   .curlcast html {
@@ -5797,52 +5796,66 @@ body #curlcast_scoreboard-widget {
   /* line 34, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast * {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important; }
-  /* line 37, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 40, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  .curlcast table.table thead tr th {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; }
+  /* line 45, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  .curlcast table.table tbody tr td {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; }
+  /* line 50, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast ul.pagination {
     margin-top: 0;
     margin-bottom: 0; }
-  /* line 41, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 54, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast ul.pagination,
   .curlcast ul.nav {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-bottom: 0 !important; }
-    /* line 47, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0; }
+    /* line 60, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
     .curlcast ul.pagination li,
     .curlcast ul.nav li {
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      margin-bottom: 0 !important; }
-  /* line 54, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+      margin-left: 0;
+      margin-right: 0;
+      margin-bottom: 0; }
+  /* line 67, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  .curlcast ul.pagination li:first-child a {
+    margin-left: 1px; }
+  /* line 70, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  .curlcast ul.pagination li a {
+    margin: 0; }
+  /* line 75, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast table .lsfe, .curlcast table .end-score, .curlcast table .total {
     width: 5%;
     text-align: center; }
-  /* line 57, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 78, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast table .total {
     font-weight: bold; }
-  /* line 60, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 81, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast .container-fluid {
     padding: 0;
     overflow: hidden; }
-  /* line 64, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 85, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast .spacer {
     margin: 10px 0; }
-  /* line 68, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 89, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   .curlcast .form-group.search_q input {
     max-width: 300px; }
 
-/* line 72, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+/* line 93, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
 #curlcast_scoreboard-widget {
   -webkit-font-smoothing: antialiased;
   min-width: 240px;
   max-width: 320px; }
-  /* line 79, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 100, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   #curlcast_scoreboard-widget .game-name {
     width: 60%; }
-  /* line 81, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 102, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   #curlcast_scoreboard-widget .game-score {
     width: 10%;
     text-align: center; }
-  /* line 84, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
+  /* line 105, /Users/canadianbeard/work/curlcast-stats-client/source/stylesheets/curlcast.sass */
   #curlcast_scoreboard-widget .game-state {
     width: 20%; }
