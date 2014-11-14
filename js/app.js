@@ -23582,17 +23582,13 @@ module.exports = warning;
       return this.loadDataFromServer();
     },
     loadDataFromServer: function() {
-      if (this.props.loadDataTimeout != null) {
-        clearTimeout(this.props.loadDataTimeout);
-      }
-      return $.ajax({
+      return jQuery.ajax({
         url: this.props.url,
         type: 'GET',
         data: this.state.search,
         dataType: 'jsonp',
         success: (function(_this) {
           return function(results) {
-            _this.props.loadDataTimeout = setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
             return _this.setState({
               competitions: results.competitions
             });
@@ -23601,7 +23597,6 @@ module.exports = warning;
       });
     },
     componentWillMount: function() {
-      this.props.loadDataTimeout = null;
       return this.loadDataFromServer();
     },
     render: function() {
