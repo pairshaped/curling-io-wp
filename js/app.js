@@ -22584,51 +22584,28 @@ module.exports = warning;
 
   DrawSheetPosition = React.createClass({
     render: function() {
-      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
+      var boxscore, end_scores, ends, game, lsfe, position, score, total, _i, _j, _len, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
         lsfe = '*';
       }
       end_scores = position.end_scores || [];
-      is_final = game.state.toLowerCase() === "final";
-      for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
-        es = end_scores[_i];
-        if (es.score == null) {
-          if (is_final) {
-            es.score = 'X';
-          }
-        } else {
-          es.score = es.score.toString();
-        }
-      }
-      if (end_scores.length < ends) {
-        padding = ends - end_scores.length;
-        for (es = _j = 0; 0 <= padding ? _j <= padding : _j >= padding; es = 0 <= padding ? ++_j : --_j) {
-          end_scores.push({
-            score: ''
-          });
-        }
-      }
       total = '';
       if (position.end_scores != null) {
         total = 0;
-        for (_k = 0, _len1 = end_scores.length; _k < _len1; _k++) {
-          score = end_scores[_k];
+        for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
+          score = end_scores[_i];
           total += parseInt(score.score) || 0;
         }
       }
       return tr({}, td({}, position.team != null ? a({
         href: position.team.url
-      }, span({
-        className: 'hidden-xs'
-      }, position.team.name), span({
-        className: 'visible-xs'
-      }, position.team.short_name)) : 'TBD'), td({
+      }, position.team.name) : 'TBD'), td({
         className: 'lsfe'
       }, "" + lsfe), (function() {
         _results = [];
-        for (var _l = 0, _ref5 = ends - 1; 0 <= _ref5 ? _l <= _ref5 : _l >= _ref5; 0 <= _ref5 ? _l++ : _l--){ _results.push(_l); }
+        for (var _j = 0, _ref5 = ends - 1; 0 <= _ref5 ? _j <= _ref5 : _j >= _ref5; 0 <= _ref5 ? _j++ : _j--){ _results.push(_j); }
         return _results;
       }).apply(this).map(function(endscore, key) {
         return td({
@@ -22659,7 +22636,7 @@ module.exports = warning;
         className: 'table-responsive'
       }, table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, strong({}, sheet.name)), th({
+      }, thead({}, tr({}, th({}, sheet.name), th({
         className: 'lsfe'
       }, span({
         className: 'hidden-xs'
@@ -22751,54 +22728,63 @@ module.exports = warning;
         draw: draw || day.draws[0]
       });
     },
-    discoverActiveDraw: function() {
-      var d, dr, _i, _j, _len, _len1, _ref4, _ref5;
-      if ((this.state.draw != null) && (this.state.day != null)) {
-        return;
-      }
-      _ref4 = this.props.days;
-      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-        d = _ref4[_i];
-        _ref5 = d.draws;
-        for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
-          dr = _ref5[_j];
-          if (dr.active != null) {
-            this.changeDraw(d, dr);
+    determineDay: function(date_filter_timestamp, days) {
+      var d, day, _i, _len;
+      day = this.state.day || this.props.day || null;
+      if (day == null) {
+        for (_i = 0, _len = days.length; _i < _len; _i++) {
+          d = days[_i];
+          if (d.starts_at_timestamp === date_filter_timestamp) {
+            this.state.day = d;
             return;
           }
         }
+        return this.state.day = days[0];
+      } else {
+        return this.state.day = day;
       }
-      return this.changeDraw(this.props.days[0], this.props.days[0].draws[0]);
     },
-    refreshActiveDraw: function() {
-      var d, dr, _i, _j, _len, _len1, _ref4, _ref5;
-      if (!((this.state.draw != null) && (this.state.day != null))) {
-        return;
-      }
-      _ref4 = this.props.days;
-      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-        d = _ref4[_i];
-        if (d.id === this.state.day.id) {
-          _ref5 = d.draws;
-          for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
-            dr = _ref5[_j];
-            if (dr.id === this.state.draw.id) {
-              this.state.day = d;
-              this.state.draw = dr;
-              return;
+    determineDraw: function() {
+      var d, day, draw, last, next, now, _i, _len, _ref4;
+      day = this.state.day;
+      draw = this.state.draw || this.props.draw;
+      if (draw == null) {
+        now = (new Date()).getTime();
+        next = false;
+        last = null;
+        _ref4 = day.draws;
+        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+          d = _ref4[_i];
+          if (next === true) {
+            if (now > d.starts_at_timestamp) {
+              this.state.draw = last;
+            } else {
+              this.state.draw = d;
             }
+            draw = this.state.draw;
+            return;
           }
+          if (d.starts_at_timestamp > now) {
+            next = true;
+          }
+          last = d;
         }
+        return this.state.draw = day.draws[0];
+      } else {
+        return this.state.draw = draw;
       }
-    },
-    componentWillMount: function() {
-      return this.discoverActiveDraw();
     },
     render: function() {
-      var competition, day, days, draw, location_str, more_competitions_url, scoreboard, _ref4, _ref5;
+      var competition, day, days, draw, location_str, more_competitions_url, scoreboard, _ref4, _ref5, _ref6;
       _ref4 = this.props, competition = _ref4.competition, days = _ref4.days, scoreboard = _ref4.scoreboard, more_competitions_url = _ref4.more_competitions_url;
-      this.refreshActiveDraw();
       _ref5 = this.state, day = _ref5.day, draw = _ref5.draw;
+      if (day == null) {
+        this.determineDay(scoreboard.date_filter_timestamp, days);
+      }
+      if (draw == null) {
+        this.determineDraw();
+      }
+      _ref6 = this.state, day = _ref6.day, draw = _ref6.draw;
       location_str = '';
       if ((scoreboard.location != null) && (scoreboard.venue != null)) {
         location_str = [scoreboard.venue, scoreboard.location].join(', ');
@@ -22911,18 +22897,18 @@ module.exports = warning;
                 competition: results.competitions[0]
               });
             }
-            _this.setState({
+            return _this.setState({
               scoreboard: results,
               days: days,
               competitions: results.competitions
             });
-            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
           };
         })(this)
       });
     },
     componentWillMount: function() {
-      return this.loadDataFromServer();
+      this.loadDataFromServer();
+      return setInterval(this.loadDataFromServer, this.props.pollInterval);
     },
     fixLinks: function() {
       var pathPrefix;
@@ -22942,6 +22928,9 @@ module.exports = warning;
       });
     },
     componentDidUpdate: function() {
+      return this.fixLinks();
+    },
+    componentDidMount: function() {
       return this.fixLinks();
     },
     render: function() {
@@ -23072,7 +23061,7 @@ module.exports = warning;
 
   BoxScoreBoardPositions = React.createClass({
     render: function() {
-      var end_score, end_scores, ends, game, is_final, lsfe, position, total, _i, _j, _len, _ref4, _ref5, _results;
+      var end_score, end_scores, ends, game, lsfe, position, total, _i, _j, _len, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -23080,19 +23069,11 @@ module.exports = warning;
       }
       end_scores = position.end_scores || [];
       total = '';
-      is_final = game.state.toLowerCase() === "final";
       if (position.end_scores != null) {
         total = 0;
         for (_i = 0, _len = end_scores.length; _i < _len; _i++) {
           end_score = end_scores[_i];
           total += parseInt(end_score.score) || 0;
-          if (end_score.score == null) {
-            if (is_final === true) {
-              end_score.score = 'X';
-            }
-          } else {
-            end_score.score = end_score.score.toString();
-          }
         }
       }
       return tr({}, td({}, position.team != null ? a({
@@ -23214,12 +23195,10 @@ module.exports = warning;
       }, div({
         className: 'col-xs-12'
       }, h1({}, 'Team Rosters')), positions != null ? positions.map(function(position) {
-        if ((position.team != null) && position.team.athletes.length > 0) {
-          return BoxScoreTeamRoster({
-            key: position.team.id,
-            team: position.team
-          });
-        }
+        return BoxScoreTeamRoster({
+          key: position.team.id,
+          team: position.team
+        });
       }) : span({}, "Loading positions..."));
     }
   });
@@ -23388,13 +23367,13 @@ module.exports = warning;
         draw: draw,
         game: game,
         competition: competition
-      }), (game.positions[0].team != null) && (game.positions[1].team != null) ? BoxScoreTeamRosters({
+      }), BoxScoreTeamRosters({
         positions: game.positions
-      }) : void 0, (game.positions[0].team != null) && (game.positions[1].team != null) ? BoxScoreAnalysis({
+      }), BoxScoreAnalysis({
         teams: teams
-      }) : void 0, game.shot_by_shot === true ? BoxScoreShootingPercentages({
+      }), BoxScoreShootingPercentages({
         teams: teams
-      }) : void 0));
+      })));
     }
   });
 
@@ -23504,6 +23483,147 @@ module.exports = warning;
   window.CurlcastBoxScore = BoxScore;
 
 }).call(this);
+(function() {
+  var CompetitionBox, CompetitionItem, CompetitionList, CompetitionSearch, a, button, div, form, input, nav, span, table, tbody, td, th, thead, tr, _ref, _ref1;
+
+  _ref = React.DOM, nav = _ref.nav, div = _ref.div, button = _ref.button, span = _ref.span, a = _ref.a, form = _ref.form, input = _ref.input;
+
+  _ref1 = React.DOM, table = _ref1.table, thead = _ref1.thead, tr = _ref1.tr, th = _ref1.th, tbody = _ref1.tbody, td = _ref1.td;
+
+  CompetitionSearch = React.createClass({
+    cancelSubmission: function(e) {
+      e.preventDefault();
+      return false;
+    },
+    setFilter: function() {
+      var newFilter;
+      newFilter = {
+        search: {
+          q: this.refs.search.getDOMNode().value
+        },
+        'utf-8': this.refs.utf8.getDOMNode().value
+      };
+      return this.props.changeFilter(newFilter);
+    },
+    filterChanged: function() {
+      if (this.props.timeout != null) {
+        clearTimeout(this.props.timeout);
+      }
+      return this.props.timeout = setTimeout(this.setFilter, 1000);
+    },
+    componentWillMount: function() {
+      return this.props.timeout = null;
+    },
+    render: function() {
+      return form({
+        className: 'simple_form search',
+        onSubmit: this.cancelSubmission
+      }, div({
+        style: {
+          display: 'none'
+        }
+      }, input({
+        name: 'utf8',
+        type: 'hidden',
+        value: '✓',
+        ref: 'utf8'
+      })), div({
+        className: 'form-group string optional search_q'
+      }, input({
+        className: 'string optional form-control',
+        ref: 'search',
+        placeholder: 'Search Competitions',
+        autoComplete: 'off',
+        type: 'text',
+        onChange: this.filterChanged
+      })));
+    }
+  });
+
+  CompetitionItem = React.createClass({
+    render: function() {
+      var competition;
+      competition = this.props.competition;
+      return tr({}, td({}, a({
+        href: competition.url
+      }, competition.title)), td({}, competition.location), td({}, competition.occurs));
+    }
+  });
+
+  CompetitionList = React.createClass({
+    render: function() {
+      return div({
+        className: 'table-responsive'
+      }, table({
+        className: 'table table-bordered table-striped'
+      }, thead({}, tr({}, th({}, 'Competition'), th({}, 'Location'), th({}, 'Occurs'))), tbody({}, this.props.competitions.map(function(competition) {
+        return CompetitionItem({
+          key: competition.id,
+          competition: competition
+        });
+      }))));
+    }
+  });
+
+  CompetitionBox = React.createClass({
+    getInitialState: function() {
+      return {
+        competitions: null,
+        search: null
+      };
+    },
+    changeFilter: function(search) {
+      if (search === window.undefined) {
+        return;
+      }
+      this.setState({
+        search: search
+      });
+      return this.loadDataFromServer();
+    },
+    loadDataFromServer: function() {
+      if (this.props.loadDataTimeout != null) {
+        clearTimeout(this.props.loadDataTimeout);
+      }
+      return $.ajax({
+        url: this.props.url,
+        type: 'GET',
+        data: this.state.search,
+        dataType: 'jsonp',
+        success: (function(_this) {
+          return function(results) {
+            _this.props.loadDataTimeout = setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
+            return _this.setState({
+              competitions: results.competitions
+            });
+          };
+        })(this)
+      });
+    },
+    componentWillMount: function() {
+      this.props.loadDataTimeout = null;
+      return this.loadDataFromServer();
+    },
+    render: function() {
+      if (this.state.competitions == null) {
+        return div({
+          className: 'col-xs-12'
+        }, 'Loading competition list...');
+      }
+      return div({
+        className: 'col-xs-12'
+      }, CompetitionSearch({
+        changeFilter: this.changeFilter
+      }), CompetitionList({
+        competitions: this.state.competitions
+      }));
+    }
+  });
+
+  window.CurlcastCompetitions = CompetitionBox;
+
+}).call(this);
+
 
 
 

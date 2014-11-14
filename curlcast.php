@@ -311,7 +311,7 @@ if (!class_exists('curlcast')) {
 
       $url = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . implode('/', $curlcast_array);
       if ( end($curlcast_array) == 'scoreboard' ) $url .= '.js';
-      if ( in_array( "games", $curlcast_array ) ) $url .= '.js';
+      if ( in_array( "games", $curlcast_array ) || in_array( "competitions", $curlcast_array ) ) $url .= '.js';
       $url .= '?'.$query;
 
       foreach (self::$templates as $pattern => $section) {
