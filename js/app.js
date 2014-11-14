@@ -22754,7 +22754,7 @@ module.exports = warning;
 
   DrawSheetPosition = React.createClass({
     render: function() {
-      var boxscore, boxscore_display, end_scores, ends, es, game, is_final, lsfe, padding, position, score, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
+      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -22772,7 +22772,6 @@ module.exports = warning;
           es.score = es.score.toString();
         }
       }
-      boxscore_display = is_final && (game.state.toLowerCase().substr(0, 4) === "after");
       if (end_scores.length < ends) {
         padding = ends - end_scores.length;
         for (es = _j = 0; 0 <= padding ? _j <= padding : _j >= padding; es = 0 <= padding ? ++_j : --_j) {
@@ -22808,7 +22807,7 @@ module.exports = warning;
         }, end_scores[endscore].score);
       }), td({
         className: 'total'
-      }, total || ''), (boxscore === true) && boxscore_display ? td({
+      }, total || ''), boxscore === true ? td({
         rowSpan: '2',
         className: 'hidden-xs'
       }, strong({}, game.state), br({}), a({
@@ -22823,7 +22822,8 @@ module.exports = warning;
       _ref4 = this.props, competition = _ref4.competition, sheet = _ref4.sheet;
       num_ends = Math.max(competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length);
       game_state = sheet.game.state.toLowerCase();
-      boxscore_display = (game_state === "final") && (game_state.substr(0, 4) === "after");
+      boxscore_display = (game_state === "final") || (game_state.substr(0, 4) === "after");
+      console.log("DrawSheetItem::game_state", game_state, boxscore_display);
       return div({
         className: 'row'
       }, div({
@@ -22858,7 +22858,7 @@ module.exports = warning;
         position: sheet.game_positions[0],
         ends: num_ends,
         game: sheet.game,
-        boxscore: true && boxscore_display
+        boxscore: boxscore_display
       }), DrawSheetPosition({
         position: sheet.game_positions[1],
         ends: num_ends,
