@@ -22794,6 +22794,9 @@ module.exports = warning;
     componentWillMount: function() {
       return this.discoverActiveDraw();
     },
+    componentDidUpdate: function() {
+      return this.props.fixLinks();
+    },
     render: function() {
       var competition, day, days, draw, location_str, more_competitions_url, scoreboard, _ref4, _ref5;
       _ref4 = this.props, competition = _ref4.competition, days = _ref4.days, scoreboard = _ref4.scoreboard, more_competitions_url = _ref4.more_competitions_url;
@@ -22970,7 +22973,8 @@ module.exports = warning;
         competition: competition,
         days: days,
         scoreboard: scoreboard,
-        pathPrefix: pathPrefix
+        pathPrefix: pathPrefix,
+        fixLinks: this.fixLinks
       }));
     }
   });
