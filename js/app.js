@@ -22507,6 +22507,8 @@ module.exports = warning;
       return jQuery.ajax({
         url: this.props.url,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             return _this.setState({
@@ -23045,6 +23047,8 @@ module.exports = warning;
       return jQuery.ajax({
         url: this.props.url,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             var comp, d, days, draw, id, k, last_day, last_day_id, obj, _i, _j, _len, _len1, _ref4, _ref5;
@@ -23590,6 +23594,8 @@ module.exports = warning;
       return jQuery.ajax({
         url: this.props.url,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             var active_competition, competition, _i, _len, _ref4;
@@ -23785,6 +23791,8 @@ module.exports = warning;
         type: 'GET',
         data: this.state.search,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             return _this.setState({
