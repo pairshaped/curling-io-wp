@@ -23620,6 +23620,26 @@ module.exports = warning;
     componentWillMount: function() {
       return this.loadDataFromServer();
     },
+    fixLinks: function() {
+      var pathPrefix;
+      pathPrefix = this.props.pathPrefix;
+      return jQuery(this.getDOMNode()).find("a").each(function() {
+        var i, pieces, url, _i;
+        url = jQuery(this).attr("href");
+        if (url.substr(0, 21) !== '/stats/organizations/') {
+          return;
+        }
+        pieces = url.substr(1).split("/");
+        for (i = _i = 0; _i <= 2; i = ++_i) {
+          pieces.shift();
+        }
+        pieces.unshift(pathPrefix);
+        return jQuery(this).attr("href", pieces.join("/"));
+      });
+    },
+    componentDidUpdate: function() {
+      return this.fixLinks();
+    },
     render: function() {
       if (this.state.competitions == null) {
         return div({
