@@ -22754,7 +22754,7 @@ module.exports = warning;
 
   DrawSheetPosition = React.createClass({
     render: function() {
-      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
+      var boxscore, boxscore_display, end_scores, ends, es, game, is_final, lsfe, padding, position, score, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -22772,6 +22772,7 @@ module.exports = warning;
           es.score = es.score.toString();
         }
       }
+      boxscore_display = is_final && (game.state.toLowerCase().substr(0, 4) === "after");
       if (end_scores.length < ends) {
         padding = ends - end_scores.length;
         for (es = _j = 0; 0 <= padding ? _j <= padding : _j >= padding; es = 0 <= padding ? ++_j : --_j) {
