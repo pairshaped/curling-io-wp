@@ -46,14 +46,14 @@ if (!class_exists('curlcast')) {
 
   class curlcast {
     static $tabs;
+    // TODO - refactor the url matching to be a bitmore robust so itcan never match on prefix for example.
     static $templates = array(
-      '^competitions$' => 'competitions.php',
-      'games' => 'boxscore.php',
-      'teams$' => 'teams.php',
-      'standings$' => 'standings.php',
-      'scoreboard$' => 'scoreboard.php',
-      'widget' => 'scoreboard_mini.php',
-      'default' => 'competitions.php'
+      '\/games' => ['boxscore.php', true],
+      '\/teams' => ['teams.php', false],
+      '\/standings$' => ['standings.php', false],
+      'scoreboard$' => ['scoreboard.php', true],
+      'widget' => ['scoreboard_mini.php', false],
+      'default' => ['competitions.php', true]
     );
 
     /**
@@ -310,15 +310,16 @@ if (!class_exists('curlcast')) {
       if($curlcast_array[0] === '') $curlcast_array = array('competitions');
 
       $url = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . implode('/', $curlcast_array);
-      if ( end($curlcast_array) == 'scoreboard' || in_array( "games", $curlcast_array ) || in_array( "competitions", $curlcast_array ) ) $url .= '.js';
-      $url .= '?'.$query;
+      //if ( end($curlcast_array) == 'scoreboard' || in_array( "games", $curlcast_array ) || in_array( "competitions", $curlcast_array ) ) $url .= '.js';
 
       foreach (self::$templates as $pattern => $section) {
         if (preg_match("/$pattern/", implode('/', $curlcast_array))) {
+          if ( $section[1] == true ) $url .= '.js';
           break;
         }
       }
-      $template_file = plugin_dir_path(__FILE__) . 'templates/' . $section;
+      $url .= '?'.$query;
+      $template_file = plugin_dir_path(__FILE__) . 'templates/' . $section[0];
 
       $template = file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
