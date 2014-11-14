@@ -22492,6 +22492,176 @@ module.exports = warning;
 
 }).call(this);
 (function() {
+  var Competition, Draw, Game, GamePositionName, GamePositionScore, Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
+
+  _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
+
+  Scoreboard = React.createClass({
+    getInitialState: function() {
+      return {
+        placeholderMessage: "Loading competitions...",
+        competitions: []
+      };
+    },
+    loadDataFromServer: function() {
+      return jQuery.ajax({
+        url: this.props.url,
+        dataType: 'jsonp',
+        success: (function(_this) {
+          return function(results) {
+            return _this.setState({
+              placeholderMessage: "There are no active competitions.",
+              competitions: results
+            });
+          };
+        })(this),
+        error: function() {
+          return console.log("there was an error");
+        }
+      });
+    },
+    componentWillMount: function() {
+      this.loadDataFromServer();
+      return setInterval(this.loadDataFromServer, this.props.pollInterval);
+    },
+    render: function() {
+      if (this.state.competitions.length === 0) {
+        return div(null, p(null, strong(null, this.state.placeholderMessage)), p(null, a({
+          href: "/" + this.props.pathPrefix + "/competitions",
+          dangerouslySetInnerHTML: {
+            __html: "Recent Competitions &raquo;"
+          }
+        })));
+      } else {
+        return div({
+          id: 'curlcast_accordion',
+          className: 'panel-group'
+        }, this.state.competitions.map((function(_this) {
+          return function(competition) {
+            return Competition({
+              key: competition.id,
+              competition: competition,
+              pathPrefix: _this.props.pathPrefix
+            });
+          };
+        })(this)));
+      }
+    }
+  });
+
+  Competition = React.createClass({
+    render: function() {
+      var current_draw, id, open, path, short_name, title, _ref1;
+      _ref1 = this.props.competition, id = _ref1.id, title = _ref1.title, short_name = _ref1.short_name, current_draw = _ref1.current_draw, path = _ref1.path, open = _ref1.open;
+      return div({
+        className: "panel panel-default"
+      }, div({
+        className: "panel-heading"
+      }, h4({
+        className: "panel-title",
+        title: title
+      }, a({
+        "data-parent": "#curlcast_accordion",
+        "data-toggle": "collapse",
+        href: "#comp-" + id,
+        title: title
+      }, {
+        short_name: short_name
+      }))), div({
+        className: "panel-collapse collapse" + (open ? ' in' : ''),
+        id: "comp-" + id
+      }, div({
+        className: "panel-body"
+      }, div({
+        className: "row"
+      }, current_draw != null ? Draw({
+        draw: current_draw,
+        pathPrefix: this.props.pathPrefix
+      }) : void 0, div({
+        className: "col-xs-12"
+      }, current_draw != null ? p(null, a({
+        href: "/" + this.props.pathPrefix + path,
+        dangerouslySetInnerHTML: {
+          __html: "Full Scoreboard &raquo;"
+        }
+      })) : p(null, "No Draws Scheduled Yet"))))));
+    }
+  });
+
+  Draw = React.createClass({
+    render: function() {
+      var games, id, label, starts, _ref1;
+      _ref1 = this.props.draw, id = _ref1.id, label = _ref1.label, starts = _ref1.starts, games = _ref1.games;
+      return div({
+        className: "col-xs-12"
+      }, p(null, strong(null, "Draw " + label + ": "), starts), games.length === 0 ? p(null, "No Games Scheduled Yet") : (p(null, "Prefix: " + this.props.pathPrefix), table({
+        className: "table table-bordered table-condensed"
+      }, games.map((function(_this) {
+        return function(game) {
+          return Game({
+            key: game.id,
+            game: game,
+            pathPrefix: _this.props.pathPrefix
+          });
+        };
+      })(this)))));
+    }
+  });
+
+  Game = React.createClass({
+    render: function() {
+      var game_positions, id, path, state, _ref1;
+      _ref1 = this.props.game, id = _ref1.id, state = _ref1.state, path = _ref1.path, game_positions = _ref1.game_positions;
+      return tbody(null, tr(null, GamePositionName({
+        key: game_positions[0].id,
+        game_position: game_positions[0],
+        pathPrefix: this.props.pathPrefix
+      }), GamePositionScore({
+        key: "score-" + game_positions[0].id,
+        game_position: game_positions[0]
+      }), td({
+        className: "game-state",
+        rowSpan: "2"
+      }, strong(null, state), br(null), a({
+        href: "/" + this.props.pathPrefix + path
+      }, "Box"))), tr(null, GamePositionName({
+        key: game_positions[1].id,
+        game_position: game_positions[1],
+        pathPrefix: this.props.pathPrefix
+      }), GamePositionScore({
+        key: "score-" + game_positions[1].id,
+        game_position: game_positions[1]
+      })));
+    }
+  });
+
+  GamePositionName = React.createClass({
+    render: function() {
+      var name, result, short_name, team_path, _ref1;
+      _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, result = _ref1.result;
+      return td({
+        className: "game-name"
+      }, team_path !== null ? a({
+        href: "/" + this.props.pathPrefix + team_path,
+        title: name
+      }, result === 'won' ? strong(null, short_name) : short_name) : name);
+    }
+  });
+
+  GamePositionScore = React.createClass({
+    render: function() {
+      var result, total, _ref1;
+      _ref1 = this.props.game_position, total = _ref1.total, result = _ref1.result;
+      return td({
+        className: "game-score"
+      }, result === 'won' ? strong(null, total) : total);
+    }
+  });
+
+  window.CurlcastScoreboardWidget = Scoreboard;
+
+}).call(this);
+(function() {
   var Competition, CompetitionDay, CompetitionDayList, DrawContentList, DrawList, DrawListItem, DrawSheetItem, DrawSheetList, DrawSheetPosition, Scoreboard, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, nav = _ref.nav, button = _ref.button, span = _ref.span, strong = _ref.strong;
@@ -22637,7 +22807,7 @@ module.exports = warning;
         }, end_scores[endscore].score);
       }), td({
         className: 'total'
-      }, total || ''), boxscore === true ? td({
+      }, total || ''), (boxscore === true) && boxscore_display ? td({
         rowSpan: '2',
         className: 'hidden-xs'
       }, strong({}, game.state), br({}), a({
@@ -22648,9 +22818,11 @@ module.exports = warning;
 
   DrawSheetItem = React.createClass({
     render: function() {
-      var competition, num_ends, sheet, _i, _ref4, _results;
+      var boxscore_display, competition, game_state, num_ends, sheet, _i, _ref4, _results;
       _ref4 = this.props, competition = _ref4.competition, sheet = _ref4.sheet;
       num_ends = Math.max(competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length);
+      game_state = sheet.game.state.toLowerCase();
+      boxscore_display = (game_state === "final") && (game_state.substr(0, 4) === "after");
       return div({
         className: 'row'
       }, div({
@@ -22678,14 +22850,14 @@ module.exports = warning;
         className: 'hidden-xs'
       }, 'TOT'), span({
         className: 'visible-xs'
-      }, 'T')), th({
+      }, 'T')), boxscore_display ? th({
         className: 'hidden-xs',
         width: '10%'
-      }, ''))), tbody({}, DrawSheetPosition({
+      }, '') : void 0)), tbody({}, DrawSheetPosition({
         position: sheet.game_positions[0],
         ends: num_ends,
         game: sheet.game,
-        boxscore: true
+        boxscore: true && boxscore_display
       }), DrawSheetPosition({
         position: sheet.game_positions[1],
         ends: num_ends,
@@ -23663,6 +23835,7 @@ module.exports = warning;
   window.CurlcastCompetitions = CompetitionBox;
 
 }).call(this);
+
 
 
 

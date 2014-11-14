@@ -52,7 +52,7 @@ if (!class_exists('curlcast')) {
       '\/teams' => ['teams.php', false],
       '\/standings$' => ['standings.php', false],
       'scoreboard$' => ['scoreboard.php', true],
-      'widget' => ['scoreboard_mini.php', false],
+      'widget' => 'scoreboard_mini.php',
       'competitions' => [ 'competitions.php', true ],
       'default' => ['competitions.php', true]
     );
