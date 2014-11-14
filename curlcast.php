@@ -53,6 +53,7 @@ if (!class_exists('curlcast')) {
       '\/standings$' => ['standings.php', false],
       'scoreboard$' => ['scoreboard.php', true],
       'widget' => ['scoreboard_mini.php', false],
+      'competitions' => [ 'competitions.php', true ],
       'default' => ['competitions.php', true]
     );
 
