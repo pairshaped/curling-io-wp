@@ -1,5 +1,5 @@
 <?php
-$version = '1.1.9';
+$version = '1.1.10';
 $description = 'The new version of the Curlcast plugin';
 $changelog = '';
 
