@@ -1,6 +1,5 @@
-<div class="curlcast" id="scoreboard">
-  <div class="container-fluid" id="curlcast_scoreboard">
-  </div>
+<div class="curlcast">
+  <div class="container-fluid" id="curlcast_scoreboard"></div>
 </div>
 <script>
   React.renderComponent(

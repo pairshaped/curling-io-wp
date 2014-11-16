@@ -1,6 +1,5 @@
-<div class="curlcast" id="boxscore">
-  <div class="container-fluid" id="curlcast_boxscore">
-  </div>
+<div class="curlcast">
+  <div class="container-fluid" id="curlcast_boxscore"></div>
 </div>
 <script>
   React.renderComponent(

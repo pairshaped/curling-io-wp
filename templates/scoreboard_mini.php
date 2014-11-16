@@ -1,9 +1,5 @@
 <div class="curlcast">
-  <div class="container-fluid">
-    <div class="row">
-      <div id="curlcast_scoreboard-widget"></div>
-    </div>
-  </div>
+  <div class="container-fluid" id="curlcast_scoreboard-widget"></div>
 </div>
 <script>
   React.renderComponent(
