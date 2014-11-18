@@ -22507,6 +22507,8 @@ module.exports = warning;
       return jQuery.ajax({
         url: this.props.url,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             return _this.setState({
@@ -23045,6 +23047,8 @@ module.exports = warning;
       return jQuery.ajax({
         url: this.props.url,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             var comp, d, days, draw, id, k, last_day, last_day_id, obj, _i, _j, _len, _len1, _ref4, _ref5;
@@ -23249,7 +23253,7 @@ module.exports = warning;
 
   BoxScoreBoardPositions = React.createClass({
     render: function() {
-      var end_score, end_scores, ends, game, is_final, lsfe, position, total, _i, _j, _len, _ref4, _ref5, _results;
+      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -23272,6 +23276,14 @@ module.exports = warning;
           }
         }
       }
+      console.log(position);
+      time_remaining = '00:00';
+      minutes = Math.floor(position.time_remaining / 60) + "";
+      seconds = position.time_remaining - (minutes * 60);
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      time_remaining = "" + minutes + ":" + seconds;
       return tr({}, td({}, position.team != null ? a({
         href: position.team.url || "#team-url"
       }, span({
@@ -23291,7 +23303,9 @@ module.exports = warning;
         }, end_scores[endscore].score);
       }), td({
         className: 'total'
-      }, total || ''));
+      }, total || ''), td({
+        className: 'time-remaining'
+      }, time_remaining));
     }
   });
 
@@ -23338,7 +23352,13 @@ module.exports = warning;
         className: 'hidden-xs'
       }, 'TOT'), span({
         className: 'visible-xs'
-      }, 'T')))), game.positions != null ? tbody({}, BoxScoreBoardPositions({
+      }, 'T')), th({
+        className: 'time-remaining'
+      }, span({
+        className: 'visible-xs'
+      }, ''), span({
+        className: 'hidden-xs'
+      }, 'Time')))), game.positions != null ? tbody({}, BoxScoreBoardPositions({
         position: game.positions[0],
         ends: num_ends,
         game: game
@@ -23590,6 +23610,8 @@ module.exports = warning;
       return jQuery.ajax({
         url: this.props.url,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             var active_competition, competition, _i, _len, _ref4;
@@ -23785,6 +23807,8 @@ module.exports = warning;
         type: 'GET',
         data: this.state.search,
         dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             return _this.setState({

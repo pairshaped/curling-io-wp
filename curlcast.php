@@ -2,11 +2,11 @@
 /*
 Plugin Name: Curlcast Stats
 Description: Displays Curlcast Stats.
-Version: 1.1.14
+Version: __CURLCAST_VERSION__
 Author: Pair Shaped Inc.
 */
 if (!class_exists('curlcast')) {
-  define('WP_CURLCAST_VERSION', '1.1.14');
+  define('WP_CURLCAST_VERSION', '__CURLCAST_VERSION__');
 
   # Set environment
   # Ideally, we should be setting/including this using a env.php file with the appropriate configuration
