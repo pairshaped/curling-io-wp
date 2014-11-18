@@ -1,6 +1,6 @@
 <?php
 $version = trim( file_get_contents("./.version") );
-$description = 'The new version of the Curlcast plugin';
+$description = 'Latest stable version of the Curlcast statistics plugin';
 $changelog = '';
 
 if (isset($_POST['action'])) {
