@@ -22832,7 +22832,7 @@ module.exports = warning;
         className: 'table-responsive'
       }, table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, strong({}, sheet.name)), th({
+      }, thead({}, tr({}, th({}, strong({}, sheet_name)), th({
         className: 'lsfe'
       }, span({
         className: 'hidden-xs'
