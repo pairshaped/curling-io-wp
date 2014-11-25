@@ -15,7 +15,7 @@ if (!class_exists('curlcast')) {
   switch(WP_CURLCAST_ENV) {
   case 'dev':
     define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
-    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', 'Wusv5gV69Nw');
+    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', '4gcDQPyP0k4');
     break;
   case 'staging':
     define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');

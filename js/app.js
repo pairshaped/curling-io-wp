@@ -22425,7 +22425,7 @@ module.exports = warning;
         return OrganizationLink({
           key: competition.id,
           competition: competition,
-          active: competition.access_key === current_competition
+          active: competition.id === current_competition.id
         });
       }), a({
         className: 'list-group-item',
@@ -23049,7 +23049,7 @@ module.exports = warning;
         jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
-            var comp, d, days, draw, id, k, last_day, last_day_id, obj, _i, _j, _len, _len1, _ref4, _ref5;
+            var d, days, draw, id, k, last_day, last_day_id, obj, _i, _len, _ref4;
             days = [];
             last_day_id = -1;
             id = 0;
@@ -23075,24 +23075,11 @@ module.exports = warning;
               }
               days[last_day_id].draws.push(draw);
             }
-            _ref5 = results.competitions;
-            for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
-              comp = _ref5[_j];
-              if (comp.access_key === results.access_key) {
-                _this.setState({
-                  competition: comp
-                });
-              }
-            }
-            if (_this.state.competition == null) {
-              _this.setState({
-                competition: results.competitions[0]
-              });
-            }
             _this.setState({
               scoreboard: results,
               days: days,
-              competitions: results.competitions
+              competitions: results.competitions,
+              competition: results
             });
             return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
           };
@@ -23142,7 +23129,7 @@ module.exports = warning;
       }, window.OrganizationNavigation({
         competitions: competitions,
         more_competitions_url: more_competitions_url,
-        current_competition: competition.access_key || '',
+        current_competition: competition,
         pathPrefix: pathPrefix
       })), Competition({
         competition: competition,
@@ -23643,25 +23630,14 @@ module.exports = warning;
         cache: true,
         success: (function(_this) {
           return function(results) {
-            var active_competition, competition, _i, _len, _ref4;
-            active_competition = {};
-            _ref4 = results.competitions;
-            for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-              competition = _ref4[_i];
-              if (competition.active == null) {
-                continue;
-              }
-              active_competition = competition;
-              break;
-            }
-            _this.replaceState({
+            _this.setState({
               game: results,
               draws: results.draws,
               draw_games: results.draw_games,
               navigation: results.navigation,
               competitions: results.competitions,
               more_competitions_url: results.more_competitions_url,
-              competition: active_competition,
+              competition: results.current_competition,
               counter: _this.state.counter + 1
             });
             return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
@@ -23711,7 +23687,7 @@ module.exports = warning;
       }, OrganizationNavigation({
         competitions: competitions,
         more_competitions_url: more_competitions_url,
-        current_competition: competition.access_key || '',
+        current_competition: competition,
         pathPrefix: pathPrefix
       })), div({
         className: 'col-sm-9 col-xs-12',
