@@ -22527,7 +22527,9 @@ module.exports = warning;
       return setInterval(this.loadDataFromServer, this.props.pollInterval);
     },
     render: function() {
-      if (this.state.competitions.length > 0) {
+      if (this.state.competitions.length === 0) {
+        return div(null, p(null, strong(null, this.state.placeholderMessage)));
+      } else {
         return div({
           id: 'curlcast_accordion',
           className: 'panel-group'
