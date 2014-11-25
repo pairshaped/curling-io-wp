@@ -22527,14 +22527,7 @@ module.exports = warning;
       return setInterval(this.loadDataFromServer, this.props.pollInterval);
     },
     render: function() {
-      if (this.state.competitions.length === 0) {
-        return div(null, p(null, strong(null, this.state.placeholderMessage)), p(null, a({
-          href: "/" + this.props.pathPrefix + "/competitions",
-          dangerouslySetInnerHTML: {
-            __html: "Recent Competitions &raquo;"
-          }
-        })));
-      } else {
+      if (this.state.competitions.length > 0) {
         return div({
           id: 'curlcast_accordion',
           className: 'panel-group'
@@ -22820,12 +22813,15 @@ module.exports = warning;
 
   DrawSheetItem = React.createClass({
     render: function() {
-      var boxscore_display, competition, game_state, num_ends, sheet, _i, _ref4, _results;
+      var boxscore_display, competition, game_state, num_ends, sheet, sheet_name, _i, _ref4, _results;
       _ref4 = this.props, competition = _ref4.competition, sheet = _ref4.sheet;
       num_ends = Math.max(competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length);
       game_state = sheet.game.state.toLowerCase();
       boxscore_display = (game_state === "final") || (game_state.substr(0, 5) === "after");
-      console.log("DrawSheetItem::game_state", game_state, boxscore_display);
+      sheet_name = sheet.name;
+      if (sheet.game.is_bracket === true) {
+        sheet_name += ":" + sheet.game.name;
+      }
       return div({
         className: 'row'
       }, div({
@@ -23160,13 +23156,13 @@ module.exports = warning;
 
 }).call(this);
 (function() {
-  var BoxScore, BoxScoreAnalysis, BoxScoreAnalysisTeam, BoxScoreBoard, BoxScoreBoardPositions, BoxScoreContent, BoxScoreShootingPercentages, BoxScoreShootingPercentagesAthletes, BoxScoreTeamRoster, BoxScoreTeamRosterAthlete, BoxScoreTeamRosters, BreadCrumbDraw, BreadCrumbGame, BreadCrumbNavigation, a, div, h1, h6, li, ol, span, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
+  var BoxScore, BoxScoreAnalysis, BoxScoreAnalysisTeam, BoxScoreBoard, BoxScoreBoardPositions, BoxScoreContent, BoxScoreShootingPercentages, BoxScoreShootingPercentagesAthletes, BoxScoreTeamRoster, BoxScoreTeamRosterAthlete, BoxScoreTeamRosters, BreadCrumbDraw, BreadCrumbGame, BreadCrumbNavigation, a, div, h1, h6, li, ol, span, table, tbody, td, tfoot, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
 
   _ref = React.DOM, div = _ref.div, span = _ref.span, a = _ref.a;
 
   _ref1 = React.DOM, ol = _ref1.ol, ul = _ref1.ul, li = _ref1.li;
 
-  _ref2 = React.DOM, table = _ref2.table, thead = _ref2.thead, tr = _ref2.tr, th = _ref2.th, tbody = _ref2.tbody, td = _ref2.td;
+  _ref2 = React.DOM, table = _ref2.table, thead = _ref2.thead, tr = _ref2.tr, th = _ref2.th, tbody = _ref2.tbody, td = _ref2.td, tfoot = _ref2.tfoot;
 
   _ref3 = React.DOM, h1 = _ref3.h1, h6 = _ref3.h6;
 
@@ -23276,7 +23272,6 @@ module.exports = warning;
           }
         }
       }
-      console.log(position);
       time_remaining = '00:00';
       minutes = Math.floor(position.time_remaining / 60) + "";
       seconds = position.time_remaining - (minutes * 60);
@@ -23464,8 +23459,8 @@ module.exports = warning;
 
   BoxScoreShootingPercentagesAthletes = React.createClass({
     render: function() {
-      var athlete_a, athlete_b, blank_athlete, _ref4;
-      _ref4 = this.props, athlete_a = _ref4.athlete_a, athlete_b = _ref4.athlete_b;
+      var athlete, blank_athlete;
+      athlete = this.props.athlete;
       blank_athlete = {
         position: '',
         name: '',
@@ -23475,14 +23470,13 @@ module.exports = warning;
           percentage: ''
         }
       };
-      athlete_a || (athlete_a = blank_athlete);
-      athlete_b || (athlete_b = blank_athlete);
-      return tr({}, td({}, athlete_a.position), td({}, athlete_a.name), td({}, athlete_a.statistics.shot_count), td({}, athlete_a.statistics.total_actual), td({}, athlete_a.statistics.percentage), td({}), td({}, athlete_b.position), td({}, athlete_b.name), td({}, athlete_b.statistics.shot_count), td({}, athlete_b.statistics.total_actual), td({}, athlete_b.statistics.percentage));
+      athlete || (athlete = blank_athlete);
+      return tr({}, td({}, athlete.name), td({}, athlete.position), td({}, athlete.statistics.shot_count), td({}, athlete.statistics.total_actual), td({}, athlete.statistics.percentage));
     }
   });
 
   BoxScoreShootingPercentages = React.createClass({
-    render: function() {
+    matchTeamPositionsFromBothTeams: function() {
       var i, left, num, players, position_left, position_right, ranking, right, teams, _i;
       teams = this.props.teams;
       left = {
@@ -23518,23 +23512,57 @@ module.exports = warning;
           break;
         }
       }
+      return players;
+    },
+    totalTeamScore: function(team_idx) {
+      var athlete, stats, _i, _len, _ref4;
+      stats = {
+        shots: 0,
+        points: 0,
+        percentage: 0
+      };
+      _ref4 = this.props.teams[team_idx].athletes;
+      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+        athlete = _ref4[_i];
+        stats.shots += athlete.statistics.shot_count || 0;
+        stats.points += athlete.statistics.total_actual || 0;
+      }
+      if (stats.shots > 0) {
+        stats.percentage = Math.round(stats.points / (stats.shots * 4) * 100);
+      }
+      return stats;
+    },
+    render: function() {
+      var players, teams;
+      teams = this.props.teams;
+      players = this.matchTeamPositionsFromBothTeams();
       return div({
         className: 'row'
       }, div({
         className: 'col-xs-12'
-      }, h1({}, 'Shooting Percentages')), div({
-        className: 'col-xs-12'
-      }, div({
-        className: 'table-responsive'
-      }, table({
-        className: 'table table-bordered table-condensed table-hover'
-      }, thead({}, tr({}, th({}), th({}, teams[0].name), th({}, 'Shots'), th({}, 'Pts'), th({}, '%'), th({}), th({}), th({}, teams[1].name), th({}, 'Shots'), th({}, 'Pts'), th({}, '%'))), tbody({}, players.map(function(set, index) {
-        return BoxScoreShootingPercentagesAthletes({
-          key: index,
-          athlete_a: set[0],
-          athlete_b: set[1]
-        });
-      }))))));
+      }, h1({}, 'Shooting Percentages')), [0, 1].map((function(_this) {
+        return function(team_idx) {
+          var total;
+          total = _this.totalTeamScore(team_idx);
+          return div({
+            key: team_idx,
+            className: 'col-xs-12 col-sm-6'
+          }, div({
+            className: 'table-responsive'
+          }, table({
+            className: 'table table-bordered table-condensed table-hover'
+          }, thead({}, tr({}, th({
+            colSpan: 5
+          }, teams[team_idx].name)), tr({}, th({}, 'Athlete'), th({}, 'Position'), th({}, 'Shots'), th({}, 'Pts'), th({}, '%'))), tbody({}, players.map(function(set, index) {
+            return BoxScoreShootingPercentagesAthletes({
+              key: index,
+              athlete: set[team_idx]
+            });
+          })), tfoot({}, tr({}, th({
+            colSpan: 2
+          }, "Team Total"), td({}, total.shots), td({}, total.points), td({}, "" + total.percentage + "%"))))));
+        };
+      })(this)));
     }
   });
 
@@ -23611,7 +23639,6 @@ module.exports = warning;
         url: this.props.url,
         dataType: 'jsonp',
         cache: true,
-        jsonpCallback: 'curlcastJSONP',
         success: (function(_this) {
           return function(results) {
             var active_competition, competition, _i, _len, _ref4;
