@@ -22822,7 +22822,7 @@ module.exports = warning;
       boxscore_display = (game_state === "final") || (game_state.substr(0, 5) === "after");
       sheet_name = sheet.name;
       if (sheet.game.is_bracket === true) {
-        sheet_name += ":" + sheet.game.name;
+        sheet_name += " : " + sheet.game.name;
       }
       return div({
         className: 'row'
