@@ -3,7 +3,16 @@
 </div>
 <script>
   React.renderComponent(
-    CurlcastBoxScore({url: "{url}", pathPrefix: "{path_prefix}", pollInterval: 15000}),
+    CurlcastShell({
+        component: CurlcastBoxScore,
+        componentProps: {
+          url: "{url}",
+          pathPrefix: "{path_prefix}",
+          pollInterval: 15000
+        },
+        highlight: 'scoreboard'
+      }
+    ),
     document.getElementById('curlcast_boxscore')
   );
 </script>

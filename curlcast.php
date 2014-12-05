@@ -49,8 +49,8 @@ if (!class_exists('curlcast')) {
     // TODO - refactor the url matching to be a bitmore robust so itcan never match on prefix for example.
     static $templates = array(
       '\/games' => ['boxscore.php', true],
-      '\/teams' => ['teams.php', false],
-      '\/standings$' => ['standings.php', false],
+      '\/teams' => ['teams.php', true],
+      '\/standings$' => ['standings.php', true],
       'scoreboard$' => ['scoreboard.php', true],
       'widget' => 'scoreboard_mini.php',
       'competitions' => [ 'competitions.php', true ],
