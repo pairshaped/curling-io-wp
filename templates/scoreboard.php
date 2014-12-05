@@ -3,9 +3,19 @@
 </div>
 <script>
   React.renderComponent(
-    CurlcastScoreboard({url: "{url}", pathPrefix: "{path_prefix}", pollInterval: 30000}),
+    CurlcastShell({
+        component: CurlcastScoreboard,
+        componentProps: {
+          url: "{url}",
+          pathPrefix: "{path_prefix}",
+          pollInterval: 30000
+        },
+        highlight: 'scoreboard'
+      }
+    ),
     document.getElementById('curlcast_scoreboard')
   );
+
 </script>
 
 
