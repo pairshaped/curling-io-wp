@@ -1,0 +1,11 @@
+//= require_tree ./lib
+//= require ./components/_nav_organization
+//= require ./components/_nav_competition
+//= require ./components/_shell
+//= require ./components/_scoreboard_widget
+//= require ./components/_scoreboard
+//= require ./components/_boxscore
+//= require ./components/_competitions
+//= require ./components/_standings
+//= require ./components/_teams
+//= require_self

@@ -1,0 +1,238 @@
+@import 'bootstrap-sprockets'
+@import 'bootstrap/variables'
+
+
+html
+  #curlcast_scoreboard-widget
+    font-size: 10px
+    -webkit-tap-highlight-color: rgba(0,0,0,0)
+
+body
+  #curlcast_scoreboard-widget
+    font-family: $font-family-base
+    font-size: $font-size-base
+    line-height: $line-height-base
+    color: $text-color
+    background-color: $body-bg
+
+.curlcast
+  // from bootstrap's html selector
+  font-family: sans-serif
+  -ms-text-size-adjust: 100%
+  -webkit-text-size-adjust: 100%
+  margin: 0
+
+  color: #333333
+  //background-color: #fff
+
+  // from bootstrap's body selector
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+  font-size: 14px
+  //line-height: 1.42857
+
+  @import 'bootstrap'
+
+  *
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important
+
+  table.table
+    thead
+      tr
+        th
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+          font-size: 14px
+    tbody
+      tr
+        td
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+          font-size: 14px
+
+
+  ul.pagination
+    margin-top: 0
+    margin-bottom: 0
+
+  ul.pagination,
+  ul.nav
+    margin-left: 0
+    margin-right: 0
+    margin-bottom: 0
+
+    li
+      margin-left: 0
+      margin-right: 0
+      margin-bottom: 0
+
+  ul.pagination
+    li:first-child
+      a
+        margin-left: 1px
+    li
+      a
+        margin: 0
+
+
+  table
+    .lsfe, .end-score, .total
+      width: 5%
+      text-align: center
+    .total
+      font-weight: bold
+    .time-remaining
+      text-align: center
+      width: 10%
+
+  .container-fluid
+    padding: 0
+    overflow: hidden
+
+  .spacer
+    margin: 10px 0
+
+  .form-group.search_q
+    input
+      max-width: 300px
+
+  .bracket
+    overflow: visible
+    padding-right: 25px
+
+    .bracket-group
+      position: relative
+      min-height: 100px
+      margin: 10px 0
+
+    .game
+      display: table
+      cursor: default
+      position: absolute
+      width: 170px
+      height: 44px
+
+    .game-name
+      display: table-cell
+      vertical-align: middle
+      font-size: 12px
+      font-weight: bold
+      color: #333
+      width: 70px
+      height: 40px
+      padding: 5px
+
+    .game-team-name
+      text-align: right
+      font-size: 12px
+      width: 100px
+      height: 21px
+      padding: 2px 5px
+
+    .game-winner-label
+      position: absolute
+
+    .game-state-upcoming
+      border: 1px solid #ccc
+      &:hover
+        background-color: #f6f6f6
+
+    .game-state-live
+      border: 1px solid #DB1F00
+      &:hover
+        background-color: #ccc
+      .game-name, .game-team-name
+        background-color: #DB1F00
+        color: white
+
+    .game-state-final
+      border: 1px solid #ccc
+      &:hover
+        background-color: #ccc
+      .game-name, .game-team-name
+        background-color: #ccc
+
+.game-popover
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+  width: 220px
+
+  .popover-content
+    .game-state-upcoming
+      border: 1px solid #DB1F00
+
+    .game-state-live
+      border: 1px solid #DB1F00
+      .game-name
+        background-color: #DB1F00
+        color: white
+
+    .game-state-final
+      border: 1px solid #ccc
+      .game-name
+        background-color: #ccc
+
+    .game-positions
+      height: 60px
+
+    .game-position
+      margin: 0 7px 0 0
+      height: 50%
+      color: #333
+      border-top: 1px solid #f0f0f0
+      overflow: hidden
+
+    .game-position-rock
+      padding: 5px
+      height: 100%
+      width: 30px
+      float: left
+
+    .game-position-name
+      float: left
+      padding: 5px
+
+    .no-rock, .red-rock, .yellow-rock, .blue-rock, .green-rock, .black-rock, .white-rock
+      background: no-repeat 10px 7px
+
+    .red-rock
+      background-image: url(asset-path("red_rock.png"))
+    .yellow-rock
+      background-image: url(asset-path("yellow_rock.png"))
+    .no-rock
+      background-image: url(asset-path("no_rock.png"))
+    .blue-rock
+      background-image: url(asset-path("blue_rock.png"))
+    .green-rock
+      background-image: url(asset-path("green_rock.png"))
+    .black-rock
+      background-image: url(asset-path("black_rock.png"))
+    .white-rock
+      background-image: url(asset-path("white_rock.png"))
+
+    .game-position-result-won
+      background: url(asset-path("winner_flag.png")) no-repeat right center
+
+    .game-date, .game-moves-to
+      clear: both
+      width: auto
+      padding: 2px 10px 0 10px
+      background-color: #f0f0f0
+      font-size: 11px
+      height: 20px
+
+    .game-moves-to
+      border-top: 1px solid #ccc
+
+#curlcast_scoreboard-widget
+
+  -webkit-font-smoothing: antialiased
+
+  min-width: 240px
+  max-width: 320px
+
+  .game-name
+    width: 60%
+  .game-score
+    width: 10%
+    text-align: center
+  .game-state
+    width: 20%
+
+
