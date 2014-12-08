@@ -10,12 +10,12 @@ if (!class_exists('curlcast')) {
 
   # Set environment
   # Ideally, we should be setting/including this using a env.php file with the appropriate configuration
-  define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
-
+  #define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
+  define( 'WP_CURLCAST_ENV', 'dev');
   switch(WP_CURLCAST_ENV) {
   case 'dev':
     define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
-    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', '4gcDQPyP0k4');
+    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', '9oEUU3UqZaM');
     break;
   case 'staging':
     define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
