@@ -6,7 +6,6 @@ gem 'capistrano', '~> 2.15'
 gem 'guard'
 gem 'guard-livereload'
 
-gem 'coffee-script'
 gem 'guard-sprockets'
 
 gem 'sass'

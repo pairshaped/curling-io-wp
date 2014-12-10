@@ -8,17 +8,22 @@ directories ['src', 'css', 'js', 'templates']
 ## Uncomment to clear the screen before every task
 clearing :on
 
-guard :sprockets, destination: 'js/', asset_paths: ['src/javascripts'] do
+guard :sprockets,
+      destination: 'js',
+      root_file: ['app.js'],
+      asset_paths: ['src/javascripts'] do
   watch(%r{src/javascripts/.+\.(js|coffee)$})
 end
 
-guard :sass, input: 'src/stylesheets/app.sass', output: 'css', style: :compressed, smart_partials: true do
+guard :sass,
+      input: 'src/stylesheets/app.sass',
+      output: 'css',
+      style: :compressed do
   watch(%r{src/stylesheets/.+\.(css|sass|scss)$})
 end
 
-guard 'livereload' do
+guard :livereload do
   watch(%r{css/.+\.css$})
   watch(%r{js/.+\.js$})
   watch(%r{templates/.+\.php$})
 end
-
