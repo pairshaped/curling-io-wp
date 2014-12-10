@@ -11,6 +11,7 @@ clearing :on
 guard :sprockets,
       destination: 'js',
       root_file: ['app.js'],
+      js_minify: true,
       asset_paths: ['src/javascripts'] do
   watch(%r{src/javascripts/.+\.(js|coffee)$})
 end

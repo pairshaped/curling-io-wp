@@ -6,6 +6,7 @@ gem 'capistrano', '~> 2.15'
 gem 'guard'
 gem 'guard-livereload'
 
+gem 'uglifier'
 gem 'guard-sprockets'
 
 gem 'sass'
