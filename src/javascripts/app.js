@@ -1,4 +1,13 @@
-//= require_tree ./lib
+//= require lib/react-with-addons
+//= require lib/0_mdn-bind-polyfill
+//= require lib/es5-sham
+//= require lib/es5-shim
+//= require lib/jquery.jsplumb-1.6.2-min
+//= require lib/bootstrap/tooltip
+//= require lib/bootstrap/popover
+//= require lib/bootstrap/tab
+//= require lib/bootstrap/dropdown
+//= require_tree ./lib/jsplumb
 //= require ./components/_nav_organization
 //= require ./components/_nav_competition
 //= require ./components/_shell
