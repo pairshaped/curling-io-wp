@@ -9,11 +9,11 @@ directories ['src', 'css', 'js', 'templates']
 clearing :on
 
 guard :sprockets, destination: 'js/', asset_paths: ['src/javascripts'] do
-  watch 'src/javascripts/app.js'
+  watch(%r{src/javascripts/.+\.(js|coffee)$})
 end
 
 guard :sass, input: 'src/stylesheets/app.sass', output: 'css', style: :compressed, smart_partials: true do
-  watch 'src/stylesheets/app.sass'
+  watch(%r{src/stylesheets/.+\.(css|sass|scss)$})
 end
 
 guard 'livereload' do
