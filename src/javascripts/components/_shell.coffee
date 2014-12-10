@@ -1,24 +1,32 @@
-div = React.DOM.div
+{ div, span } = React.DOM
 
 Shell = React.createClass
   getInitialState: ->
-    {navigation: null, competitions: [], status: 'Loading curling data...', retryDelay: 5000}
+    navigation: null
+    competitions: []
+    status: 'Loading curling data...'
+    retryDelay: 5000
+    components:
+      competitions: {}
+      scoreboard: {}
+      boxscores: {}
 
   loadDataFromServer: ->
-    navigationUrlPieces = @props.componentProps.url.split("/")
-    competitionChunk = navigationUrlPieces.indexOf "competitions"
-    pieces = navigationUrlPieces[0..(competitionChunk+1)]
-    pieces.push 'navigation.js'
+    #navigationUrlPieces = @props.componentProps.url.split("/")
+    #competitionChunk = navigationUrlPieces.indexOf "competitions"
+    #pieces = navigationUrlPieces[0..(competitionChunk+1)]
+    #pieces.push 'navigation.js'
 
-    url = pieces.join "/"
+    #url = pieces.join "/"
 
     jQuery.ajax
-      url: url
+      url: @props.url #url
       dataType: 'jsonp'
       cache: true
       success: (results) =>
-        @setState navigation: results.navigation, competitions: results.competitions
+        @setState navigation: results.navigation, competitions: results.competitions, retryDelay: 5000
       error: =>
+        console.log "Could not hit ", @props.url
         seconds = @state.retryDelay / 1000
         newStatus = "Could not load data, retrying in #{seconds} seconds..."
         newStatus = "Still having connectivity problems, retrying in #{seconds} seconds..." if seconds > 5
@@ -38,7 +46,7 @@ Shell = React.createClass
       url = jQuery(anchor).attr "href"
       # Only update the url if it's base is /stats/organizations
       # This will be the case from any urls passed from curlcast
-      return unless url.substr(0, 21) == '/stats/organizations/'
+      return unless url? && url.substr(0, 21) == '/stats/organizations/'
       pieces = url.substr(1).split "/"
       # Remove the first two pieces of the url
       # Should be 'stats', 'organizations'
@@ -58,31 +66,21 @@ Shell = React.createClass
       return div className: 'row',
         div className: 'col-xs-12', @state.status
 
-    pathPrefix = @props.componentProps.pathPrefix
+    pathPrefix = @props.pathPrefix #@props.componentProps.pathPrefix
     {competitions, navigation } = @state
 
     # Get the active competition
     competition = competitions[0]
-    for c in competitions
-      if c.active == true
-        competition = c
-        break
-
-    # Augment the componentProps with fixLinks
-    # and the active competition
-    componentProps = @props.componentProps
-    augments =
-      fixLinks: @fixLinks
-      competition: competition
-      navigation: navigation
-    for k, v of augments
-      componentProps[k] = v
+    #for c in competitions
+    #  if c.active == true
+    #    competition = c
+    #    break
 
     div className: 'row',
       div className: 'col-sm-3 hidden-xs', id: 'organization-nav',
         OrganizationNavigation({competitions: competitions, more_competitions_url: navigation.more_competitions, pathPrefix: pathPrefix})
       div className: 'col-sm-9 col-xs-12', id: 'scoreboard',
         CompetitionNavigation({competition: competition, navigation: navigation || {}, pathPrefix: pathPrefix, highlight: @props.highlight})
-        @props.component componentProps
+        RouteHandler {}
 
 window.CurlcastShell = Shell

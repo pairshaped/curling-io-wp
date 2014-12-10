@@ -75,7 +75,7 @@ DrawSheetPosition = React.createClass
     tr {},
       td {},
         if position.team?
-          a href: position.team.url,
+          a href: @props.teams_url + '#!' + position.team.url,
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
@@ -92,7 +92,7 @@ DrawSheetPosition = React.createClass
 
 DrawSheetItem = React.createClass
   render: ->
-    {competition, sheet} = @props
+    {competition, sheet, teams_url} = @props
     num_ends = Math.max competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length
     game_state = sheet.game.state.toLowerCase()
     boxscore_display = (game_state == "final") || (game_state.substr(0,5) == "after")
@@ -116,25 +116,25 @@ DrawSheetItem = React.createClass
                 if boxscore_display
                   th className: 'hidden-xs', width: '10%', ''
             tbody {},
-              DrawSheetPosition({position: sheet.game_positions[0], ends: num_ends, game: sheet.game, boxscore: boxscore_display})
-              DrawSheetPosition({position: sheet.game_positions[1], ends: num_ends, game: sheet.game})
+              DrawSheetPosition position: sheet.game_positions[0], ends: num_ends, game: sheet.game, boxscore: boxscore_display, teams_url: teams_url
+              DrawSheetPosition position: sheet.game_positions[1], ends: num_ends, game: sheet.game, teams_url: teams_url
 
 DrawSheetList = React.createClass
   render: ->
-    {draw, competition} = @props
+    {draw, competition, teams_url} = @props
     active_class = ''
     active_class = ' in active' if @props.active == true
     div className: "tab-pane fade#{active_class}", id: "draw#{draw.id}",
       div className: 'spacer'
       draw.draw_sheets.map (sheet, key) ->
-        DrawSheetItem({key: key, draw: draw, sheet: sheet, competition: competition})
+        DrawSheetItem key: key, draw: draw, sheet: sheet, competition: competition, teams_url: teams_url
 
 DrawContentList = React.createClass
   render: ->
-    {draws, competition, draw} = @props
+    {draws, competition, draw, teams_url} = @props
     div className: 'tab-content',
       draws.map (draw_item) ->
-        DrawSheetList({key: draw_item.id, draw: draw_item, competition: competition, active: (draw.id == draw_item.id)})
+        DrawSheetList key: draw_item.id, draw: draw_item, competition: competition, active: (draw.id == draw_item.id), teams_url: teams_url
 
 Competition = React.createClass
   getInitialState: ->
@@ -202,7 +202,7 @@ Competition = React.createClass
         div className: 'row',
           div className: 'col-xs-12',
             DrawList({competition: competition, draws: day.draws, day: day, draw: draw, changeDraw: @changeDraw})
-            DrawContentList({competition: competition, draws: day.draws, day: day, draw: draw})
+            DrawContentList({competition: competition, draws: day.draws, day: day, draw: draw, teams_url: @props.teams_url})
             p {}, 'LSFE: Last shot in the first end'
 
 Scoreboard = React.createClass
@@ -251,8 +251,10 @@ Scoreboard = React.createClass
         div className: 'col-xs-12', 'Loading Scoreboard...'
 
     pathPrefix = @props.pathPrefix
+    chopped = @props.navigation.teams.split('/').slice(4).join('/')
+    teams_url = pathPrefix + '/' + chopped
     { days, scoreboard } = @state
-    Competition({competition: @props.competition, days: days, scoreboard: scoreboard, pathPrefix: pathPrefix, drawChanged: @drawChanged})
+    Competition({competition: @props.competition, days: days, scoreboard: scoreboard, pathPrefix: pathPrefix, drawChanged: @drawChanged, teams_url: teams_url})
 
 window.CurlcastScoreboard = Scoreboard
 

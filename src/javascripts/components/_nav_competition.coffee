@@ -1,4 +1,5 @@
 {nav, div, button, span, ul, li, a} = React.DOM
+Link = ReactRouter.Link
 
 CompetitionNavigation = React.createClass
   render: ->
@@ -16,7 +17,7 @@ CompetitionNavigation = React.createClass
       div className: 'collapse navbar-collapse', id: 'curlcast-navigation',
         ul className: 'nav navbar-nav',
           li className: (if !@props.highlight? || @props.highlight == 'scoreboard' then 'active' else null),
-            a href: navigation.scoreboard || '#scoreboard', 'Scoreboard'
+            Link to: navigation.scoreboard || '#scoreboard', 'Scoreboard'
           li className: (if @props.highlight == 'standings' then 'active' else null),
             a href: navigation.standings_draw || '#standings_draw', 'Standings / Draw'
           li className: (if @props.highlight == 'teams' then 'active' else null),

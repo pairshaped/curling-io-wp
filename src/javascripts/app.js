@@ -1,5 +1,6 @@
 //= require lib/react-with-addons
-//= require lib/0_mdn-bind-polyfill
+//= require lib/react-router
+//= require lib/mdn-bind-polyfill
 //= require lib/es5-sham
 //= require lib/es5-shim
 //= require lib/jquery.jsplumb-1.6.2-min

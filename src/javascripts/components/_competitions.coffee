@@ -1,6 +1,8 @@
 {nav, div, button, span, a, form, input} = React.DOM
 {table, thead, tr, th, tbody, td}= React.DOM
 
+Link = ReactRouter.Link
+
 CompetitionSearch = React.createClass
   cancelSubmission: (e) ->
     e.preventDefault()
@@ -27,9 +29,11 @@ CompetitionSearch = React.createClass
 CompetitionItem = React.createClass
   render: ->
     competition = @props.competition
+    competition_id = competition.url.split('/').slice(-2,1)[0]
+    console.log 'id=', competition_id
     tr {},
       td {},
-        a href: competition.url, competition.title
+        Link to: 'scoreboard', params: { competition_id: competition.id }, competition.title
       td {},
         competition.location
       td {},
@@ -37,6 +41,7 @@ CompetitionItem = React.createClass
 
 CompetitionList = React.createClass
   render: ->
+    console.log 'CompetitionList'
     div className: 'table-responsive',
       table className: 'table table-bordered table-striped',
         thead {},
@@ -59,7 +64,7 @@ CompetitionBox = React.createClass
 
   loadDataFromServer: () ->
     jQuery.ajax
-      url: @props.url
+      url: @props.apiRoot + 'competitions.js'
       type: 'GET'
       data: @state.search
       dataType: 'jsonp'
@@ -87,6 +92,7 @@ CompetitionBox = React.createClass
     @fixLinks()
 
   render: ->
+    console.log 'Competitions', @
     unless @state.competitions?
       return div className: 'col-xs-12', 'Loading competition list...'
     div className: 'col-xs-12',
