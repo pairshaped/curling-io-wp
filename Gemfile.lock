@@ -12,10 +12,6 @@ GEM
     celluloid (0.16.0)
       timers (~> 4.0.0)
     coderay (1.1.0)
-    coffee-script (2.3.0)
-      coffee-script-source
-      execjs
-    coffee-script-source (1.8.0)
     em-websocket (0.5.1)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0.6.0)
@@ -44,6 +40,7 @@ GEM
     hike (1.2.3)
     hitimes (1.2.2)
     http_parser.rb (0.6.0)
+    json (1.8.1)
     listen (2.8.3)
       celluloid (>= 0.15.2)
       rb-fsevent (>= 0.9.3)
@@ -77,6 +74,9 @@ GEM
     tilt (1.4.1)
     timers (4.0.1)
       hitimes
+    uglifier (2.5.3)
+      execjs (>= 0.3.0)
+      json (>= 1.8.0)
 
 PLATFORMS
   ruby
@@ -84,9 +84,9 @@ PLATFORMS
 DEPENDENCIES
   bootstrap-sass
   capistrano (~> 2.15)
-  coffee-script
   guard
   guard-livereload
   guard-sass
   guard-sprockets
   sass
+  uglifier
