@@ -2,6 +2,7 @@
 {table, thead, tbody, tr, td, th} = React.DOM
 {h6, h4, h3} = React.DOM
 {ul, li} = React.DOM
+Link = ReactRouter.Link
 
 CompetitionDay = React.createClass
   changeDraw: ->
@@ -207,14 +208,16 @@ Competition = React.createClass
 
 Scoreboard = React.createClass
   getInitialState: ->
-    {scoreboard: null, days: []}
+    {scoreboard: null, days: [], mounted: false}
 
   drawChanged: ->
-    @props.fixLinks()
+    #@props.fixLinks()
 
   loadDataFromServer: ->
+    return unless @state.mounted == true
+    scoreboard_url = @props.apiRoot + @props.routerState.path.substr(1) + '.js'
     jQuery.ajax(
-      url: @props.url
+      url: scoreboard_url
       dataType: 'jsonp'
       cache: true
       success: (results) =>
@@ -237,24 +240,25 @@ Scoreboard = React.createClass
     )
 
   componentWillMount: ->
+    @setState mounted: true
     @loadDataFromServer()
 
+  componentWillUnmount: ->
+    @setState mounted: false
+
   componentDidUpdate: ->
-    @props.fixLinks()
+    #@props.fixLinks()
 
   componentDidMount: ->
-    @props.fixLinks()
+    #@props.fixLinks()
 
   render: ->
     unless @state.scoreboard?
       return div className: 'row',
         div className: 'col-xs-12', 'Loading Scoreboard...'
 
-    pathPrefix = @props.pathPrefix
-    chopped = @props.navigation.teams.split('/').slice(4).join('/')
-    teams_url = pathPrefix + '/' + chopped
     { days, scoreboard } = @state
-    Competition({competition: @props.competition, days: days, scoreboard: scoreboard, pathPrefix: pathPrefix, drawChanged: @drawChanged, teams_url: teams_url})
+    Competition({competition: @props.competition, days: days, scoreboard: scoreboard, drawChanged: @drawChanged })
 
 window.CurlcastScoreboard = Scoreboard
 

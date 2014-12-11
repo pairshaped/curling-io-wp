@@ -28194,21 +28194,27 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var OrganizationLink, OrganizationNavigation, a, div, strong, _ref;
+  var Link, OrganizationLink, OrganizationNavigation, a, div, strong, _ref;
 
   _ref = React.DOM, a = _ref.a, div = _ref.div, strong = _ref.strong;
 
+  Link = ReactRouter.Link;
+
   OrganizationLink = React.createClass({
     render: function() {
-      var active_class, title, url, _ref1;
+      var active_class, competition_id, title, url, _ref1;
       _ref1 = this.props.competition, title = _ref1.title, url = _ref1.url;
+      competition_id = this.props.competition.url.split('/').slice(-2)[0];
       active_class = '';
       if (this.props.active === true) {
         active_class = ' active';
       }
-      return a({
-        className: "list-group-item" + active_class,
-        href: url || "#missing"
+      return Link({
+        to: 'scoreboard',
+        params: {
+          competition_id: competition_id
+        },
+        className: "list-group-item" + active_class
       }, title);
     }
   });
@@ -28226,7 +28232,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           competition: competition,
           active: competition.active === true
         });
-      }), a({
+      }), Link({
+        to: 'competitions',
         className: 'list-group-item',
         href: more_competitions_url
       }, strong({}, 'More Competitions')));
@@ -28316,8 +28323,19 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       };
     },
     loadDataFromServer: function() {
+      var navigation_parts, navigation_url;
+      console.log(this.props.routerState);
+      navigation_parts = this.props.routerState.path.split('/');
+      navigation_parts.shift();
+      navigation_parts.pop();
+      if (navigation_parts[0] !== 'competitions') {
+        navigation_parts.unshift('competitions');
+      }
+      navigation_parts.push('navigation');
+      navigation_url = this.props.apiRoot + navigation_parts.join('/') + '.js';
+      console.log('Navigation url:', navigation_url);
       return jQuery.ajax({
-        url: this.props.url,
+        url: navigation_url,
         dataType: 'jsonp',
         cache: true,
         success: (function(_this) {
@@ -28372,7 +28390,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return this.loadDataFromServer();
     },
     render: function() {
-      var competition, competitions, navigation, pathPrefix, _ref1;
+      var competition, competitions, navigation, pathPrefix, routedProps, _ref1;
       if (this.state.navigation == null) {
         return div({
           className: 'row'
@@ -28383,6 +28401,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       pathPrefix = this.props.pathPrefix;
       _ref1 = this.state, competitions = _ref1.competitions, navigation = _ref1.navigation;
       competition = competitions[0];
+      routedProps = this.props;
+      routedProps.competition = competition;
       return div({
         className: 'row'
       }, div({
@@ -28400,7 +28420,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         navigation: navigation || {},
         pathPrefix: pathPrefix,
         highlight: this.props.highlight
-      }), RouteHandler({})));
+      }), ReactRouter.RouteHandler(this.props)));
     }
   });
 
@@ -28408,9 +28428,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var Competition, Draw, Game, GamePositionName, GamePositionScore, Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
+  var Competition, Draw, Game, GamePositionName, GamePositionScore, Link, Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
+
+  Link = ReactRouter.Link;
 
   Scoreboard = React.createClass({
     getInitialState: function() {
@@ -28575,7 +28597,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var Competition, CompetitionDay, CompetitionDayList, DrawContentList, DrawList, DrawListItem, DrawSheetItem, DrawSheetList, DrawSheetPosition, Scoreboard, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
+  var Competition, CompetitionDay, CompetitionDayList, DrawContentList, DrawList, DrawListItem, DrawSheetItem, DrawSheetList, DrawSheetPosition, Link, Scoreboard, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, nav = _ref.nav, button = _ref.button, span = _ref.span, strong = _ref.strong;
 
@@ -28584,6 +28606,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   _ref2 = React.DOM, h6 = _ref2.h6, h4 = _ref2.h4, h3 = _ref2.h3;
 
   _ref3 = React.DOM, ul = _ref3.ul, li = _ref3.li;
+
+  Link = ReactRouter.Link;
 
   CompetitionDay = React.createClass({
     changeDraw: function() {
@@ -28948,15 +28972,19 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     getInitialState: function() {
       return {
         scoreboard: null,
-        days: []
+        days: [],
+        mounted: false
       };
     },
-    drawChanged: function() {
-      return this.props.fixLinks();
-    },
+    drawChanged: function() {},
     loadDataFromServer: function() {
+      var scoreboard_url;
+      if (this.state.mounted !== true) {
+        return;
+      }
+      scoreboard_url = this.props.apiRoot + this.props.routerState.path.substr(1) + '.js';
       return jQuery.ajax({
-        url: this.props.url,
+        url: scoreboard_url,
         dataType: 'jsonp',
         cache: true,
         success: (function(_this) {
@@ -28997,16 +29025,20 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       });
     },
     componentWillMount: function() {
+      this.setState({
+        mounted: true
+      });
       return this.loadDataFromServer();
     },
-    componentDidUpdate: function() {
-      return this.props.fixLinks();
+    componentWillUnmount: function() {
+      return this.setState({
+        mounted: false
+      });
     },
-    componentDidMount: function() {
-      return this.props.fixLinks();
-    },
+    componentDidUpdate: function() {},
+    componentDidMount: function() {},
     render: function() {
-      var chopped, days, pathPrefix, scoreboard, teams_url, _ref4;
+      var days, scoreboard, _ref4;
       if (this.state.scoreboard == null) {
         return div({
           className: 'row'
@@ -29014,17 +29046,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'col-xs-12'
         }, 'Loading Scoreboard...'));
       }
-      pathPrefix = this.props.pathPrefix;
-      chopped = this.props.navigation.teams.split('/').slice(4).join('/');
-      teams_url = pathPrefix + '/' + chopped;
       _ref4 = this.state, days = _ref4.days, scoreboard = _ref4.scoreboard;
       return Competition({
         competition: this.props.competition,
         days: days,
         scoreboard: scoreboard,
-        pathPrefix: pathPrefix,
-        drawChanged: this.drawChanged,
-        teams_url: teams_url
+        drawChanged: this.drawChanged
       });
     }
   });
@@ -29620,12 +29647,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var competition, competition_id;
       competition = this.props.competition;
-      competition_id = competition.url.split('/').slice(-2, 1)[0];
-      console.log('id=', competition_id);
+      competition_id = competition.url.split('/').slice(-2)[0];
       return tr({}, td({}, Link({
         to: 'scoreboard',
         params: {
-          competition_id: competition.id
+          competition_id: competition_id
         }
       }, competition.title)), td({}, competition.location), td({}, competition.occurs));
     }
@@ -29633,7 +29659,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   CompetitionList = React.createClass({
     render: function() {
-      console.log('CompetitionList');
       return div({
         className: 'table-responsive'
       }, table({
@@ -30456,6 +30481,19 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   window.CurlcastTeams = Teams;
 
 }).call(this);
+(function() {
+  var Dummy;
+
+  Dummy = React.createClass({
+    render: function() {
+      return ReactRouter.RouteHandler(this.props);
+    }
+  });
+
+  window.CurlcastDummy = Dummy;
+
+}).call(this);
+
 
 
 

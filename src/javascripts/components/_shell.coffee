@@ -18,9 +18,17 @@ Shell = React.createClass
     #pieces.push 'navigation.js'
 
     #url = pieces.join "/"
+    #
+    
+    navigation_parts = @props.routerState.path.split('/')
+    navigation_parts.shift()
+    navigation_parts.pop()
+    navigation_parts.push 'navigation'
+
+    navigation_url = @props.apiRoot + navigation_parts.join('/') + '.js'
 
     jQuery.ajax
-      url: @props.url #url
+      url: navigation_url
       dataType: 'jsonp'
       cache: true
       success: (results) =>
@@ -69,6 +77,8 @@ Shell = React.createClass
     pathPrefix = @props.pathPrefix #@props.componentProps.pathPrefix
     {competitions, navigation } = @state
 
+
+
     # Get the active competition
     competition = competitions[0]
     #for c in competitions
@@ -76,11 +86,14 @@ Shell = React.createClass
     #    competition = c
     #    break
 
+    routedProps = @props
+    routedProps.competition = competition
+
     div className: 'row',
       div className: 'col-sm-3 hidden-xs', id: 'organization-nav',
-        OrganizationNavigation({competitions: competitions, more_competitions_url: navigation.more_competitions, pathPrefix: pathPrefix})
+        OrganizationNavigation competitions: competitions, more_competitions_url: navigation.more_competitions, pathPrefix: pathPrefix
       div className: 'col-sm-9 col-xs-12', id: 'scoreboard',
-        CompetitionNavigation({competition: competition, navigation: navigation || {}, pathPrefix: pathPrefix, highlight: @props.highlight})
-        RouteHandler {}
+        CompetitionNavigation competition: competition, navigation: navigation || {}, pathPrefix: pathPrefix, highlight: @props.highlight
+        ReactRouter.RouteHandler @props
 
 window.CurlcastShell = Shell

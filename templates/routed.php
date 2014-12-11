@@ -3,19 +3,19 @@
   </div>
 </div>
 <script type="text/javascript">
-  routes = React.createElement( ReactRouter.Route, { name: 'competition-list', path: '/competitions', handler: CurlcastCompetitions },
-    React.createElement( ReactRouter.Route, { name: 'scoreboard', path: '/competitions/:competition_id/scoreboard', handler: CurlcastScoreboard } )
+  routes = React.createElement( ReactRouter.Route, { handler: CurlcastDummy, path: '/' },
+    React.createElement( ReactRouter.DefaultRoute, { handler: CurlcastCompetitions, name: 'competitions' } ),
+    React.createElement( ReactRouter.Route, { path: 'competitions/:competition_id', handler: CurlcastShell },
+      React.createElement( ReactRouter.Route, { name: 'scoreboard', path: 'scoreboard', handler: CurlcastScoreboard } )
+    )
   );
-
-  console.log( 'Routes', routes );
-  console.log( 'Path Prefix:', '{path_prefix}');
-  console.log( 'Url:', '{url}' );
 
   ReactRouter.run( routes, function(Handler, state){
     console.log( 'ReactRouter', Handler(), state )
     React.renderComponent( React.createElement( Handler, {
-      apiRoot: 'http://curlcast.ca/stats/organizations/qw4LUsJ1_aQ/',
-      pathPrefix: 'stats'
+      apiRoot: '{url}',
+      prefix: '{path_prefix}',
+      routerState: state
     }), document.getElementById('curlcast') );
   });
 

@@ -18,4 +18,5 @@
 //= require ./components/_competitions
 //= require ./components/_standings
 //= require ./components/_teams
+//= require ./components/_dummy
 //= require_self

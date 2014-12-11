@@ -1,11 +1,13 @@
 {a, div, strong} = React.DOM
+Link = ReactRouter.Link
 
 OrganizationLink = React.createClass
   render: ->
     {title, url} = @props.competition
+    competition_id = @props.competition.url.split('/').slice(-2)[0]
     active_class = ''
     active_class = ' active' if @props.active == true
-    a className: "list-group-item#{active_class}", href: url || "#missing", title
+    Link to: 'scoreboard', params: { competition_id: competition_id }, className: "list-group-item#{active_class}", title
 
 OrganizationNavigation = React.createClass
   render: ->
@@ -13,7 +15,7 @@ OrganizationNavigation = React.createClass
     div className: 'list-group', ref: 'linkParent',
       competitions.map (competition) ->
         OrganizationLink({key: competition.id, competition: competition, active: (competition.active == true)})
-      a className: 'list-group-item', href: more_competitions_url,
+      Link to: 'competitions', className: 'list-group-item', href: more_competitions_url,
         strong {}, 'More Competitions'
 
 

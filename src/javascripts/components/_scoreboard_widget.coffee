@@ -1,4 +1,5 @@
 {div, p, a, strong, br, h4, table, tbody, tr, td} = React.DOM
+Link = ReactRouter.Link
 
 Scoreboard = React.createClass
   getInitialState: ->

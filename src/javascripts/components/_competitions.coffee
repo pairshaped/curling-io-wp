@@ -29,11 +29,12 @@ CompetitionSearch = React.createClass
 CompetitionItem = React.createClass
   render: ->
     competition = @props.competition
-    competition_id = competition.url.split('/').slice(-2,1)[0]
-    console.log 'id=', competition_id
+    competition_id = competition.url.split('/').slice(-2)[0]
+    #console.log 'competition url', competition.url.split('/').slice(-2)
+    #console.log 'id=', competition_id
     tr {},
       td {},
-        Link to: 'scoreboard', params: { competition_id: competition.id }, competition.title
+        Link to: 'scoreboard', params: { competition_id: competition_id }, competition.title
       td {},
         competition.location
       td {},
@@ -41,7 +42,6 @@ CompetitionItem = React.createClass
 
 CompetitionList = React.createClass
   render: ->
-    console.log 'CompetitionList'
     div className: 'table-responsive',
       table className: 'table table-bordered table-striped',
         thead {},
