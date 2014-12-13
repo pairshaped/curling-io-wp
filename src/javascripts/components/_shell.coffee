@@ -2,37 +2,34 @@
 
 Shell = React.createClass
   getInitialState: ->
-    navigation: null
-    competitions: []
+    other_competitions: []
+    competition: null
     status: 'Loading curling data...'
     retryDelay: 5000
-    components:
-      competitions: {}
-      scoreboard: {}
-      boxscores: {}
+
+  redrawShell: ->
+    console.log 'Attempting to change competition'
+    @forceUpdate()
+
+  statics:
+    willTransitionTo: ( transition, params, to ) ->
+      console.log 'Shell.willTranslateTo', [ transition, params, to ], @
 
   loadDataFromServer: ->
-    #navigationUrlPieces = @props.componentProps.url.split("/")
-    #competitionChunk = navigationUrlPieces.indexOf "competitions"
-    #pieces = navigationUrlPieces[0..(competitionChunk+1)]
-    #pieces.push 'navigation.js'
+    competition_parts = @props.routerState.path.split('/').slice(1,3)
+    competition_parts.push 'competition'
 
-    #url = pieces.join "/"
-    #
-    
-    navigation_parts = @props.routerState.path.split('/')
-    navigation_parts.shift()
-    navigation_parts.pop()
-    navigation_parts.push 'navigation'
-
-    navigation_url = @props.apiRoot + navigation_parts.join('/') + '.js'
+    competition_url = @props.apiRoot + competition_parts.join('/') + '.js'
 
     jQuery.ajax
-      url: navigation_url
+      url: competition_url
       dataType: 'jsonp'
       cache: true
       success: (results) =>
-        @setState navigation: results.navigation, competitions: results.competitions, retryDelay: 5000
+        @setState
+          other_competitions: results.other_competitions
+          competition: results.current_competition
+          retryDelay: 5000
       error: =>
         console.log "Could not hit ", @props.url
         seconds = @state.retryDelay / 1000
@@ -41,59 +38,27 @@ Shell = React.createClass
         @setState status: newStatus, retryDelay: if (@state.retryDelay >= 30000) then @state.retryDelay else (@state.retryDelay + 5000)
         setTimeout @loadDataFromServer, (seconds * 1000)
 
-
-  # Reformat links to proper prefix
-  fixLinks: (parent = null) ->
-    # Grab a valid parent DOM element
-    # If none is provided, use this shell
-    parent = parent || @getDOMNode()
-    # Grab the component prefix path
-    pathPrefix = @props.componentProps.pathPrefix
-    # Grab each anchor link inside this component
-    jQuery("a", @getDOMNode()).each (i, anchor) ->
-      url = jQuery(anchor).attr "href"
-      # Only update the url if it's base is /stats/organizations
-      # This will be the case from any urls passed from curlcast
-      return unless url? && url.substr(0, 21) == '/stats/organizations/'
-      pieces = url.substr(1).split "/"
-      # Remove the first two pieces of the url
-      # Should be 'stats', 'organizations'
-      for i in [0..2]
-        pieces.shift()
-      # Use the new path prefix
-      pieces.unshift pathPrefix
-      # Fix the url
-      jQuery(anchor).attr "href", pieces.join "/"
-
-
   componentWillMount: ->
     @loadDataFromServer()
 
+  componentWillUnmount: ->
+    #console.log 'Shell.componentWillUnmount', @
+
   render: ->
-    unless @state.navigation?
+    unless @state.competition?
       return div className: 'row',
         div className: 'col-xs-12', @state.status
 
-    pathPrefix = @props.pathPrefix #@props.componentProps.pathPrefix
-    {competitions, navigation } = @state
-
-
-
-    # Get the active competition
-    competition = competitions[0]
-    #for c in competitions
-    #  if c.active == true
-    #    competition = c
-    #    break
+    {other_competitions, competition} = @state
 
     routedProps = @props
     routedProps.competition = competition
 
     div className: 'row',
-      div className: 'col-sm-3 hidden-xs', id: 'organization-nav',
-        OrganizationNavigation competitions: competitions, more_competitions_url: navigation.more_competitions, pathPrefix: pathPrefix
-      div className: 'col-sm-9 col-xs-12', id: 'scoreboard',
-        CompetitionNavigation competition: competition, navigation: navigation || {}, pathPrefix: pathPrefix, highlight: @props.highlight
+      div className: 'col-sm-3 hidden-xs',
+        OrganizationNavigation competitions: other_competitions, current_id: competition.to_param, redrawShell: @redrawShell
+      div className: 'col-sm-9 col-xs-12',
+        CompetitionNavigation competition: competition, redrawShell: @redrawShell
         ReactRouter.RouteHandler @props
 
 window.CurlcastShell = Shell

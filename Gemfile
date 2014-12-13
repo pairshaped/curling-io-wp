@@ -8,6 +8,7 @@ gem 'guard-livereload'
 
 gem 'uglifier'
 gem 'guard-sprockets'
+gem 'coffee-script'
 
 gem 'sass'
 gem 'bootstrap-sass'

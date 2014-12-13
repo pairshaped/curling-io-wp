@@ -29,9 +29,7 @@ CompetitionSearch = React.createClass
 CompetitionItem = React.createClass
   render: ->
     competition = @props.competition
-    competition_id = competition.url.split('/').slice(-2)[0]
-    #console.log 'competition url', competition.url.split('/').slice(-2)
-    #console.log 'id=', competition_id
+    competition_id = competition.to_param
     tr {},
       td {},
         Link to: 'scoreboard', params: { competition_id: competition_id }, competition.title
