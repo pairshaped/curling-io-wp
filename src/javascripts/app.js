@@ -15,6 +15,7 @@
 //= require ./components/_scoreboard_widget
 //= require ./components/_scoreboard
 //= require ./components/_scoreboard_day
+//= require ./components/_scoreboard_draw
 //= require ./components/_boxscore
 //= require ./components/_competitions
 //= require ./components/_standings

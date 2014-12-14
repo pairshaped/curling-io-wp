@@ -5,13 +5,16 @@
 Link = ReactRouter.Link
 
 DayItem = React.createClass
+  changeToToday: ->
+    @props.changeDay @props.day
+
   render: ->
     { day, routerState, dayToStr } = @props
     dayString = dayToStr day
     active_class = ''
     active_class = ' active' if (routerState.params.day? && ( routerState.params.day == dayString )) || (!routerState.params.day? && @props.active)
     li className: "text-center#{active_class}",
-      Link to: 'scoreboard-day', params: { competition_id: routerState.params.competition_id, day: dayToStr( day ) },
+      Link to: 'scoreboard-day', params: { competition_id: routerState.params.competition_id, day: dayToStr( day ) }, activeClassName: '', onClick: @changeToToday,
         day.date
         br {}
         day.day
@@ -21,26 +24,51 @@ DayList = React.createClass
     { days, day } = @props
     ul className: 'pagination',
       days.map (day_item) =>
-        DayItem key: day_item.id, day: day_item, active: (day_item.id == day.id), routerState: @props.routerState, dayToStr: @props.dayToStr
+        DayItem key: day_item.id, day: day_item, active: (day_item.id == day.id), routerState: @props.routerState, dayToStr: @props.dayToStr, changeDay: @props.changeDay
 
 ScoreboardDay = React.createClass
+  getInitialState: ->
+    day: null
+
+  changeDay: (day) ->
+    @setState day: day
+
+  dayToStr: (day) ->
+    "#{day.day}-#{day.date}"
+
+  getSelectedDay: ->
+    selectedDay = @props.routerState.params.day
+    for day in @props.days
+      dayStr = @dayToStr day
+      if dayStr == selectedDay
+        return day
+      if day.draws?
+        for draw in day.draws
+          if draw.active == true
+            unless selectedDay?
+              return day
+    console.log 'getSelectedDay - could not find day', @props.routerState
+
+  componentWillMount: ->
+    @changeDay @getSelectedDay()
+
   render: ->
-    {competition, days, day, draw, scoreboard} = @props
+    {competition, days, scoreboard} = @props
+    day = @state.day
 
-    console.log 'ScoreboardDay', @
-
-    if !day?
-      return div className: 'col-xs-12', 'Loading Competition Day...'
+    unless day?
+      return div className: 'col-xs-12', 'Loading competition...'
 
     location_str = ''
     if scoreboard.location? && scoreboard.venue?
       location_str = [scoreboard.venue, scoreboard.location].filter( (i) -> (i? && i) ).join ', '
 
     drawProps = @props
+    drawProps.day = day
 
     div className: 'row',
       div className: 'col-xs-12 col-sm-10',
-        DayList days: days, day: day, routerState: @props.routerState, dayToStr: @props.dayToStr
+        DayList days: days, day: day, routerState: @props.routerState, dayToStr: @dayToStr, changeDay: @changeDay
         h3 className: 'hidden-xs', day.starts_on
         h4 className: 'visible-xs', day.starts_on
       div className: 'col-sm-2 hidden-xs',

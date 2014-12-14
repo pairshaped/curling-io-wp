@@ -3,7 +3,6 @@ Link = ReactRouter.Link
 
 CompetitionNavigation = React.createClass
   render: ->
-    console.log 'CompetitionNavigation.render'
     {routerState, competition} = @props
     {title, short_name} = competition
 
