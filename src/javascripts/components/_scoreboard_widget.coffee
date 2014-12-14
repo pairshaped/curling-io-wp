@@ -22,6 +22,9 @@ Scoreboard = React.createClass
     @loadDataFromServer()
     setInterval(@loadDataFromServer, @props.pollInterval)
 
+  baseUrl: ->
+    @props.url.substr(0, @props.url.indexOf('/', 8))
+
   render: ->
     if @state.competitions.length == 0
       div null,
@@ -31,7 +34,7 @@ Scoreboard = React.createClass
     else
       div id: 'curlcast_accordion', className: 'panel-group',
         @state.competitions.map (competition) =>
-          Competition({key: competition.id, competition: competition, pathPrefix: @props.pathPrefix})
+          Competition({key: competition.id, competition: competition, pathPrefix: @props.pathPrefix, baseUrl: @baseUrl()})
 
 Competition = React.createClass
   render: ->
@@ -45,7 +48,7 @@ Competition = React.createClass
         div className: "panel-body",
           div className: "row",
             if current_draw?
-              Draw({draw: current_draw, pathPrefix: @props.pathPrefix})
+              Draw({draw: current_draw, pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
             div className: "col-xs-12",
               if current_draw?
                 p null,
@@ -70,14 +73,14 @@ Draw = React.createClass
           "Prefix: #{@props.pathPrefix}"
         table className: "table table-bordered table-condensed",
           games.map (game) =>
-            Game({key: game.id, game: game, pathPrefix: @props.pathPrefix})
+            Game({key: game.id, game: game, pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
 
 Game = React.createClass
   render: ->
     {id, state, path, game_positions} = @props.game
     tbody null,
       tr null,
-        GamePositionName({key: game_positions[0].id, game_position: game_positions[0], pathPrefix: @props.pathPrefix})
+        GamePositionName({key: game_positions[0].id, game_position: game_positions[0], pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
         GamePositionScore({key: "score-#{game_positions[0].id}", game_position: game_positions[0]})
         td className: "game-state", rowSpan: "2",
           strong null,
@@ -86,16 +89,19 @@ Game = React.createClass
           a href: "/#{@props.pathPrefix}#{path}",
             "Box"
       tr null,
-        GamePositionName({key: game_positions[1].id, game_position: game_positions[1], pathPrefix: @props.pathPrefix})
+        GamePositionName({key: game_positions[1].id, game_position: game_positions[1], pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
         GamePositionScore({key: "score-#{game_positions[1].id}", game_position: game_positions[1]})
 
 
 GamePositionName = React.createClass
   render: ->
-    {name, short_name, team_path, result} = @props.game_position
+    {name, short_name, team_path, team_path_url, result} = @props.game_position
+    path = "#{@props.pathPrefix}#{team_path}"
+    path = path.split('/').slice(0,-1).join('/') + "#!#{team_path_url}"
+    #console.log 'GamePositionName', [path, pathWithoutTeam, @props.baseUrl], @props
     td className: "game-name",
       if team_path != null
-        a href: "/#{@props.pathPrefix}#{team_path}", title: name,
+        a href: path, title: name,
           if result == 'won'
             strong null,
               short_name

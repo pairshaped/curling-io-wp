@@ -24683,6 +24683,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       this.loadDataFromServer();
       return setInterval(this.loadDataFromServer, this.props.pollInterval);
     },
+    baseUrl: function() {
+      return this.props.url.substr(0, this.props.url.indexOf('/', 8));
+    },
     render: function() {
       if (this.state.competitions.length === 0) {
         return div(null, p(null, strong(null, this.state.placeholderMessage)));
@@ -24695,7 +24698,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             return Competition({
               key: competition.id,
               competition: competition,
-              pathPrefix: _this.props.pathPrefix
+              pathPrefix: _this.props.pathPrefix,
+              baseUrl: _this.baseUrl()
             });
           };
         })(this)));
@@ -24730,7 +24734,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: "row"
       }, current_draw != null ? Draw({
         draw: current_draw,
-        pathPrefix: this.props.pathPrefix
+        pathPrefix: this.props.pathPrefix,
+        baseUrl: this.props.baseUrl
       }) : void 0, div({
         className: "col-xs-12"
       }, current_draw != null ? p(null, a({
@@ -24755,7 +24760,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return Game({
             key: game.id,
             game: game,
-            pathPrefix: _this.props.pathPrefix
+            pathPrefix: _this.props.pathPrefix,
+            baseUrl: _this.props.baseUrl
           });
         };
       })(this)))));
@@ -24769,7 +24775,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return tbody(null, tr(null, GamePositionName({
         key: game_positions[0].id,
         game_position: game_positions[0],
-        pathPrefix: this.props.pathPrefix
+        pathPrefix: this.props.pathPrefix,
+        baseUrl: this.props.baseUrl
       }), GamePositionScore({
         key: "score-" + game_positions[0].id,
         game_position: game_positions[0]
@@ -24781,7 +24788,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, "Box"))), tr(null, GamePositionName({
         key: game_positions[1].id,
         game_position: game_positions[1],
-        pathPrefix: this.props.pathPrefix
+        pathPrefix: this.props.pathPrefix,
+        baseUrl: this.props.baseUrl
       }), GamePositionScore({
         key: "score-" + game_positions[1].id,
         game_position: game_positions[1]
@@ -24791,12 +24799,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   GamePositionName = React.createClass({
     render: function() {
-      var name, result, short_name, team_path, _ref1;
-      _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, result = _ref1.result;
+      var name, path, result, short_name, team_path, team_path_url, _ref1;
+      _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, team_path_url = _ref1.team_path_url, result = _ref1.result;
+      path = "" + this.props.pathPrefix + team_path;
+      path = path.split('/').slice(0, -1).join('/') + ("#!" + team_path_url);
       return td({
         className: "game-name"
       }, team_path !== null ? a({
-        href: "/" + this.props.pathPrefix + team_path,
+        href: path,
         title: name
       }, result === 'won' ? strong(null, short_name) : short_name) : name);
     }
