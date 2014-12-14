@@ -205,6 +205,7 @@ Standings = React.createClass
       url: @props.url
       dataType: 'jsonp'
       cache: true
+      jsonpCallback: 'curlcastJSONP'
       success: (results) =>
         # do something with results
         rounds = []

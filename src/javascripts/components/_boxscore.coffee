@@ -367,6 +367,7 @@ BoxScore = React.createClass
       url: @props.url
       dataType: 'jsonp'
       cache: true
+      jsonpCallback: 'curlcastJSONP'
       success: (results) =>
         @setState({
           game: results

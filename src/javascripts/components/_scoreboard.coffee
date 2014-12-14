@@ -217,6 +217,7 @@ Scoreboard = React.createClass
       url: @props.url
       dataType: 'jsonp'
       cache: true
+      jsonpCallback: 'curlcastJSONP'
       success: (results) =>
         days = []
         last_day_id = -1

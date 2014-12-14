@@ -163,6 +163,7 @@ Teams = React.createClass
       url: @props.url
       dataType: 'jsonp'
       cache: true
+      jsonpCallback: 'curlcastJSONP'
       success: (results) =>
         @setState teams: results
         setTimeout @loadDataFromServer, @props.pollInterval
@@ -185,6 +186,7 @@ Teams = React.createClass
         url: url
         dataType: 'jsonp'
         cache: true
+        jsonpCallback: 'curlcastJSONP'
         success: (results) =>
           @setState team: results
       )

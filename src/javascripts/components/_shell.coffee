@@ -16,6 +16,7 @@ Shell = React.createClass
       url: url
       dataType: 'jsonp'
       cache: true
+      jsonpCallback: 'curlcastJSONP'
       success: (results) =>
         @setState navigation: results.navigation, competitions: results.competitions
       error: =>
