@@ -97,10 +97,8 @@ GamePositionName = React.createClass
   render: ->
     {name, short_name, team_path, team_path_url, result} = @props.game_position
     path = "#{@props.pathPrefix}#{team_path}"
-    path = path.split('/').slice(0,-1).join('/') + "#!#{team_path_url}"
-    #console.log 'GamePositionName', [path, pathWithoutTeam, @props.baseUrl], @props
     td className: "game-name",
-      if team_path != null
+      if team_path?
         a href: path, title: name,
           if result == 'won'
             strong null,

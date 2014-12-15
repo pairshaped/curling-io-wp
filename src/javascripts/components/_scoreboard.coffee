@@ -67,6 +67,10 @@ DrawSheetPosition = React.createClass
       for es in [0..padding]
         end_scores.push { score: '' }
 
+    team_url = position.team.url #'#no-team-assigned'
+    #if position.team? 
+    #  team_url = position.team.url.split('/').slice(0, -1).join('/') + '/#!' + position.team.url
+
     total = ''
     if position.end_scores?
       total = 0
@@ -75,7 +79,7 @@ DrawSheetPosition = React.createClass
     tr {},
       td {},
         if position.team?
-          a href: position.team.url,
+          a href: team_url,
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else

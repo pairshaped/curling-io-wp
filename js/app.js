@@ -24802,10 +24802,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       var name, path, result, short_name, team_path, team_path_url, _ref1;
       _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, team_path_url = _ref1.team_path_url, result = _ref1.result;
       path = "" + this.props.pathPrefix + team_path;
-      path = path.split('/').slice(0, -1).join('/') + ("#!" + team_path_url);
       return td({
         className: "game-name"
-      }, team_path !== null ? a({
+      }, team_path != null ? a({
         href: path,
         title: name
       }, result === 'won' ? strong(null, short_name) : short_name) : name);
@@ -24918,7 +24917,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   DrawSheetPosition = React.createClass({
     render: function() {
-      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
+      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, team_url, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -24944,6 +24943,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           });
         }
       }
+      team_url = position.team.url;
       total = '';
       if (position.end_scores != null) {
         total = 0;
@@ -24953,7 +24953,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         }
       }
       return tr({}, td({}, position.team != null ? a({
-        href: position.team.url
+        href: team_url
       }, span({
         className: 'hidden-xs'
       }, position.team.name), span({
@@ -25370,7 +25370,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   BoxScoreBoardPositions = React.createClass({
     render: function() {
-      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, team_url, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
+      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -25400,12 +25400,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         seconds = "0" + seconds;
       }
       time_remaining = "" + minutes + ":" + seconds;
-      team_url = '#no-team-assigned';
-      if (position.team != null) {
-        team_url = position.team.url.split('/').slice(0, -1).join('/') + '#!' + position.team.url;
-      }
       return tr({}, td({}, position.team != null ? a({
-        href: team_url || "#team-url"
+        href: position.team.url
       }, span({
         className: 'hidden-xs'
       }, position.team.name), span({
@@ -26374,15 +26370,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   _ref3 = React.DOM, ol = _ref3.ol, li = _ref3.li;
 
   TeamShowBreadcrumb = React.createClass({
-    showTeamIndex: function(e) {
-      return this.props.showTeam(null);
-    },
     render: function() {
       return ol({
         className: 'breadcrumb'
       }, li({}, a({
-        href: '#',
-        onClick: this.showTeamIndex
+        href: '../'
       }, 'Teams')), li({
         className: 'active'
       }, this.props.team.name));
@@ -26529,8 +26521,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, div({
         className: 'col-xs-12'
       }, TeamShowBreadcrumb({
-        team: this.props.team,
-        showTeam: this.props.showTeam
+        team: this.props.team
       })), div({
         className: 'col-xs-12'
       }, h3({}, this.props.team.name), TeamShowAthleteList({
@@ -26546,15 +26537,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   });
 
   TeamListItem = React.createClass({
-    showTeam: function() {
-      return this.props.showTeam(this.props.absoluteUrl(this.props.team.url) + ".js");
-    },
     render: function() {
       var team;
       team = this.props.team;
       return tr({}, td({}, a({
-        href: "#!" + team.url,
-        onClick: this.showTeam
+        href: team.url
       }, team.name)), td({}, team.coach || ''), td({}, team.affiliation), td({}, team.location));
     }
   });
@@ -26568,7 +26555,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return TeamListItem({
             key: team.id,
             team: team,
-            showTeam: _this.props.showTeam,
             absoluteUrl: _this.props.absoluteUrl
           });
         };
@@ -26580,33 +26566,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     getInitialState: function() {
       return {
         teams: null,
-        team: null,
-        base_url: null
+        team: null
       };
     },
     baseUrl: function() {
       return this.props.url.substr(0, this.props.url.indexOf('/', 8));
-    },
-    loadDataFromServer: function() {
-      if (this.state.base_url == null) {
-        this.setState({
-          base_url: this.baseUrl()
-        });
-      }
-      return jQuery.ajax({
-        url: this.props.url,
-        dataType: 'jsonp',
-        cache: true,
-        jsonpCallback: 'curlcastJSONP',
-        success: (function(_this) {
-          return function(results) {
-            _this.setState({
-              teams: results
-            });
-            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
-          };
-        })(this)
-      });
     },
     absoluteUrl: function() {
       var args, base_url, i, uri, url, _i, _ref4;
@@ -26625,40 +26589,36 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }
       return url + uri;
     },
-    showTeam: function(url) {
-      if (url == null) {
-        url = null;
+    loadDataFromServer: function(url, isTeamIndex) {
+      if (isTeamIndex == null) {
+        isTeamIndex = true;
       }
-      if (url != null) {
-        return jQuery.ajax({
-          url: url,
-          dataType: 'jsonp',
-          cache: true,
-          jsonpCallback: 'curlcastJSONP',
-          success: (function(_this) {
-            return function(results) {
-              return _this.setState({
+      return jQuery.ajax({
+        url: this.props.url,
+        dataType: 'jsonp',
+        cache: true,
+        jsonpCallback: 'curlcastJSONP',
+        success: (function(_this) {
+          return function(results) {
+            if (isTeamIndex === true) {
+              _this.setState({
+                teams: results
+              });
+            } else {
+              _this.setState({
                 team: results
               });
-            };
-          })(this)
-        });
-      } else {
-        return this.setState({
-          team: null
-        });
-      }
-    },
-    parseUrl: function() {
-      if (window.location.hash) {
-        if (window.location.hash[1] === "!") {
-          return this.showTeam(this.absoluteUrl(window.location.hash.substr(2) + ".js"));
-        }
-      }
+            }
+            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
+          };
+        })(this)
+      });
     },
     componentWillMount: function() {
-      this.loadDataFromServer();
-      return this.parseUrl();
+      var pieces, suffix;
+      pieces = this.props.url.split('/');
+      suffix = pieces[pieces.length - 1].split('.js')[0];
+      return this.loadDataFromServer(this.props.url, suffix === 'teams');
     },
     componentDidMount: function() {
       return this.props.fixLinks();
@@ -26667,24 +26627,22 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return this.props.fixLinks();
     },
     render: function() {
-      if (this.state.teams == null) {
+      if (!((this.state.teams != null) || (this.state.team != null))) {
         return div({
           className: 'row'
         }, div({
           className: 'col-xs-12'
-        }, 'Loading Teams...'));
+        }, 'Loading Team Data...'));
       }
       if (this.state.team === null) {
         return TeamList({
           teams: this.state.teams,
-          showTeam: this.showTeam,
           absoluteUrl: this.absoluteUrl
         });
       } else {
         return TeamShow({
           team: this.state.team,
           teams: this.state.teams,
-          showTeam: this.showTeam,
           absoluteUrl: this.absoluteUrl
         });
       }

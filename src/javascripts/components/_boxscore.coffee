@@ -62,14 +62,10 @@ BoxScoreBoardPositions = React.createClass
     seconds = "0" + seconds if seconds < 10
     time_remaining = "#{minutes}:#{seconds}"
 
-    team_url = '#no-team-assigned'
-    if position.team? 
-      team_url = position.team.url.split('/').slice(0, -1).join('/') + '#!' + position.team.url
-
     tr {},
       td {},
         if position.team?
-          a href: team_url || "#team-url",
+          a href: position.team.url,
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else

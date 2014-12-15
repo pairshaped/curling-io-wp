@@ -4,13 +4,10 @@
 {ol, li} = React.DOM
 
 TeamShowBreadcrumb = React.createClass
-  showTeamIndex: (e) ->
-    @props.showTeam null
-
   render: ->
     ol className: 'breadcrumb',
       li {},
-        a href: '#', onClick: @showTeamIndex, 'Teams'
+        a href: '../', 'Teams'
       li className: 'active',
         @props.team.name
 
@@ -110,7 +107,7 @@ TeamShow = React.createClass
   render: ->
     div className: 'row',
       div className: 'col-xs-12',
-        TeamShowBreadcrumb team: @props.team, showTeam: @props.showTeam
+        TeamShowBreadcrumb team: @props.team
       div className: 'col-xs-12',
         h3 {}, @props.team.name
         TeamShowAthleteList team_athletes: @props.team.team_athletes, absoluteUrl: @props.absoluteUrl
@@ -121,14 +118,11 @@ TeamShow = React.createClass
         TeamShowScoringAnalysis team: @props.team
 
 TeamListItem = React.createClass
-  showTeam: ->
-    @props.showTeam @props.absoluteUrl( @props.team.url ) + ".js"
-
   render: ->
     team = @props.team
     tr {},
       td {},
-        a href: "#!" + team.url, onClick: @showTeam,
+        a href: team.url,
           team.name
       td {}, team.coach || ''
       td {}, team.affiliation
@@ -146,28 +140,14 @@ TeamList = React.createClass
           th {}, "Location"
       tbody {},
         @props.teams.map (team) =>
-          TeamListItem key: team.id, team: team, showTeam: @props.showTeam, absoluteUrl: @props.absoluteUrl
+          TeamListItem key: team.id, team: team, absoluteUrl: @props.absoluteUrl
 
 Teams = React.createClass
   getInitialState: ->
-    {teams: null, team: null, base_url: null}
+    {teams: null, team: null}
 
   baseUrl: ->
     @props.url.substr(0, @props.url.indexOf('/', 8))
-
-  loadDataFromServer: ->
-    unless @state.base_url?
-      @setState base_url: @baseUrl()
-
-    jQuery.ajax(
-      url: @props.url
-      dataType: 'jsonp'
-      cache: true
-      jsonpCallback: 'curlcastJSONP'
-      success: (results) =>
-        @setState teams: results
-        setTimeout @loadDataFromServer, @props.pollInterval
-    )
 
   absoluteUrl: -> # Variable arguments accepted
     return @state.base_url unless arguments.length > 0
@@ -180,28 +160,24 @@ Teams = React.createClass
     url = base_url unless uri.toLowerCase().indexOf(base_url.toLowerCase()) == 0
     return url + uri
 
-  showTeam: (url = null) ->
-    if url?
-      jQuery.ajax(
-        url: url
-        dataType: 'jsonp'
-        cache: true
-        jsonpCallback: 'curlcastJSONP'
-        success: (results) =>
+  loadDataFromServer: (url, isTeamIndex = true) ->
+    jQuery.ajax(
+      url: @props.url
+      dataType: 'jsonp'
+      cache: true
+      jsonpCallback: 'curlcastJSONP'
+      success: (results) =>
+        if isTeamIndex == true
+          @setState teams: results
+        else
           @setState team: results
-      )
-    else
-      @setState team: null
-
-  parseUrl: ->
-    # Get hash value of url
-    if window.location.hash
-      if window.location.hash[1] == "!"
-        @showTeam @absoluteUrl(window.location.hash.substr(2) + ".js")
+        setTimeout @loadDataFromServer, @props.pollInterval
+    )
 
   componentWillMount: ->
-    @loadDataFromServer()
-    @parseUrl()
+    pieces = @props.url.split('/')
+    suffix = pieces[pieces.length-1].split('.js')[0]
+    @loadDataFromServer(@props.url, (suffix == 'teams'))
 
   componentDidMount: ->
     @props.fixLinks()
@@ -210,14 +186,14 @@ Teams = React.createClass
     @props.fixLinks()
 
   render: ->
-    unless @state.teams?
+    unless @state.teams? || @state.team?
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading Teams...'
+        div className: 'col-xs-12', 'Loading Team Data...'
 
     if @state.team == null
-      TeamList teams: @state.teams, showTeam: @showTeam, absoluteUrl: @absoluteUrl
+      TeamList teams: @state.teams, absoluteUrl: @absoluteUrl
     else
-      TeamShow team: @state.team, teams: @state.teams, showTeam: @showTeam, absoluteUrl: @absoluteUrl
+      TeamShow team: @state.team, teams: @state.teams, absoluteUrl: @absoluteUrl
 
 window.CurlcastTeams = Teams
 
