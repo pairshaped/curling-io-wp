@@ -8,12 +8,17 @@ Scoreboard = React.createClass
   getInitialState: ->
     scoreboard: null
     days: null
-    day: null
-    draw: null
-    pollInterval: 30000
+    dataUri: null
+    loadingStatus: 'Loading...'
 
-  processServerData: (results) ->
-    console.log 'Scoreboard.results', results
+  processServerData: (props) ->
+    results = props.data
+    unless results?
+      loadingStatus = 'Loading...'
+      loadingStatus = "Loading #{props.competition.title}..." if props.competition?
+      @setState scoreboard: null, days: null, loadingStatus: loadingStatus
+      return
+
     days = []
     last_day_id = -1
     id = 0
@@ -28,15 +33,15 @@ Scoreboard = React.createClass
         id++
       days[last_day_id].draws.push draw
 
-    @setState {scoreboard: results, days: days }
+    @setState scoreboard: results, days: days, dataUri: props.routerState.path, loadingStatus: 'Loading...'
 
   componentWillReceiveProps: (nextProps) ->
-    @processServerData(nextProps.data)
+    @processServerData nextProps
 
   render: ->
     unless @state.days?
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading Scoreboard...'
+        div className: 'col-xs-12', @state.loadingStatus
 
     { days, scoreboard, day, draw } = @state
 
@@ -48,31 +53,6 @@ Scoreboard = React.createClass
       RouteHandler dayProps
     else
       CurlcastScoreboardDay dayProps
-    #div className: 'row',
-    #  div className: 'col-xs-12 col-sm-10',
-    #    div className: 'row',
-    #      div className: 'col-xs-12',
-    #        p {},
-    #          location_str
-    #          br {}
-    #          scoreboard.starts_on
-    #          ' to '
-    #          scoreboard.ends_on
-    #        CompetitionDayList days: days, day: day, routerState: @props.routerState
-    #        h3 className: 'hidden-xs', day.starts_on
-    #        h4 className: 'visible-xs', day.starts_on
-    #  div className: 'col-sm-2 hidden-xs',
-    #    h6 className: 'text-right',
-    #      'Current Time'
-    #      br {}
-    #      scoreboard.time_now
-    #  div className: 'col-xs-12',
-    #    div className: 'row',
-    #      div className: 'col-xs-12',
-    #        DrawList draws: day.draws, day: day, draw: draw, routerState: @props.routerState
-    #        DrawContentList draws: day.draws, draw: draw, competition: @props.competition, routerState: @props.routerState
-    #        p {}, 'LSFE: Last shot in the first end'
-
 
 window.CurlcastScoreboard = Scoreboard
 

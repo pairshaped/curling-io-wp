@@ -543,7 +543,8 @@ if (!class_exists('curlcast')) {
         echo $args['before_title'] . $title . $args['after_title'];
       }
 
-      $access_key  = get_option('curlcast_api_key');
+      //$access_key  = get_option('curlcast_api_key');
+      $access_key  = (defined('WP_CURLCAST_ACCESS_KEY_OVERRIDE') && WP_CURLCAST_ACCESS_KEY_OVERRIDE) ? WP_CURLCAST_ACCESS_KEY_OVERRIDE : get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url() . '/' . $page_prefix;
       $url         = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . WP_CURLCAST_WIDGET_URL . '?base_url=' . urlencode($base_url);

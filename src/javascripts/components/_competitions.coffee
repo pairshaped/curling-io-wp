@@ -66,8 +66,7 @@ CompetitionBox = React.createClass
       type: 'GET'
       data: @state.search
       dataType: 'jsonp'
-      cache: true
-      jsonpCallback: 'curlcastJSONP'
+      jsonpCallback: 'curlcastCompetitionsJSONP'
       success: (results) =>
         # If we do a loadData pre-emptively, cancel the old timeout
         @setState competitions: results.competitions
@@ -75,22 +74,22 @@ CompetitionBox = React.createClass
   componentWillMount: ->
     @loadDataFromServer()
 
-  fixLinks: ->
-    pathPrefix = @props.pathPrefix
-    jQuery(@getDOMNode()).find("a").each ->
-      url = jQuery(this).attr "href"
-      return unless url? && url.substr(0, 21) == '/stats/organizations/'
-      pieces = url.substr(1).split "/"
-      for i in [0..2]
-        pieces.shift()
-      pieces.unshift pathPrefix
-      jQuery(this).attr "href", pieces.join "/"
+  #fixLinks: ->
+  #  pathPrefix = @props.pathPrefix
+  #  jQuery(@getDOMNode()).find("a").each ->
+  #    url = jQuery(this).attr "href"
+  #    return unless url? && url.substr(0, 21) == '/stats/organizations/'
+  #    pieces = url.substr(1).split "/"
+  #    for i in [0..2]
+  #      pieces.shift()
+  #    pieces.unshift pathPrefix
+  #    jQuery(this).attr "href", pieces.join "/"
 
-  componentDidUpdate: ->
-    @fixLinks()
+  #componentDidUpdate: ->
+  #  @fixLinks()
 
   render: ->
-    console.log 'Competitions', @
+    #console.log 'Competitions', @
     unless @state.competitions?
       return div className: 'col-xs-12', 'Loading competition list...'
     div className: 'col-xs-12',

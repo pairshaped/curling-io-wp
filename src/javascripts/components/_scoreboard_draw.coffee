@@ -6,27 +6,31 @@ Link = ReactRouter.Link
 
 DrawListItem = React.createClass
   render: ->
-    {draw} = @props
+    {day, draw} = @props
     active_class = ''
     active_class = 'active' if @props.active == true
 
-    day = dayToStr @props.day
-    draw = drawToStr @props.draw
+    dayParam = @props.dayToStr day
+    drawParam = @props.drawToStr draw
 
     li className: active_class,
-      Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: day, draw: draw }, activeClassName: 'router-active',
+      Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam }, activeClassName: 'router-active',
+      #a {},
         "Draw #{draw.label}"
         br {}
         draw.starts_at
 
 DrawList = React.createClass
   render: ->
-    console.log 'DrawList', @props.draw
     {draws, changeDraw, day} = @props
     draw = @props.draw
     ul className: 'nav nav-tabs', role: 'tablist',
-      draws.map (draw_item) =>
-        DrawListItem key: draw_item.id, draw: draw_item, day: day, active: (draw_item.id == draw.id), routerState: @props.routerState
+      day.draws.map (draw_item) =>
+        drawProps = @props
+        drawProps.key = draw_item.id
+        drawProps.draw = draw_item
+        drawProps.active = (draw_item.id == draw.id)
+        DrawListItem drawProps
 
 DrawSheetPosition = React.createClass
   render: ->
@@ -52,10 +56,15 @@ DrawSheetPosition = React.createClass
       total = 0
       for score in end_scores
         total += parseInt(score.score) || 0
+
+    if position.team?
+      team_id = @props.teamToStr position.team
+
     tr {},
       td {},
         if position.team?
-          a href: @props.teams_url + '#!' + position.team.url,
+          Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: team_id },
+          #a href: @props.teams_url + '#!' + position.team.url,
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
@@ -68,7 +77,9 @@ DrawSheetPosition = React.createClass
         td rowSpan: '2', className: 'hidden-xs',
           strong {}, game.state
           br {}
-          a href: game.boxscore_url || '#boxscore-missing', 'Boxscore'
+          Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: game.id }, onClick: @props.shellComponentChanged,
+            'Boxscore'
+          #a href: game.boxscore_url || '#boxscore-missing', 'Boxscore'
 
 DrawSheetItem = React.createClass
   render: ->
@@ -96,8 +107,8 @@ DrawSheetItem = React.createClass
                 if boxscore_display
                   th className: 'hidden-xs', width: '10%', ''
             tbody {},
-              DrawSheetPosition position: sheet.game_positions[0], ends: number_of_ends, game: sheet.game, routerState: @props.routerState, boxscore: boxscore_display
-              DrawSheetPosition position: sheet.game_positions[1], ends: number_of_ends, game: sheet.game, routerState: @props.routerState
+              DrawSheetPosition position: sheet.game_positions[0], ends: number_of_ends, game: sheet.game, teamToStr: @props.teamToStr, routerState: @props.routerState, shellComponentChanged: @props.shellComponentChanged, boxscore: boxscore_display
+              DrawSheetPosition position: sheet.game_positions[1], ends: number_of_ends, game: sheet.game, teamToStr: @props.teamToStr, routerState: @props.routerState, shellComponentChanged: @props.shellComponentChanged
 
 DrawSheetList = React.createClass
   render: ->
@@ -107,43 +118,52 @@ DrawSheetList = React.createClass
     div className: "tab-pane fade#{active_class}", id: "draw#{draw.id}",
       div className: 'spacer'
       draw.draw_sheets.map (sheet, key) =>
-        DrawSheetItem key: key, draw: draw, sheet: sheet, competition: competition, routerState: @props.routerState
+        props = @props
+        props.key = key
+        props.sheet = sheet
+        DrawSheetItem props
 
 DrawContentList = React.createClass
   render: ->
-    {draws, competition, draw} = @props
+    {day, competition, draw} = @props
     div className: 'tab-content',
-      draws.map (draw_item) =>
-        DrawSheetList key: draw_item.id, draw: draw_item, competition: competition, active: (draw.id == draw_item.id), routerState: @props.routerState
+      day.draws.map (draw_item) =>
+        props = @props
+        props.key = draw_item.id
+        props.active = (draw.id == draw_item.id)
+        props.draw = draw_item
+        DrawSheetList props
 
 ScoreboardDraw = React.createClass
   getInitialState: ->
     draw: null
 
-  drawToStr: (draw) ->
-    "draw-#{draw.label}-#{draw.starts_at}"
-
   getDraw: ->
     currentDraw = @props.routerState.params.draw
     for draw in @props.day.draws
-      if currentDraw?
-        return draw if draw.active
+      str = @props.drawToStr(draw)
+      if !currentDraw?
+        if draw.active
+          return draw
       else
-        return draw if @drawToStr(draw) == currentDraw
+        if str == currentDraw
+          return draw
     return @props.day.draws[0]
 
   componentDidMount: ->
-    @setState draw: @getDraw
+    @setState draw: @getDraw()
 
   render: ->
-    {competition, day} = @props
+    draw = @getDraw()
 
-    console.log 'Scoreboard.render'
+    drawProps = @props
+    drawProps.draw = draw
 
-    div className: 'col-xs-12',
-      DrawList({competition: competition, draws: day.draws, day: day, draw: draw, changeDraw: @changeDraw})
-      DrawContentList({competition: competition, draws: day.draws, day: day, draw: draw, teams_url: @props.teams_url})
-      p {}, 'LSFE: Last shot in the first end'
+    div className: 'row',
+      div className: 'col-xs-12',
+        DrawList drawProps
+        DrawContentList drawProps
+        p {}, 'LSFE: Last shot in the first end'
 
 window.CurlcastScoreboardDraw = ScoreboardDraw
 

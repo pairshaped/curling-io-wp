@@ -3,7 +3,7 @@ Link = ReactRouter.Link
 
 CompetitionNavigation = React.createClass
   render: ->
-    {routerState, competition} = @props
+    {routerState, competition, currentRoute} = @props
     {title, short_name} = competition
 
     nav className: 'navbar navbar-default', role: 'navigation',
@@ -16,13 +16,15 @@ CompetitionNavigation = React.createClass
         span className: 'navbar-brand', short_name || title
       div className: 'collapse navbar-collapse', id: 'curlcast-navigation',
         ul className: 'nav navbar-nav',
-          li {}, # TODO: Set className: 'active' on proper route(s)
-            Link to: 'scoreboard', params: { competition_id: competition.id },
+          li className: (if currentRoute == 'scoreboard' || currentRoute == 'boxscore' then 'active' else null), # TODO: Set className: 'active' on proper route(s)
+            Link to: 'scoreboard', params: { competition_id: competition.to_param }, #, onClick: @props.shellComponentChanged,
               'Scoreboard'
-          li {}, # TODO: ...
-            a href: '#standings_draw', 'Standings / Draw'
-          li {}, # TODO: ...
-            a href: '#teams', 'Teams'
+          li className: (if currentRoute == 'standings' then 'active' else null),
+            Link to: 'standings', params: { competition_id: competition.to_param },
+              'Standings / Draw'
+          li className: (if currentRoute == 'teams' then 'active' else null),
+            Link to: 'teams', params: { competition_id: competition.to_param },
+              'Teams'
           li className: 'visible-xs',
             Link to: 'competitions',
               'More Competitions'

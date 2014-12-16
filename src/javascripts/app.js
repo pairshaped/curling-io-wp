@@ -8,6 +8,8 @@
 //= require lib/bootstrap/popover
 //= require lib/bootstrap/tab
 //= require lib/bootstrap/dropdown
+//= require lib/bootstrap/collapse
+//= require lib/bootstrap/transition
 //= require_tree ./lib/jsplumb
 //= require ./components/_nav_organization
 //= require ./components/_nav_competition

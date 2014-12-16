@@ -1,6 +1,7 @@
 { div, ul, li, a, p } = React.DOM
 { h4 }  = React.DOM
 { table, thead, tr, th, tbody, td } = React.DOM
+Link = ReactRouter.Link
 
 StandingsBracketGameTeam = React.createClass
   render: ->
@@ -85,11 +86,12 @@ StandingsBracket = React.createClass
     div className: 'row',
       div className: 'col-xs-12',
         p {}, 'Mouse-over or tap on a game below to view game details.'
-        if @props.round.groups.length > 1
-          ul className: 'pagination',
-            @props.round.groups.map (group, idx) ->
-              li key: idx,
-                a href: "##{group.id}", group.name || 'A Event'
+        # TODO: Might need to bring in a plugin to handle scrolling?
+        #if @props.round.groups.length > 1
+        #  ul className: 'pagination',
+        #    @props.round.groups.map (group, idx) ->
+        #      li key: idx,
+        #        a href: "##{group.id}", group.name || 'A Event'
         @props.round.groups.map (group, idx) =>
           StandingsBracketGroup key: idx, bracket: @props.round, group: group, zoom_factor: @state.zoom_factor
 
@@ -116,8 +118,8 @@ StandingsPanel = React.createClass
   render: ->
     active_class = ''
     active_class = ' bracket' if @props.round.type == "bracket"
-    active_class += ' active in' if @props.isActive( @props.round ) == true
-    div className: 'tab-pane fade' + active_class, id: @props.id,
+    active_class += ' active in' if @props.round.active == true
+    div className: 'tab-pane fade' + active_class, id: @props.round.to_param,
       div className: 'row',
         div className: 'col-xs-12', style: { height: '1em' }
       if @props.round.type == 'round_robin'
@@ -126,118 +128,97 @@ StandingsPanel = React.createClass
         StandingsBracket(@props)
 
 StandingsTab = React.createClass
-  propogateTab: ->
-    @props.setActive @props.round.type, @props.round.id
-
   render: ->
-    li className: (if @props.isActive(@props.round) == true then 'active' else ''),
-      a href: @props.href, 'data-toggle': 'tab', onClick: @propogateTab, @props.round.name
+    li className: (if @props.round.active == true then 'active' else ''), 'data-tab-target': @props.round.to_param,
+      Link to: 'standings-round', params: { competition_id: @props.routerState.params.competition_id, round_id: @props.round.to_param }, className: 'tab-link',
+        @props.round.name
+      #a href: @props.href, 'data-toggle': 'tab', onClick: @propogateTab, @props.round.name
 
 StandingsTabContainer = React.createClass
   render: ->
-    {rounds} = @props
     div className: 'col-xs-12',
       ul className: 'nav nav-tabs', role: 'tablist',
-        rounds.map (round, idx) =>
-          StandingsTab key: "tab-#{round.type}-#{round.id}", href: "#tab#{idx+1}", round: round, setActive: @props.setActive, isActive: @props.isActive
+        @props.rounds.map (round, idx) =>
+          roundProps = @props
+          roundProps.key = "tab-#{round.to_param}"
+          roundProps.round = round
+          StandingsTab roundProps
       div className: 'tab-content',
-        rounds.map (round, idx) =>
-          StandingsPanel key: "pane-#{round.type}-#{round.id}", round: round, id: "tab#{idx + 1}", isActive: @props.isActive
+        @props.rounds.map (round, idx) =>
+          roundProps = @props
+          roundProps.key = "pane-#{round.to_param}"
+          roundProps.round = round
+          StandingsPanel roundProps
 
 Standings = React.createClass
   getInitialState: ->
-    { active: null, rounds: null }
+    { rounds: null }
 
-  updateActive: (rounds = @state.rounds) ->
-    active = @state.active
-    return active if active? && active.type? && active.id?
-    return { type: rounds[0].type, id: rounds[0].id } if rounds.length > 0
-    return null
+  connectPoints: (game, position) ->
+    if (game.attr("data-#{position}-connecting-input") && game.attr('data-group') == game.attr("data-#{position}-connecting-input-group"))
+      jpObj = jsPlumb.getInstance()
+      jpObj.importDefaults Connector: "Flowchart"
 
-  isActive: (round) ->
-    active = @updateActive()
-    return false unless round? && active?
-    return true if round.type == active.type && round.id == active.id
-    return false
+      targetY = (game.attr("data-#{position}-connecting-input-result") == 'W' ? 0.25 : 0.75)
+      jpObj.connect
+        source: game.attr('id')
+        target: game.attr("data-#{position}-connecting-input")
+        endpoint: "Blank"
+        anchors: [
+          [0, 0.5, -1, 0]
+          [1, 0.5, 1, 0]
+        ]
+        paintStyle: { strokeStyle: "#ccc", lineWidth: 1 }
 
-  getActive: ->
-    active = @updateActive()
-    return null unless active?
-    for round in @state.rounds
-      return round if round.type == active.type && round.id == active.id
-    # If the round was removed, reset active
-    @state.active = null
-    @getActive()
+  tabChanged: ->
+    activeTabTarget = '#' + jQuery('.nav.nav-tabs li.active').attr('data-tab-target')
+    activeTab = jQuery(activeTabTarget)
+    activeTab.find('.game').each (index, game) =>
+      $game = jQuery(game)
+      @connectPoints($game, 'top')
+      @connectPoints($game, 'bottom')
 
-  setActive: (type, id) ->
-    @setState active: {type: type, id: id}
+  processServerData: (props) ->
+    results = props.data
+    rounds = []
+    hasActive = false
+    results.round_robins.map (roundRobin, idx) =>
+      round = roundRobin
+      round.type = "round_robin"
+      round.index = idx + 1
+      round.to_param = @props.roundToStr round
+      round.active = (props.routerState.params.round_id == round.to_param)
+      hasActive = round.active if hasActive == false
+      rounds.push round
+    results.brackets.map (bracket, idx) =>
+      round = bracket
+      round.type = "bracket"
+      round.index = results.round_robins.length + idx + 1
+      round.to_param = @props.roundToStr round
+      round.active = (props.routerState.params.round_id == round.to_param)
+      hasActive = round.active if hasActive == false
+      rounds.push round
+    rounds[0].active = true if hasActive == false
+    @setState rounds: rounds
 
-  doPlumbing: ->
-    connectPoints = (game, position) ->
-      if (game.attr("data-#{position}-connecting-input") && game.attr('data-group') == game.attr("data-#{position}-connecting-input-group"))
-        jpObj = jsPlumb.getInstance()
-        jpObj.importDefaults Connector: "Flowchart"
-
-        targetY = (game.attr("data-#{position}-connecting-input-result") == 'W' ? 0.25 : 0.75)
-        jpObj.connect
-          source: game.attr('id')
-          target: game.attr("data-#{position}-connecting-input")
-          endpoint: "Blank"
-          anchors: [
-            [0, 0.5, -1, 0]
-            [1, 0.5, 1, 0]
-          ]
-          paintStyle: { strokeStyle: "#ccc", lineWidth: 1 }
-
-    jQuery("a[data-toggle='tab']").on "shown.bs.tab", (e) ->
-      activeTab = jQuery(jQuery(e.target).attr("href"))
-      activeTab.find('.game').each ->
-        game = jQuery(this)
-        connectPoints(jQuery(this), 'top')
-        connectPoints(jQuery(this), 'bottom')
-
-    # On load we need to trigger the first tabs shown event
-    # in case it's a bracket in order to draw the connections.
-    jQuery("a[data-toggle='tab']").first().trigger("shown.bs.tab");
-
-  loadDataFromServer: ->
-    jQuery.ajax(
-      url: @props.url
-      dataType: 'jsonp'
-      cache: true
-      success: (results) =>
-        # do something with results
-        rounds = []
-        results.round_robins.map (roundRobin, idx) ->
-          round = roundRobin
-          round.type = "round_robin"
-          round.index = idx + 1
-          rounds.push round
-        results.brackets.map (bracket, idx) ->
-          round = bracket
-          round.type = "bracket"
-          round.index = results.round_robins.length + idx + 1
-          rounds.push round
-        @setState rounds: rounds, active: @updateActive(rounds)
-        setTimeout @loadDataFromServer, @props.pollInterval
-    )
-
-  componentWillMount: ->
-    @loadDataFromServer()
+  componentWillReceiveProps: (nextProps) ->
+    @processServerData nextProps
 
   componentDidUpdate: ->
-    @props.fixLinks()
-    @doPlumbing()
+    @tabChanged()
 
-  componentDidMount: ->
-    @doPlumbing()
+  #componentDidMount: ->
+  #  @doPlumbing()
 
   render: ->
-    pathPrefix = @props.pathPrefix
-    {rounds} = @state
-    return div {}, 'Loading Standings...' unless rounds?
+    return div {}, 'Loading Standings...' unless @state.rounds?
+
+    roundProps = @props
+    roundProps.rounds = @state.rounds
+    roundProps.isActive = @isActive
+
     div className: 'row',
-      StandingsTabContainer({rounds: rounds, isActive: @isActive, setActive: @setActive})
+      StandingsTabContainer roundProps
 
 
 

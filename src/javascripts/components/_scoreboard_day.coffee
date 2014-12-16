@@ -1,3 +1,4 @@
+
 {div, p, a, strong, br, nav, button, span, strong} = React.DOM
 {table, thead, tbody, tr, td, th} = React.DOM
 {h6, h4, h3} = React.DOM
@@ -33,13 +34,10 @@ ScoreboardDay = React.createClass
   changeDay: (day) ->
     @setState day: day
 
-  dayToStr: (day) ->
-    "#{day.day}-#{day.date}"
-
   getSelectedDay: ->
     selectedDay = @props.routerState.params.day
     for day in @props.days
-      dayStr = @dayToStr day
+      dayStr = @props.dayToStr day
       if dayStr == selectedDay
         return day
       if day.draws?
@@ -47,7 +45,7 @@ ScoreboardDay = React.createClass
           if draw.active == true
             unless selectedDay?
               return day
-    console.log 'getSelectedDay - could not find day', @props.routerState
+    @props.days[0]
 
   componentWillMount: ->
     @changeDay @getSelectedDay()
@@ -68,7 +66,7 @@ ScoreboardDay = React.createClass
 
     div className: 'row',
       div className: 'col-xs-12 col-sm-10',
-        DayList days: days, day: day, routerState: @props.routerState, dayToStr: @dayToStr, changeDay: @changeDay
+        DayList days: days, day: day, routerState: @props.routerState, dayToStr: @props.dayToStr, changeDay: @changeDay
         h3 className: 'hidden-xs', day.starts_on
         h4 className: 'visible-xs', day.starts_on
       div className: 'col-sm-2 hidden-xs',
@@ -77,11 +75,10 @@ ScoreboardDay = React.createClass
           br {}
           scoreboard.time_now
       div className: 'col-xs-12',
-        ReactRouter.RouteHandler drawProps
-          #div className: 'col-xs-12',
-          #  DrawList({competition: competition, draws: day.draws, day: day, draw: draw, changeDraw: @changeDraw})
-          #  DrawContentList({competition: competition, draws: day.draws, day: day, draw: draw, teams_url: @props.teams_url})
-          #  p {}, 'LSFE: Last shot in the first end'
+        if @props.routerState.params.draw?
+          ReactRouter.RouteHandler drawProps
+        else
+          CurlcastScoreboardDraw drawProps
 
 window.CurlcastScoreboardDay = ScoreboardDay
 

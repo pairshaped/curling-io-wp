@@ -26,7 +26,7 @@ OrganizationNavigation = React.createClass
         OrganizationNavigationLink
           key: competition.id
           competition: competition
-          active: (competition.id == @state.selectedCompetition)
+          active: (competition.to_param == @props.routerState.params.competition_id)
           current_id: current_id
           setCompetition: @setCompetition
       Link to: 'competitions', className: 'list-group-item',

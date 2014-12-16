@@ -2,15 +2,14 @@
 {table, thead, tbody, tr, td, th} = React.DOM
 {h6, h4, h3} = React.DOM
 {ol, li} = React.DOM
+Link = ReactRouter.Link
 
 TeamShowBreadcrumb = React.createClass
-  showTeamIndex: (e) ->
-    @props.showTeam null
-
   render: ->
     ol className: 'breadcrumb',
       li {},
-        a href: '#', onClick: @showTeamIndex, 'Teams'
+        Link to: 'teams', params: { competition_id: @props.routerState.params.competition_id },
+          'Teams'
       li className: 'active',
         @props.team.name
 
@@ -37,8 +36,9 @@ TeamShowAthleteList = React.createClass
 TeamShowScoresGame = React.createClass
   render: ->
     game = @props.game
-    game_position_self = if game.game_positions[0].team_id == @props.team.id then 0 else 1
-    game_position_opponent = if game_position_self == 1 then 0 else 1
+    game_position_self = if game.game_positions[0].name == @props.team.name then 0 else 1
+    game_position_opponent = if game_position_self == 0 then 1 else 0
+    #console.log 'TeamShowScoreGame.render', @props.team, game.game_positions
     tr {},
       td {}, game.draw.label
       td {}, game.draw.starts_at
@@ -110,7 +110,7 @@ TeamShow = React.createClass
   render: ->
     div className: 'row',
       div className: 'col-xs-12',
-        TeamShowBreadcrumb team: @props.team, showTeam: @props.showTeam
+        TeamShowBreadcrumb team: @props.team, routerState: @props.routerState
       div className: 'col-xs-12',
         h3 {}, @props.team.name
         TeamShowAthleteList team_athletes: @props.team.team_athletes, absoluteUrl: @props.absoluteUrl
@@ -121,14 +121,12 @@ TeamShow = React.createClass
         TeamShowScoringAnalysis team: @props.team
 
 TeamListItem = React.createClass
-  showTeam: ->
-    @props.showTeam @props.absoluteUrl( @props.team.url ) + ".js"
-
   render: ->
     team = @props.team
     tr {},
       td {},
-        a href: "#!" + team.url, onClick: @showTeam,
+        #a href: "#!" + team.url, onClick: @showTeam,
+        Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: team.to_param },
           team.name
       td {}, team.coach || ''
       td {}, team.affiliation
@@ -146,27 +144,17 @@ TeamList = React.createClass
           th {}, "Location"
       tbody {},
         @props.teams.map (team) =>
-          TeamListItem key: team.id, team: team, showTeam: @props.showTeam, absoluteUrl: @props.absoluteUrl
+          teamProps = @props
+          teamProps.key = team.id
+          teamProps.team = team
+          TeamListItem teamProps
 
 Teams = React.createClass
   getInitialState: ->
     {teams: null, team: null, base_url: null}
 
   baseUrl: ->
-    @props.url.substr(0, @props.url.indexOf('/', 8))
-
-  loadDataFromServer: ->
-    unless @state.base_url?
-      @setState base_url: @baseUrl()
-
-    jQuery.ajax(
-      url: @props.url
-      dataType: 'jsonp'
-      cache: true
-      success: (results) =>
-        @setState teams: results
-        setTimeout @loadDataFromServer, @props.pollInterval
-    )
+    @props.apiRoot.substr(0, @props.apiRoot.indexOf('/', 8))
 
   absoluteUrl: -> # Variable arguments accepted
     return @state.base_url unless arguments.length > 0
@@ -179,43 +167,34 @@ Teams = React.createClass
     url = base_url unless uri.toLowerCase().indexOf(base_url.toLowerCase()) == 0
     return url + uri
 
-  showTeam: (url = null) ->
-    if url?
-      jQuery.ajax(
-        url: url
-        dataType: 'jsonp'
-        cache: true
-        success: (results) =>
-          @setState team: results
-      )
+  processServerData: (props) ->
+    results = props.data
+    if props.routerState.params.team_id?
+      @setState team: results, teams: null
     else
-      @setState team: null
+      if results?
+        for team in results
+          team.to_param = @props.teamToStr team
 
-  parseUrl: ->
-    # Get hash value of url
-    if window.location.hash
-      if window.location.hash[1] == "!"
-        @showTeam @absoluteUrl(window.location.hash.substr(2) + ".js")
+      @setState teams: results, team: null #, baseUrl: @baseUrl()
 
-  componentWillMount: ->
-    @loadDataFromServer()
-    @parseUrl()
-
-  componentDidMount: ->
-    @props.fixLinks()
-
-  componentDidUpdate: ->
-    @props.fixLinks()
+  componentWillReceiveProps: (nextProps) ->
+    @processServerData nextProps
 
   render: ->
-    unless @state.teams?
+    unless @state.teams? || @state.team?
       return div className: 'row',
         div className: 'col-xs-12', 'Loading Teams...'
 
+    passedProps = @props
+    passedProps.absoluteUrl = @absoluteUrl
+
     if @state.team == null
-      TeamList teams: @state.teams, showTeam: @showTeam, absoluteUrl: @absoluteUrl
+      passedProps.teams = @state.teams
+      TeamList passedProps
     else
-      TeamShow team: @state.team, teams: @state.teams, showTeam: @showTeam, absoluteUrl: @absoluteUrl
+      passedProps.team = @state.team
+      TeamShow passedProps
 
 window.CurlcastTeams = Teams
 
