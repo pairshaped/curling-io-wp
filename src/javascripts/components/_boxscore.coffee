@@ -6,7 +6,7 @@ Link = ReactRouter.Link
 
 BreadCrumbDraw = React.createClass
   render: ->
-    console.log 'Boxscore.BreadCrumbDraw', @props
+    #console.log 'Boxscore.BreadCrumbDraw', @props
     active_class = ''
     active_class = 'active' if @props.active == true
 
@@ -90,10 +90,13 @@ BoxScoreBoardPositions = React.createClass
     team_url_parts.pop()
     team_url = team_url_parts.join('/') + "#!" + position.team.url
 
+    teamParam = @props.teamToStr( position.team )
+
     tr {},
       td {},
         if position.team?
-          a href: position.team.url || "#team-url",  # FIXME: team url
+          Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: teamParam },
+          #a href: position.team.url || "#team-url",  # FIXME: team url
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
@@ -136,8 +139,8 @@ BoxScoreBoard = React.createClass
                     span className: 'hidden-xs', 'Time'
               if game.positions?
                 tbody {},
-                  BoxScoreBoardPositions({position: game.positions[0], ends: num_ends, game: game})
-                  BoxScoreBoardPositions({position: game.positions[1], ends: num_ends, game: game})
+                  BoxScoreBoardPositions position: game.positions[0], ends: num_ends, game: game, routerState: @props.routerState, teamToStr: @props.teamToStr
+                  BoxScoreBoardPositions position: game.positions[1], ends: num_ends, game: game, routerState: @props.routerState, teamToStr: @props.teamToStr
 
 BoxScoreTeamRosterAthlete = React.createClass
   render: ->
@@ -392,16 +395,18 @@ BoxScore = React.createClass
   getInitialState: ->
     {game: null, draws: []}
 
-  componentWillReceiveProps: (nextProps) ->
-    results = nextProps.data
-    console.log 'Boxscore.componentWillReceiveProps', nextProps
+  processServerData: (props) ->
+    results = props.data
+    return unless results?
     @setState
       game: results
       draws: results.draws
 
+  componentWillReceiveProps: (nextProps) ->
+    @processServerData nextProps
 
   render: ->
-    console.log 'Boxscore.render', @state.game?, @state
+    #console.log 'Boxscore.render', @state.game?, @state
     unless @state.game?
       return div className: 'row',
         div className: 'col-xs-12', 'Loading Boxscore...'

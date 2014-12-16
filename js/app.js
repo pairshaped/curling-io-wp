@@ -29609,7 +29609,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   BreadCrumbDraw = React.createClass({
     render: function() {
       var active_class, dayParam, drawParam;
-      console.log('Boxscore.BreadCrumbDraw', this.props);
       active_class = '';
       if (this.props.active === true) {
         active_class = 'active';
@@ -29724,7 +29723,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   BoxScoreBoardPositions = React.createClass({
     render: function() {
-      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, team_url, team_url_parts, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
+      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, teamParam, team_url, team_url_parts, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -29758,8 +29757,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       team_url_parts.shift();
       team_url_parts.pop();
       team_url = team_url_parts.join('/') + "#!" + position.team.url;
-      return tr({}, td({}, position.team != null ? a({
-        href: position.team.url || "#team-url"
+      teamParam = this.props.teamToStr(position.team);
+      return tr({}, td({}, position.team != null ? Link({
+        to: 'teams-show',
+        params: {
+          competition_id: this.props.routerState.params.competition_id,
+          team_id: teamParam
+        }
       }, span({
         className: 'hidden-xs'
       }, position.team.name), span({
@@ -29835,11 +29839,15 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, 'Time')))), game.positions != null ? tbody({}, BoxScoreBoardPositions({
         position: game.positions[0],
         ends: num_ends,
-        game: game
+        game: game,
+        routerState: this.props.routerState,
+        teamToStr: this.props.teamToStr
       }), BoxScoreBoardPositions({
         position: game.positions[1],
         ends: num_ends,
-        game: game
+        game: game,
+        routerState: this.props.routerState,
+        teamToStr: this.props.teamToStr
       })) : void 0)))));
     }
   });
@@ -30095,18 +30103,22 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         draws: []
       };
     },
-    componentWillReceiveProps: function(nextProps) {
+    processServerData: function(props) {
       var results;
-      results = nextProps.data;
-      console.log('Boxscore.componentWillReceiveProps', nextProps);
+      results = props.data;
+      if (results == null) {
+        return;
+      }
       return this.setState({
         game: results,
         draws: results.draws
       });
     },
+    componentWillReceiveProps: function(nextProps) {
+      return this.processServerData(nextProps);
+    },
     render: function() {
       var props;
-      console.log('Boxscore.render', this.state.game != null, this.state);
       if (this.state.game == null) {
         return div({
           className: 'row'
