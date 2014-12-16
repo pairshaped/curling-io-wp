@@ -29621,11 +29621,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: active_class,
         role: 'presentation'
       }, Link({
-        to: 'scoreboard-draw',
+        to: 'boxscore',
         params: {
           competition_id: this.props.routerState.params.competition_id,
-          day: dayParam,
-          draw: drawParam
+          game_id: this.props.draw.games[0].id
         },
         href: '#',
         role: 'menuitem'

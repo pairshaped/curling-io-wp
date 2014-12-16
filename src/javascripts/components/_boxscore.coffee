@@ -14,8 +14,7 @@ BreadCrumbDraw = React.createClass
     drawParam = @props.drawToStr @props.draw
 
     li className: active_class, role: 'presentation',
-      Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam }, href: '#', role: 'menuitem',
-      #a href: @props.draw.game_url,
+      Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: @props.draw.games[0].id }, href: '#', role: 'menuitem',
         "Draw #{@props.draw.label}, #{@props.draw.start_at_hour}"
 
 BreadCrumbGame = React.createClass
