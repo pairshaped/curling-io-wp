@@ -20275,7 +20275,6 @@ module.exports = warning;
 },{"./emptyFunction":116}]},{},[88])
 (88)
 });
-<<<<<<< HEAD
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.ReactRouter=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 /**
  * Actions that modify the URL.
@@ -24050,8 +24049,6 @@ define(function() {
 },{}]},{},[10])
 (10)
 });
-=======
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 if (!Function.prototype.bind) {
   Function.prototype.bind = function(oThis) {
     if (typeof this !== 'function') {
@@ -25991,7 +25988,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
  * Bootstrap: tooltip.js v3.3.1
  * http://getbootstrap.com/javascript/#tooltip
  * Inspired by the original jQuery.tipsy by Jason Frame
-<<<<<<< HEAD
  * ========================================================================
  * Copyright 2011-2014 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
@@ -26590,8 +26586,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
 /* ========================================================================
  * Bootstrap: tab.js v3.3.1
  * http://getbootstrap.com/javascript/#tabs
-=======
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
  * ========================================================================
  * Copyright 2011-2014 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
@@ -26602,7 +26596,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
 +function ($) {
   'use strict';
 
-<<<<<<< HEAD
   // TAB CLASS DEFINITION
   // ====================
 
@@ -26747,476 +26740,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
 /* ========================================================================
  * Bootstrap: dropdown.js v3.3.1
  * http://getbootstrap.com/javascript/#dropdowns
-=======
-  // TOOLTIP PUBLIC CLASS DEFINITION
-  // ===============================
-
-  var Tooltip = function (element, options) {
-    this.type       =
-    this.options    =
-    this.enabled    =
-    this.timeout    =
-    this.hoverState =
-    this.$element   = null
-
-    this.init('tooltip', element, options)
-  }
-
-  Tooltip.VERSION  = '3.3.1'
-
-  Tooltip.TRANSITION_DURATION = 150
-
-  Tooltip.DEFAULTS = {
-    animation: true,
-    placement: 'top',
-    selector: false,
-    template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
-    trigger: 'hover focus',
-    title: '',
-    delay: 0,
-    html: false,
-    container: false,
-    viewport: {
-      selector: 'body',
-      padding: 0
-    }
-  }
-
-  Tooltip.prototype.init = function (type, element, options) {
-    this.enabled   = true
-    this.type      = type
-    this.$element  = $(element)
-    this.options   = this.getOptions(options)
-    this.$viewport = this.options.viewport && $(this.options.viewport.selector || this.options.viewport)
-
-    var triggers = this.options.trigger.split(' ')
-
-    for (var i = triggers.length; i--;) {
-      var trigger = triggers[i]
-
-      if (trigger == 'click') {
-        this.$element.on('click.' + this.type, this.options.selector, $.proxy(this.toggle, this))
-      } else if (trigger != 'manual') {
-        var eventIn  = trigger == 'hover' ? 'mouseenter' : 'focusin'
-        var eventOut = trigger == 'hover' ? 'mouseleave' : 'focusout'
-
-        this.$element.on(eventIn  + '.' + this.type, this.options.selector, $.proxy(this.enter, this))
-        this.$element.on(eventOut + '.' + this.type, this.options.selector, $.proxy(this.leave, this))
-      }
-    }
-
-    this.options.selector ?
-      (this._options = $.extend({}, this.options, { trigger: 'manual', selector: '' })) :
-      this.fixTitle()
-  }
-
-  Tooltip.prototype.getDefaults = function () {
-    return Tooltip.DEFAULTS
-  }
-
-  Tooltip.prototype.getOptions = function (options) {
-    options = $.extend({}, this.getDefaults(), this.$element.data(), options)
-
-    if (options.delay && typeof options.delay == 'number') {
-      options.delay = {
-        show: options.delay,
-        hide: options.delay
-      }
-    }
-
-    return options
-  }
-
-  Tooltip.prototype.getDelegateOptions = function () {
-    var options  = {}
-    var defaults = this.getDefaults()
-
-    this._options && $.each(this._options, function (key, value) {
-      if (defaults[key] != value) options[key] = value
-    })
-
-    return options
-  }
-
-  Tooltip.prototype.enter = function (obj) {
-    var self = obj instanceof this.constructor ?
-      obj : $(obj.currentTarget).data('bs.' + this.type)
-
-    if (self && self.$tip && self.$tip.is(':visible')) {
-      self.hoverState = 'in'
-      return
-    }
-
-    if (!self) {
-      self = new this.constructor(obj.currentTarget, this.getDelegateOptions())
-      $(obj.currentTarget).data('bs.' + this.type, self)
-    }
-
-    clearTimeout(self.timeout)
-
-    self.hoverState = 'in'
-
-    if (!self.options.delay || !self.options.delay.show) return self.show()
-
-    self.timeout = setTimeout(function () {
-      if (self.hoverState == 'in') self.show()
-    }, self.options.delay.show)
-  }
-
-  Tooltip.prototype.leave = function (obj) {
-    var self = obj instanceof this.constructor ?
-      obj : $(obj.currentTarget).data('bs.' + this.type)
-
-    if (!self) {
-      self = new this.constructor(obj.currentTarget, this.getDelegateOptions())
-      $(obj.currentTarget).data('bs.' + this.type, self)
-    }
-
-    clearTimeout(self.timeout)
-
-    self.hoverState = 'out'
-
-    if (!self.options.delay || !self.options.delay.hide) return self.hide()
-
-    self.timeout = setTimeout(function () {
-      if (self.hoverState == 'out') self.hide()
-    }, self.options.delay.hide)
-  }
-
-  Tooltip.prototype.show = function () {
-    var e = $.Event('show.bs.' + this.type)
-
-    if (this.hasContent() && this.enabled) {
-      this.$element.trigger(e)
-
-      var inDom = $.contains(this.$element[0].ownerDocument.documentElement, this.$element[0])
-      if (e.isDefaultPrevented() || !inDom) return
-      var that = this
-
-      var $tip = this.tip()
-
-      var tipId = this.getUID(this.type)
-
-      this.setContent()
-      $tip.attr('id', tipId)
-      this.$element.attr('aria-describedby', tipId)
-
-      if (this.options.animation) $tip.addClass('fade')
-
-      var placement = typeof this.options.placement == 'function' ?
-        this.options.placement.call(this, $tip[0], this.$element[0]) :
-        this.options.placement
-
-      var autoToken = /\s?auto?\s?/i
-      var autoPlace = autoToken.test(placement)
-      if (autoPlace) placement = placement.replace(autoToken, '') || 'top'
-
-      $tip
-        .detach()
-        .css({ top: 0, left: 0, display: 'block' })
-        .addClass(placement)
-        .data('bs.' + this.type, this)
-
-      this.options.container ? $tip.appendTo(this.options.container) : $tip.insertAfter(this.$element)
-
-      var pos          = this.getPosition()
-      var actualWidth  = $tip[0].offsetWidth
-      var actualHeight = $tip[0].offsetHeight
-
-      if (autoPlace) {
-        var orgPlacement = placement
-        var $container   = this.options.container ? $(this.options.container) : this.$element.parent()
-        var containerDim = this.getPosition($container)
-
-        placement = placement == 'bottom' && pos.bottom + actualHeight > containerDim.bottom ? 'top'    :
-                    placement == 'top'    && pos.top    - actualHeight < containerDim.top    ? 'bottom' :
-                    placement == 'right'  && pos.right  + actualWidth  > containerDim.width  ? 'left'   :
-                    placement == 'left'   && pos.left   - actualWidth  < containerDim.left   ? 'right'  :
-                    placement
-
-        $tip
-          .removeClass(orgPlacement)
-          .addClass(placement)
-      }
-
-      var calculatedOffset = this.getCalculatedOffset(placement, pos, actualWidth, actualHeight)
-
-      this.applyPlacement(calculatedOffset, placement)
-
-      var complete = function () {
-        var prevHoverState = that.hoverState
-        that.$element.trigger('shown.bs.' + that.type)
-        that.hoverState = null
-
-        if (prevHoverState == 'out') that.leave(that)
-      }
-
-      $.support.transition && this.$tip.hasClass('fade') ?
-        $tip
-          .one('bsTransitionEnd', complete)
-          .emulateTransitionEnd(Tooltip.TRANSITION_DURATION) :
-        complete()
-    }
-  }
-
-  Tooltip.prototype.applyPlacement = function (offset, placement) {
-    var $tip   = this.tip()
-    var width  = $tip[0].offsetWidth
-    var height = $tip[0].offsetHeight
-
-    // manually read margins because getBoundingClientRect includes difference
-    var marginTop = parseInt($tip.css('margin-top'), 10)
-    var marginLeft = parseInt($tip.css('margin-left'), 10)
-
-    // we must check for NaN for ie 8/9
-    if (isNaN(marginTop))  marginTop  = 0
-    if (isNaN(marginLeft)) marginLeft = 0
-
-    offset.top  = offset.top  + marginTop
-    offset.left = offset.left + marginLeft
-
-    // $.fn.offset doesn't round pixel values
-    // so we use setOffset directly with our own function B-0
-    $.offset.setOffset($tip[0], $.extend({
-      using: function (props) {
-        $tip.css({
-          top: Math.round(props.top),
-          left: Math.round(props.left)
-        })
-      }
-    }, offset), 0)
-
-    $tip.addClass('in')
-
-    // check to see if placing tip in new offset caused the tip to resize itself
-    var actualWidth  = $tip[0].offsetWidth
-    var actualHeight = $tip[0].offsetHeight
-
-    if (placement == 'top' && actualHeight != height) {
-      offset.top = offset.top + height - actualHeight
-    }
-
-    var delta = this.getViewportAdjustedDelta(placement, offset, actualWidth, actualHeight)
-
-    if (delta.left) offset.left += delta.left
-    else offset.top += delta.top
-
-    var isVertical          = /top|bottom/.test(placement)
-    var arrowDelta          = isVertical ? delta.left * 2 - width + actualWidth : delta.top * 2 - height + actualHeight
-    var arrowOffsetPosition = isVertical ? 'offsetWidth' : 'offsetHeight'
-
-    $tip.offset(offset)
-    this.replaceArrow(arrowDelta, $tip[0][arrowOffsetPosition], isVertical)
-  }
-
-  Tooltip.prototype.replaceArrow = function (delta, dimension, isHorizontal) {
-    this.arrow()
-      .css(isHorizontal ? 'left' : 'top', 50 * (1 - delta / dimension) + '%')
-      .css(isHorizontal ? 'top' : 'left', '')
-  }
-
-  Tooltip.prototype.setContent = function () {
-    var $tip  = this.tip()
-    var title = this.getTitle()
-
-    $tip.find('.tooltip-inner')[this.options.html ? 'html' : 'text'](title)
-    $tip.removeClass('fade in top bottom left right')
-  }
-
-  Tooltip.prototype.hide = function (callback) {
-    var that = this
-    var $tip = this.tip()
-    var e    = $.Event('hide.bs.' + this.type)
-
-    function complete() {
-      if (that.hoverState != 'in') $tip.detach()
-      that.$element
-        .removeAttr('aria-describedby')
-        .trigger('hidden.bs.' + that.type)
-      callback && callback()
-    }
-
-    this.$element.trigger(e)
-
-    if (e.isDefaultPrevented()) return
-
-    $tip.removeClass('in')
-
-    $.support.transition && this.$tip.hasClass('fade') ?
-      $tip
-        .one('bsTransitionEnd', complete)
-        .emulateTransitionEnd(Tooltip.TRANSITION_DURATION) :
-      complete()
-
-    this.hoverState = null
-
-    return this
-  }
-
-  Tooltip.prototype.fixTitle = function () {
-    var $e = this.$element
-    if ($e.attr('title') || typeof ($e.attr('data-original-title')) != 'string') {
-      $e.attr('data-original-title', $e.attr('title') || '').attr('title', '')
-    }
-  }
-
-  Tooltip.prototype.hasContent = function () {
-    return this.getTitle()
-  }
-
-  Tooltip.prototype.getPosition = function ($element) {
-    $element   = $element || this.$element
-
-    var el     = $element[0]
-    var isBody = el.tagName == 'BODY'
-
-    var elRect    = el.getBoundingClientRect()
-    if (elRect.width == null) {
-      // width and height are missing in IE8, so compute them manually; see https://github.com/twbs/bootstrap/issues/14093
-      elRect = $.extend({}, elRect, { width: elRect.right - elRect.left, height: elRect.bottom - elRect.top })
-    }
-    var elOffset  = isBody ? { top: 0, left: 0 } : $element.offset()
-    var scroll    = { scroll: isBody ? document.documentElement.scrollTop || document.body.scrollTop : $element.scrollTop() }
-    var outerDims = isBody ? { width: $(window).width(), height: $(window).height() } : null
-
-    return $.extend({}, elRect, scroll, outerDims, elOffset)
-  }
-
-  Tooltip.prototype.getCalculatedOffset = function (placement, pos, actualWidth, actualHeight) {
-    return placement == 'bottom' ? { top: pos.top + pos.height,   left: pos.left + pos.width / 2 - actualWidth / 2  } :
-           placement == 'top'    ? { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2  } :
-           placement == 'left'   ? { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth } :
-        /* placement == 'right' */ { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width   }
-
-  }
-
-  Tooltip.prototype.getViewportAdjustedDelta = function (placement, pos, actualWidth, actualHeight) {
-    var delta = { top: 0, left: 0 }
-    if (!this.$viewport) return delta
-
-    var viewportPadding = this.options.viewport && this.options.viewport.padding || 0
-    var viewportDimensions = this.getPosition(this.$viewport)
-
-    if (/right|left/.test(placement)) {
-      var topEdgeOffset    = pos.top - viewportPadding - viewportDimensions.scroll
-      var bottomEdgeOffset = pos.top + viewportPadding - viewportDimensions.scroll + actualHeight
-      if (topEdgeOffset < viewportDimensions.top) { // top overflow
-        delta.top = viewportDimensions.top - topEdgeOffset
-      } else if (bottomEdgeOffset > viewportDimensions.top + viewportDimensions.height) { // bottom overflow
-        delta.top = viewportDimensions.top + viewportDimensions.height - bottomEdgeOffset
-      }
-    } else {
-      var leftEdgeOffset  = pos.left - viewportPadding
-      var rightEdgeOffset = pos.left + viewportPadding + actualWidth
-      if (leftEdgeOffset < viewportDimensions.left) { // left overflow
-        delta.left = viewportDimensions.left - leftEdgeOffset
-      } else if (rightEdgeOffset > viewportDimensions.width) { // right overflow
-        delta.left = viewportDimensions.left + viewportDimensions.width - rightEdgeOffset
-      }
-    }
-
-    return delta
-  }
-
-  Tooltip.prototype.getTitle = function () {
-    var title
-    var $e = this.$element
-    var o  = this.options
-
-    title = $e.attr('data-original-title')
-      || (typeof o.title == 'function' ? o.title.call($e[0]) :  o.title)
-
-    return title
-  }
-
-  Tooltip.prototype.getUID = function (prefix) {
-    do prefix += ~~(Math.random() * 1000000)
-    while (document.getElementById(prefix))
-    return prefix
-  }
-
-  Tooltip.prototype.tip = function () {
-    return (this.$tip = this.$tip || $(this.options.template))
-  }
-
-  Tooltip.prototype.arrow = function () {
-    return (this.$arrow = this.$arrow || this.tip().find('.tooltip-arrow'))
-  }
-
-  Tooltip.prototype.enable = function () {
-    this.enabled = true
-  }
-
-  Tooltip.prototype.disable = function () {
-    this.enabled = false
-  }
-
-  Tooltip.prototype.toggleEnabled = function () {
-    this.enabled = !this.enabled
-  }
-
-  Tooltip.prototype.toggle = function (e) {
-    var self = this
-    if (e) {
-      self = $(e.currentTarget).data('bs.' + this.type)
-      if (!self) {
-        self = new this.constructor(e.currentTarget, this.getDelegateOptions())
-        $(e.currentTarget).data('bs.' + this.type, self)
-      }
-    }
-
-    self.tip().hasClass('in') ? self.leave(self) : self.enter(self)
-  }
-
-  Tooltip.prototype.destroy = function () {
-    var that = this
-    clearTimeout(this.timeout)
-    this.hide(function () {
-      that.$element.off('.' + that.type).removeData('bs.' + that.type)
-    })
-  }
-
-
-  // TOOLTIP PLUGIN DEFINITION
-  // =========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this    = $(this)
-      var data     = $this.data('bs.tooltip')
-      var options  = typeof option == 'object' && option
-      var selector = options && options.selector
-
-      if (!data && option == 'destroy') return
-      if (selector) {
-        if (!data) $this.data('bs.tooltip', (data = {}))
-        if (!data[selector]) data[selector] = new Tooltip(this, options)
-      } else {
-        if (!data) $this.data('bs.tooltip', (data = new Tooltip(this, options)))
-      }
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.tooltip
-
-  $.fn.tooltip             = Plugin
-  $.fn.tooltip.Constructor = Tooltip
-
-
-  // TOOLTIP NO CONFLICT
-  // ===================
-
-  $.fn.tooltip.noConflict = function () {
-    $.fn.tooltip = old
-    return this
-  }
-
-}(jQuery);
-/* ========================================================================
- * Bootstrap: popover.js v3.3.1
- * http://getbootstrap.com/javascript/#popovers
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
  * ========================================================================
  * Copyright 2011-2014 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
@@ -27227,7 +26750,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
 +function ($) {
   'use strict';
 
-<<<<<<< HEAD
   // DROPDOWN CLASS DEFINITION
   // =========================
 
@@ -27380,118 +26902,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
 /* ========================================================================
  * Bootstrap: collapse.js v3.3.1
  * http://getbootstrap.com/javascript/#collapse
-=======
-  // POPOVER PUBLIC CLASS DEFINITION
-  // ===============================
-
-  var Popover = function (element, options) {
-    this.init('popover', element, options)
-  }
-
-  if (!$.fn.tooltip) throw new Error('Popover requires tooltip.js')
-
-  Popover.VERSION  = '3.3.1'
-
-  Popover.DEFAULTS = $.extend({}, $.fn.tooltip.Constructor.DEFAULTS, {
-    placement: 'right',
-    trigger: 'click',
-    content: '',
-    template: '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-  })
-
-
-  // NOTE: POPOVER EXTENDS tooltip.js
-  // ================================
-
-  Popover.prototype = $.extend({}, $.fn.tooltip.Constructor.prototype)
-
-  Popover.prototype.constructor = Popover
-
-  Popover.prototype.getDefaults = function () {
-    return Popover.DEFAULTS
-  }
-
-  Popover.prototype.setContent = function () {
-    var $tip    = this.tip()
-    var title   = this.getTitle()
-    var content = this.getContent()
-
-    $tip.find('.popover-title')[this.options.html ? 'html' : 'text'](title)
-    $tip.find('.popover-content').children().detach().end()[ // we use append for html objects to maintain js events
-      this.options.html ? (typeof content == 'string' ? 'html' : 'append') : 'text'
-    ](content)
-
-    $tip.removeClass('fade top bottom left right in')
-
-    // IE8 doesn't accept hiding via the `:empty` pseudo selector, we have to do
-    // this manually by checking the contents.
-    if (!$tip.find('.popover-title').html()) $tip.find('.popover-title').hide()
-  }
-
-  Popover.prototype.hasContent = function () {
-    return this.getTitle() || this.getContent()
-  }
-
-  Popover.prototype.getContent = function () {
-    var $e = this.$element
-    var o  = this.options
-
-    return $e.attr('data-content')
-      || (typeof o.content == 'function' ?
-            o.content.call($e[0]) :
-            o.content)
-  }
-
-  Popover.prototype.arrow = function () {
-    return (this.$arrow = this.$arrow || this.tip().find('.arrow'))
-  }
-
-  Popover.prototype.tip = function () {
-    if (!this.$tip) this.$tip = $(this.options.template)
-    return this.$tip
-  }
-
-
-  // POPOVER PLUGIN DEFINITION
-  // =========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this    = $(this)
-      var data     = $this.data('bs.popover')
-      var options  = typeof option == 'object' && option
-      var selector = options && options.selector
-
-      if (!data && option == 'destroy') return
-      if (selector) {
-        if (!data) $this.data('bs.popover', (data = {}))
-        if (!data[selector]) data[selector] = new Popover(this, options)
-      } else {
-        if (!data) $this.data('bs.popover', (data = new Popover(this, options)))
-      }
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.popover
-
-  $.fn.popover             = Plugin
-  $.fn.popover.Constructor = Popover
-
-
-  // POPOVER NO CONFLICT
-  // ===================
-
-  $.fn.popover.noConflict = function () {
-    $.fn.popover = old
-    return this
-  }
-
-}(jQuery);
-/* ========================================================================
- * Bootstrap: tab.js v3.3.1
- * http://getbootstrap.com/javascript/#tabs
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
  * ========================================================================
  * Copyright 2011-2014 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
@@ -27502,7 +26912,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
 +function ($) {
   'use strict';
 
-<<<<<<< HEAD
   // COLLAPSE PUBLIC CLASS DEFINITION
   // ================================
 
@@ -27760,309 +27169,6 @@ for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(
       }
     }
   })
-=======
-  // TAB CLASS DEFINITION
-  // ====================
-
-  var Tab = function (element) {
-    this.element = $(element)
-  }
-
-  Tab.VERSION = '3.3.1'
-
-  Tab.TRANSITION_DURATION = 150
-
-  Tab.prototype.show = function () {
-    var $this    = this.element
-    var $ul      = $this.closest('ul:not(.dropdown-menu)')
-    var selector = $this.data('target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-    }
-
-    if ($this.parent('li').hasClass('active')) return
-
-    var $previous = $ul.find('.active:last a')
-    var hideEvent = $.Event('hide.bs.tab', {
-      relatedTarget: $this[0]
-    })
-    var showEvent = $.Event('show.bs.tab', {
-      relatedTarget: $previous[0]
-    })
-
-    $previous.trigger(hideEvent)
-    $this.trigger(showEvent)
-
-    if (showEvent.isDefaultPrevented() || hideEvent.isDefaultPrevented()) return
-
-    var $target = $(selector)
-
-    this.activate($this.closest('li'), $ul)
-    this.activate($target, $target.parent(), function () {
-      $previous.trigger({
-        type: 'hidden.bs.tab',
-        relatedTarget: $this[0]
-      })
-      $this.trigger({
-        type: 'shown.bs.tab',
-        relatedTarget: $previous[0]
-      })
-    })
-  }
-
-  Tab.prototype.activate = function (element, container, callback) {
-    var $active    = container.find('> .active')
-    var transition = callback
-      && $.support.transition
-      && (($active.length && $active.hasClass('fade')) || !!container.find('> .fade').length)
-
-    function next() {
-      $active
-        .removeClass('active')
-        .find('> .dropdown-menu > .active')
-          .removeClass('active')
-        .end()
-        .find('[data-toggle="tab"]')
-          .attr('aria-expanded', false)
-
-      element
-        .addClass('active')
-        .find('[data-toggle="tab"]')
-          .attr('aria-expanded', true)
-
-      if (transition) {
-        element[0].offsetWidth // reflow for transition
-        element.addClass('in')
-      } else {
-        element.removeClass('fade')
-      }
-
-      if (element.parent('.dropdown-menu')) {
-        element
-          .closest('li.dropdown')
-            .addClass('active')
-          .end()
-          .find('[data-toggle="tab"]')
-            .attr('aria-expanded', true)
-      }
-
-      callback && callback()
-    }
-
-    $active.length && transition ?
-      $active
-        .one('bsTransitionEnd', next)
-        .emulateTransitionEnd(Tab.TRANSITION_DURATION) :
-      next()
-
-    $active.removeClass('in')
-  }
-
-
-  // TAB PLUGIN DEFINITION
-  // =====================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.tab')
-
-      if (!data) $this.data('bs.tab', (data = new Tab(this)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  var old = $.fn.tab
-
-  $.fn.tab             = Plugin
-  $.fn.tab.Constructor = Tab
-
-
-  // TAB NO CONFLICT
-  // ===============
-
-  $.fn.tab.noConflict = function () {
-    $.fn.tab = old
-    return this
-  }
-
-
-  // TAB DATA-API
-  // ============
-
-  var clickHandler = function (e) {
-    e.preventDefault()
-    Plugin.call($(this), 'show')
-  }
-
-  $(document)
-    .on('click.bs.tab.data-api', '[data-toggle="tab"]', clickHandler)
-    .on('click.bs.tab.data-api', '[data-toggle="pill"]', clickHandler)
-
-}(jQuery);
-/* ========================================================================
- * Bootstrap: dropdown.js v3.3.1
- * http://getbootstrap.com/javascript/#dropdowns
- * ========================================================================
- * Copyright 2011-2014 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * ======================================================================== */
-
-
-
-+function ($) {
-  'use strict';
-
-  // DROPDOWN CLASS DEFINITION
-  // =========================
-
-  var backdrop = '.dropdown-backdrop'
-  var toggle   = '[data-toggle="dropdown"]'
-  var Dropdown = function (element) {
-    $(element).on('click.bs.dropdown', this.toggle)
-  }
-
-  Dropdown.VERSION = '3.3.1'
-
-  Dropdown.prototype.toggle = function (e) {
-    var $this = $(this)
-
-    if ($this.is('.disabled, :disabled')) return
-
-    var $parent  = getParent($this)
-    var isActive = $parent.hasClass('open')
-
-    clearMenus()
-
-    if (!isActive) {
-      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
-        // if mobile we use a backdrop because click events don't delegate
-        $('<div class="dropdown-backdrop"/>').insertAfter($(this)).on('click', clearMenus)
-      }
-
-      var relatedTarget = { relatedTarget: this }
-      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
-
-      if (e.isDefaultPrevented()) return
-
-      $this
-        .trigger('focus')
-        .attr('aria-expanded', 'true')
-
-      $parent
-        .toggleClass('open')
-        .trigger('shown.bs.dropdown', relatedTarget)
-    }
-
-    return false
-  }
-
-  Dropdown.prototype.keydown = function (e) {
-    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
-
-    var $this = $(this)
-
-    e.preventDefault()
-    e.stopPropagation()
-
-    if ($this.is('.disabled, :disabled')) return
-
-    var $parent  = getParent($this)
-    var isActive = $parent.hasClass('open')
-
-    if ((!isActive && e.which != 27) || (isActive && e.which == 27)) {
-      if (e.which == 27) $parent.find(toggle).trigger('focus')
-      return $this.trigger('click')
-    }
-
-    var desc = ' li:not(.divider):visible a'
-    var $items = $parent.find('[role="menu"]' + desc + ', [role="listbox"]' + desc)
-
-    if (!$items.length) return
-
-    var index = $items.index(e.target)
-
-    if (e.which == 38 && index > 0)                 index--                        // up
-    if (e.which == 40 && index < $items.length - 1) index++                        // down
-    if (!~index)                                      index = 0
-
-    $items.eq(index).trigger('focus')
-  }
-
-  function clearMenus(e) {
-    if (e && e.which === 3) return
-    $(backdrop).remove()
-    $(toggle).each(function () {
-      var $this         = $(this)
-      var $parent       = getParent($this)
-      var relatedTarget = { relatedTarget: this }
-
-      if (!$parent.hasClass('open')) return
-
-      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
-
-      if (e.isDefaultPrevented()) return
-
-      $this.attr('aria-expanded', 'false')
-      $parent.removeClass('open').trigger('hidden.bs.dropdown', relatedTarget)
-    })
-  }
-
-  function getParent($this) {
-    var selector = $this.attr('data-target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-    }
-
-    var $parent = selector && $(selector)
-
-    return $parent && $parent.length ? $parent : $this.parent()
-  }
-
-
-  // DROPDOWN PLUGIN DEFINITION
-  // ==========================
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.dropdown')
-
-      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
-      if (typeof option == 'string') data[option].call($this)
-    })
-  }
-
-  var old = $.fn.dropdown
-
-  $.fn.dropdown             = Plugin
-  $.fn.dropdown.Constructor = Dropdown
-
-
-  // DROPDOWN NO CONFLICT
-  // ====================
-
-  $.fn.dropdown.noConflict = function () {
-    $.fn.dropdown = old
-    return this
-  }
-
-
-  // APPLY TO STANDARD DROPDOWN ELEMENTS
-  // ===================================
-
-  $(document)
-    .on('click.bs.dropdown.data-api', clearMenus)
-    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
-    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
-    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
-    .on('keydown.bs.dropdown.data-api', '[role="menu"]', Dropdown.prototype.keydown)
-    .on('keydown.bs.dropdown.data-api', '[role="listbox"]', Dropdown.prototype.keydown)
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
 }(jQuery);
 /**
@@ -29360,7 +28466,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var Link, OrganizationNavigation, OrganizationNavigationLink, a, div, strong, _ref;
 
   _ref = React.DOM, a = _ref.a, div = _ref.div, strong = _ref.strong;
@@ -29384,29 +28489,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         activeClassName: 'active',
         onClick: this.setCompetition
       }, competition.title);
-=======
-  var OrganizationLink, OrganizationNavigation, a, div, strong, _ref;
-
-  _ref = React.DOM, a = _ref.a, div = _ref.div, strong = _ref.strong;
-
-  OrganizationLink = React.createClass({
-    render: function() {
-      var active_class, title, url, _ref1;
-      _ref1 = this.props.competition, title = _ref1.title, url = _ref1.url;
-      active_class = '';
-      if (this.props.active === true) {
-        active_class = ' active';
-      }
-      return a({
-        className: "list-group-item" + active_class,
-        href: url || "#missing"
-      }, title);
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
   OrganizationNavigation = React.createClass({
-<<<<<<< HEAD
     getInitialState: function() {
       return {
         selectedCompetition: null
@@ -29436,23 +28522,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       })(this)), Link({
         to: 'competitions',
         className: 'list-group-item'
-=======
-    render: function() {
-      var competitions, current_competition, more_competitions_url, _ref1;
-      _ref1 = this.props, competitions = _ref1.competitions, current_competition = _ref1.current_competition, more_competitions_url = _ref1.more_competitions_url;
-      return div({
-        className: 'list-group',
-        ref: 'linkParent'
-      }, competitions.map(function(competition) {
-        return OrganizationLink({
-          key: competition.id,
-          competition: competition,
-          active: competition.active === true
-        });
-      }), a({
-        className: 'list-group-item',
-        href: more_competitions_url
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, strong({}, 'More Competitions')));
     }
   });
@@ -29461,7 +28530,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var CompetitionNavigation, Link, a, button, div, li, nav, span, ul, _ref;
 
   _ref = React.DOM, nav = _ref.nav, div = _ref.div, button = _ref.button, span = _ref.span, ul = _ref.ul, li = _ref.li, a = _ref.a;
@@ -29473,17 +28541,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       var competition, currentRoute, routerState, short_name, title, _ref1;
       _ref1 = this.props, routerState = _ref1.routerState, competition = _ref1.competition, currentRoute = _ref1.currentRoute;
       title = competition.title, short_name = competition.short_name;
-=======
-  var CompetitionNavigation, a, button, div, li, nav, span, ul, _ref;
-
-  _ref = React.DOM, nav = _ref.nav, div = _ref.div, button = _ref.button, span = _ref.span, ul = _ref.ul, li = _ref.li, a = _ref.a;
-
-  CompetitionNavigation = React.createClass({
-    render: function() {
-      var navigation, short_name, title, _ref1;
-      _ref1 = this.props.competition, title = _ref1.title, short_name = _ref1.short_name;
-      navigation = this.props.navigation;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       return nav({
         className: 'navbar navbar-default',
         role: 'navigation'
@@ -29510,7 +28567,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, ul({
         className: 'nav navbar-nav'
       }, li({
-<<<<<<< HEAD
         className: (currentRoute === 'scoreboard' || currentRoute === 'boxscore' ? 'active' : null)
       }, Link({
         to: 'scoreboard',
@@ -29535,23 +28591,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'visible-xs'
       }, Link({
         to: 'competitions'
-=======
-        className: ((this.props.highlight == null) || this.props.highlight === 'scoreboard' ? 'active' : null)
-      }, a({
-        href: navigation.scoreboard || '#scoreboard'
-      }, 'Scoreboard')), li({
-        className: (this.props.highlight === 'standings' ? 'active' : null)
-      }, a({
-        href: navigation.standings_draw || '#standings_draw'
-      }, 'Standings / Draw')), li({
-        className: (this.props.highlight === 'teams' ? 'active' : null)
-      }, a({
-        href: navigation.teams || '#teams'
-      }, 'Teams')), li({
-        className: 'visible-xs'
-      }, a({
-        href: navigation.more_competitions || '#more_competitions'
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, 'More Competitions')))));
     }
   });
@@ -29560,7 +28599,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var Shell, div, routes, span, _pageTimeout, _ref;
 
   _ref = React.DOM, div = _ref.div, span = _ref.span;
@@ -29596,16 +28634,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   });
 
   _pageTimeout = null;
-=======
-  var Shell, div;
-
-  div = React.DOM.div;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
   Shell = React.createClass({
     getInitialState: function() {
       return {
-<<<<<<< HEAD
         other_competitions: [],
         competition: null,
         rawServerData: null,
@@ -29661,41 +28693,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
               other_competitions: results.other_competitions,
               competition: results.current_competition,
               retryDelay: 5000
-=======
-        navigation: null,
-        competitions: [],
-        status: 'Loading curling data...',
-        retryDelay: 5000
-      };
-    },
-    loadDataFromServer: function() {
-      var competitionChunk, navigationUrlPieces, pieces, url;
-      navigationUrlPieces = this.props.componentProps.url.split("/");
-      competitionChunk = navigationUrlPieces.indexOf("competitions");
-      pieces = navigationUrlPieces.slice(0, +(competitionChunk + 1) + 1 || 9e9);
-      pieces.push('navigation.js');
-      url = pieces.join("/");
-      return jQuery.ajax({
-        url: url,
-        dataType: 'jsonp',
-        cache: true,
-        jsonpCallback: 'curlcastJSONP',
-        success: (function(_this) {
-          return function(results) {
-            return _this.setState({
-              navigation: results.navigation,
-              competitions: results.competitions
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
             });
           };
         })(this),
         error: (function(_this) {
           return function() {
             var newStatus, seconds;
-<<<<<<< HEAD
             console.debug('Shell.loadNavigationFromServer.ajax.error');
-=======
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
             seconds = _this.state.retryDelay / 1000;
             newStatus = "Could not load data, retrying in " + seconds + " seconds...";
             if (seconds > 5) {
@@ -29705,7 +28709,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
               status: newStatus,
               retryDelay: _this.state.retryDelay >= 30000 ? _this.state.retryDelay : _this.state.retryDelay + 5000
             });
-<<<<<<< HEAD
             return setTimeout(_this.loadNavigationFromServer, seconds * 1000);
           };
         })(this)
@@ -29757,14 +28760,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             if (interval != null) {
               return _pageTimeout = window.setTimeout(_this.getPageData, interval, url, interval);
             }
-=======
-            return setTimeout(_this.loadDataFromServer, seconds * 1000);
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
           };
         })(this)
       });
     },
-<<<<<<< HEAD
     setPageDataUrl: function(url, interval) {
       if (url == null) {
         if (_pageTimeout) {
@@ -29859,42 +28858,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var competition, other_competitions, rawServerData, routedProps, _ref1;
       if (this.state.competition == null) {
-=======
-    fixLinks: function(parent) {
-      var pathPrefix;
-      if (parent == null) {
-        parent = null;
-      }
-      parent = parent || this.getDOMNode();
-      pathPrefix = this.props.componentProps.pathPrefix;
-      return jQuery("a", this.getDOMNode()).each(function(i, anchor) {
-        var pieces, url, _i;
-        url = jQuery(anchor).attr("href");
-        if (url.substr(0, 21) !== '/stats/organizations/') {
-          return;
-        }
-        pieces = url.substr(1).split("/");
-        for (i = _i = 0; _i <= 2; i = ++_i) {
-          pieces.shift();
-        }
-        pieces.unshift(pathPrefix);
-        return jQuery(anchor).attr("href", pieces.join("/"));
-      });
-    },
-    componentWillMount: function() {
-      return this.loadDataFromServer();
-    },
-    render: function() {
-      var augments, c, competition, competitions, componentProps, k, navigation, pathPrefix, v, _i, _len, _ref;
-      if (this.state.navigation == null) {
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         return div({
           className: 'row'
         }, div({
           className: 'col-xs-12'
         }, this.state.status));
       }
-<<<<<<< HEAD
       _ref1 = this.state, other_competitions = _ref1.other_competitions, competition = _ref1.competition, rawServerData = _ref1.rawServerData;
       routedProps = this.props;
       routedProps.competition = competition;
@@ -29920,46 +28889,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         competition: competition,
         currentRoute: this.state.currentRoute
       }), this.state.rawServerDataSucceeded === false ? this.state.componentStatus : void 0, ReactRouter.RouteHandler(routedProps)));
-=======
-      pathPrefix = this.props.componentProps.pathPrefix;
-      _ref = this.state, competitions = _ref.competitions, navigation = _ref.navigation;
-      competition = competitions[0];
-      for (_i = 0, _len = competitions.length; _i < _len; _i++) {
-        c = competitions[_i];
-        if (c.active === true) {
-          competition = c;
-          break;
-        }
-      }
-      componentProps = this.props.componentProps;
-      augments = {
-        fixLinks: this.fixLinks,
-        competition: competition,
-        navigation: navigation
-      };
-      for (k in augments) {
-        v = augments[k];
-        componentProps[k] = v;
-      }
-      return div({
-        className: 'row'
-      }, div({
-        className: 'col-sm-3 hidden-xs',
-        id: 'organization-nav'
-      }, OrganizationNavigation({
-        competitions: competitions,
-        more_competitions_url: navigation.more_competitions,
-        pathPrefix: pathPrefix
-      })), div({
-        className: 'col-sm-9 col-xs-12',
-        id: 'scoreboard'
-      }, CompetitionNavigation({
-        competition: competition,
-        navigation: navigation || {},
-        pathPrefix: pathPrefix,
-        highlight: this.props.highlight
-      }), this.props.component(componentProps)));
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
@@ -29967,7 +28896,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var Competition, Draw, Game, GamePositionName, GamePositionScore, Link, Scoreboard, a, br, div, h4, p, scoreboardUrl, strong, table, tbody, td, tr, _ref;
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
@@ -29981,12 +28909,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     return "" + prefix + "#" + url;
   };
 
-=======
-  var Competition, Draw, Game, GamePositionName, GamePositionScore, Scoreboard, a, br, div, h4, p, strong, table, tbody, td, tr, _ref;
-
-  _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, h4 = _ref.h4, table = _ref.table, tbody = _ref.tbody, tr = _ref.tr, td = _ref.td;
-
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
   Scoreboard = React.createClass({
     getInitialState: function() {
       return {
@@ -30009,13 +28931,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           };
         })(this),
         error: function() {
-<<<<<<< HEAD
           return this.setState({
             placeholderMessage: "There was an error getting active competitions, retrying..."
           });
-=======
-          return console.log("there was an error");
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         }
       });
     },
@@ -30023,12 +28941,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       this.loadDataFromServer();
       return setInterval(this.loadDataFromServer, this.props.pollInterval);
     },
-<<<<<<< HEAD
-=======
     baseUrl: function() {
       return this.props.url.substr(0, this.props.url.indexOf('/', 8));
     },
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     render: function() {
       if (this.state.competitions.length === 0) {
         return div(null, p(null, strong(null, this.state.placeholderMessage)));
@@ -30041,12 +28956,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             return Competition({
               key: competition.id,
               competition: competition,
-<<<<<<< HEAD
-              pathPrefix: _this.props.pathPrefix
-=======
               pathPrefix: _this.props.pathPrefix,
               baseUrl: _this.baseUrl()
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
             });
           };
         })(this)));
@@ -30081,20 +28992,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: "row"
       }, current_draw != null ? Draw({
         draw: current_draw,
-<<<<<<< HEAD
-        pathPrefix: this.props.pathPrefix
-      }) : void 0, div({
-        className: "col-xs-12"
-      }, current_draw != null ? p(null, a({
-        href: scoreboardUrl(this.props.pathPrefix, path),
-=======
         pathPrefix: this.props.pathPrefix,
         baseUrl: this.props.baseUrl
       }) : void 0, div({
         className: "col-xs-12"
       }, current_draw != null ? p(null, a({
-        href: "/" + this.props.pathPrefix + path,
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
+        href: scoreboardUrl(this.props.pathPrefix, path),
         dangerouslySetInnerHTML: {
           __html: "Full Scoreboard &raquo;"
         }
@@ -30115,12 +29018,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return Game({
             key: game.id,
             game: game,
-<<<<<<< HEAD
-            pathPrefix: _this.props.pathPrefix
-=======
             pathPrefix: _this.props.pathPrefix,
             baseUrl: _this.props.baseUrl
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
           });
         };
       })(this)))));
@@ -30134,12 +29033,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return tbody(null, tr(null, GamePositionName({
         key: game_positions[0].id,
         game_position: game_positions[0],
-<<<<<<< HEAD
-        pathPrefix: this.props.pathPrefix
-=======
         pathPrefix: this.props.pathPrefix,
         baseUrl: this.props.baseUrl
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }), GamePositionScore({
         key: "score-" + game_positions[0].id,
         game_position: game_positions[0]
@@ -30147,20 +29042,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: "game-state",
         rowSpan: "2"
       }, strong(null, state), br(null), a({
-<<<<<<< HEAD
         href: scoreboardUrl(this.props.pathPrefix, path)
-      }, "Box"))), tr(null, GamePositionName({
-        key: game_positions[1].id,
-        game_position: game_positions[1],
-        pathPrefix: this.props.pathPrefix
-=======
-        href: "/" + this.props.pathPrefix + path
       }, "Box"))), tr(null, GamePositionName({
         key: game_positions[1].id,
         game_position: game_positions[1],
         pathPrefix: this.props.pathPrefix,
         baseUrl: this.props.baseUrl
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }), GamePositionScore({
         key: "score-" + game_positions[1].id,
         game_position: game_positions[1]
@@ -30170,22 +29057,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   GamePositionName = React.createClass({
     render: function() {
-<<<<<<< HEAD
-      var name, result, short_name, team_path, _ref1;
-      _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, result = _ref1.result;
-      return td({
-        className: "game-name"
-      }, team_path !== null ? a({
-        href: scoreboardUrl(this.props.pathPrefix, team_path),
-=======
       var name, path, result, short_name, team_path, team_path_url, _ref1;
       _ref1 = this.props.game_position, name = _ref1.name, short_name = _ref1.short_name, team_path = _ref1.team_path, team_path_url = _ref1.team_path_url, result = _ref1.result;
       path = "" + this.props.pathPrefix + team_path;
       return td({
         className: "game-name"
-      }, team_path != null ? a({
-        href: path,
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
+      }, team_path !== null ? a({
+        href: scoreboardUrl(this.props.pathPrefix, team_path),
         title: name
       }, result === 'won' ? strong(null, short_name) : short_name) : name);
     }
@@ -30205,7 +29083,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var Link, RouteHandler, Scoreboard, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, nav = _ref.nav, button = _ref.button, span = _ref.span, strong = _ref.strong;
@@ -30303,9 +29180,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 }).call(this);
 (function() {
   var DayItem, DayList, Link, ScoreboardDay, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
-=======
-  var Competition, CompetitionDay, CompetitionDayList, DrawContentList, DrawList, DrawListItem, DrawSheetItem, DrawSheetList, DrawSheetPosition, Scoreboard, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, nav = _ref.nav, button = _ref.button, span = _ref.span, strong = _ref.strong;
 
@@ -30315,7 +29189,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   _ref3 = React.DOM, ul = _ref3.ul, li = _ref3.li;
 
-<<<<<<< HEAD
   Link = ReactRouter.Link;
 
   DayItem = React.createClass({
@@ -30328,23 +29201,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       dayString = dayToStr(day);
       active_class = '';
       if (((routerState.params.day != null) && (routerState.params.day === dayString)) || ((routerState.params.day == null) && this.props.active)) {
-=======
-  CompetitionDay = React.createClass({
-    changeDraw: function() {
-      this.props.changeDraw(this.props.day);
-      return false;
-    },
-    render: function() {
-      var active_class, date, day, _ref4;
-      _ref4 = this.props.day, date = _ref4.date, day = _ref4.day;
-      active_class = '';
-      if (this.props.active === true) {
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         active_class = ' active';
       }
       return li({
         className: "text-center" + active_class
-<<<<<<< HEAD
       }, Link({
         to: 'scoreboard-day',
         params: {
@@ -30477,45 +29337,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var active_class, day, dayParam, draw, drawParam, _ref4;
       _ref4 = this.props, day = _ref4.day, draw = _ref4.draw;
-=======
-      }, a({
-        href: "#day-" + date + "-" + day,
-        onClick: this.changeDraw
-      }, date, br({}), day));
-    }
-  });
-
-  CompetitionDayList = React.createClass({
-    render: function() {
-      var changeDraw, day, days, filter, _ref4;
-      _ref4 = this.props, days = _ref4.days, filter = _ref4.filter, day = _ref4.day, changeDraw = _ref4.changeDraw;
-      return ul({
-        className: 'pagination'
-      }, days.map(function(day_item) {
-        return CompetitionDay({
-          key: day_item.id,
-          day: day_item,
-          active: day.id === day_item.id,
-          changeDraw: changeDraw
-        });
-      }));
-    }
-  });
-
-  DrawListItem = React.createClass({
-    changeDraw: function() {
-      this.props.changeDraw(this.props.day, this.props.draw);
-      return false;
-    },
-    render: function() {
-      var active_class, draw;
-      draw = this.props.draw;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       active_class = '';
       if (this.props.active === true) {
         active_class = 'active';
       }
-<<<<<<< HEAD
       dayParam = this.props.dayToStr(day);
       drawParam = this.props.drawToStr(draw);
       return li({
@@ -30528,14 +29353,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           draw: drawParam
         },
         activeClassName: 'router-active'
-=======
-      return li({
-        className: active_class
-      }, a({
-        href: "#draw" + draw.label,
-        role: 'tab',
-        onClick: this.changeDraw
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, "Draw " + draw.label, br({}), draw.starts_at));
     }
   });
@@ -30548,7 +29365,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return ul({
         className: 'nav nav-tabs',
         role: 'tablist'
-<<<<<<< HEAD
       }, day.draws.map((function(_this) {
         return function(draw_item) {
           var drawProps;
@@ -30559,27 +29375,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return DrawListItem(drawProps);
         };
       })(this)));
-=======
-      }, draws.map(function(draw_item) {
-        return DrawListItem({
-          key: draw_item.id,
-          draw: draw_item,
-          day: day,
-          active: draw_item.id === draw.id,
-          changeDraw: changeDraw
-        });
-      }));
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
   DrawSheetPosition = React.createClass({
     render: function() {
-<<<<<<< HEAD
       var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, team_id, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
-=======
-      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, team_url, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -30605,10 +29406,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           });
         }
       }
-<<<<<<< HEAD
-=======
-      team_url = position.team.url;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       total = '';
       if (position.end_scores != null) {
         total = 0;
@@ -30617,7 +29414,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           total += parseInt(score.score) || 0;
         }
       }
-<<<<<<< HEAD
       if (position.team != null) {
         team_id = this.props.teamToStr(position.team);
       }
@@ -30627,10 +29423,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           competition_id: this.props.routerState.params.competition_id,
           team_id: team_id
         }
-=======
-      return tr({}, td({}, position.team != null ? a({
-        href: team_url
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, span({
         className: 'hidden-xs'
       }, position.team.name), span({
@@ -30651,7 +29443,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, total), boxscore === true ? td({
         rowSpan: '2',
         className: 'hidden-xs'
-<<<<<<< HEAD
       }, strong({}, game.state), br({}), Link({
         to: 'boxscore',
         params: {
@@ -30659,25 +29450,15 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           game_id: game.id
         },
         onClick: this.props.shellComponentChanged
-=======
-      }, strong({}, game.state), br({}), a({
-        href: game.boxscore_url || '#boxscore-missing'
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, 'Boxscore')) : void 0);
     }
   });
 
   DrawSheetItem = React.createClass({
     render: function() {
-<<<<<<< HEAD
       var boxscore_display, competition, game_state, number_of_ends, sheet, sheet_name, teams_url, _i, _ref4, _results;
       _ref4 = this.props, competition = _ref4.competition, sheet = _ref4.sheet, teams_url = _ref4.teams_url, competition = _ref4.competition;
       number_of_ends = Math.max(competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length);
-=======
-      var boxscore_display, competition, game_state, num_ends, sheet, sheet_name, _i, _ref4, _results;
-      _ref4 = this.props, competition = _ref4.competition, sheet = _ref4.sheet;
-      num_ends = Math.max(competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length);
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       game_state = sheet.game.state.toLowerCase();
       boxscore_display = (game_state === "final") || (game_state.substr(0, 5) === "after");
       sheet_name = sheet.name;
@@ -30698,11 +29479,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'hidden-xs'
       }, 'LSFE')), (function() {
         _results = [];
-<<<<<<< HEAD
         for (var _i = 1; 1 <= number_of_ends ? _i <= number_of_ends : _i >= number_of_ends; 1 <= number_of_ends ? _i++ : _i--){ _results.push(_i); }
-=======
-        for (var _i = 1; 1 <= num_ends ? _i <= num_ends : _i >= num_ends; 1 <= num_ends ? _i++ : _i--){ _results.push(_i); }
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         return _results;
       }).apply(this).map(function(endscore, key) {
         return th({
@@ -30720,7 +29497,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         width: '10%'
       }, '') : void 0)), tbody({}, DrawSheetPosition({
         position: sheet.game_positions[0],
-<<<<<<< HEAD
         ends: number_of_ends,
         game: sheet.game,
         teamToStr: this.props.teamToStr,
@@ -30734,28 +29510,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         teamToStr: this.props.teamToStr,
         routerState: this.props.routerState,
         shellComponentChanged: this.props.shellComponentChanged
-=======
-        ends: num_ends,
-        game: sheet.game,
-        boxscore: boxscore_display
-      }), DrawSheetPosition({
-        position: sheet.game_positions[1],
-        ends: num_ends,
-        game: sheet.game
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }))))));
     }
   });
 
   DrawSheetList = React.createClass({
     render: function() {
-<<<<<<< HEAD
       var active_class, competition, draw, teams_url, _ref4;
       _ref4 = this.props, draw = _ref4.draw, competition = _ref4.competition, teams_url = _ref4.teams_url;
-=======
-      var active_class, competition, draw, _ref4;
-      _ref4 = this.props, draw = _ref4.draw, competition = _ref4.competition;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       active_class = '';
       if (this.props.active === true) {
         active_class = ' in active';
@@ -30765,7 +29527,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         id: "draw" + draw.id
       }, div({
         className: 'spacer'
-<<<<<<< HEAD
       }), draw.draw_sheets.map((function(_this) {
         return function(sheet, key) {
           var props;
@@ -30775,22 +29536,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return DrawSheetItem(props);
         };
       })(this)));
-=======
-      }), draw.draw_sheets.map(function(sheet, key) {
-        return DrawSheetItem({
-          key: key,
-          draw: draw,
-          sheet: sheet,
-          competition: competition
-        });
-      }));
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
   DrawContentList = React.createClass({
     render: function() {
-<<<<<<< HEAD
       var competition, day, draw, _ref4;
       _ref4 = this.props, day = _ref4.day, competition = _ref4.competition, draw = _ref4.draw;
       return div({
@@ -30856,226 +29606,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 }).call(this);
 (function() {
   var BoxScore, BoxScoreAnalysis, BoxScoreAnalysisTeam, BoxScoreBoard, BoxScoreBoardPositions, BoxScoreContent, BoxScoreShootingPercentages, BoxScoreShootingPercentagesAthletes, BoxScoreTeamRoster, BoxScoreTeamRosterAthlete, BoxScoreTeamRosters, BreadCrumbDraw, BreadCrumbGame, BreadCrumbNavigation, Link, a, div, h1, h6, li, ol, span, table, tbody, td, tfoot, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
-=======
-      var competition, draw, draws, _ref4;
-      _ref4 = this.props, draws = _ref4.draws, competition = _ref4.competition, draw = _ref4.draw;
-      return div({
-        className: 'tab-content'
-      }, draws.map(function(draw_item) {
-        return DrawSheetList({
-          key: draw_item.id,
-          draw: draw_item,
-          competition: competition,
-          active: draw.id === draw_item.id
-        });
-      }));
-    }
-  });
-
-  Competition = React.createClass({
-    getInitialState: function() {
-      return {
-        day: null,
-        draw: null
-      };
-    },
-    changeDraw: function(day, draw) {
-      if (draw == null) {
-        draw = null;
-      }
-      this.setState({
-        day: day,
-        draw: draw || day.draws[0]
-      });
-      return this.props.drawChanged();
-    },
-    discoverActiveDraw: function() {
-      var d, dr, _i, _j, _len, _len1, _ref4, _ref5;
-      if ((this.state.draw != null) && (this.state.day != null)) {
-        return;
-      }
-      _ref4 = this.props.days;
-      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-        d = _ref4[_i];
-        _ref5 = d.draws;
-        for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
-          dr = _ref5[_j];
-          if (dr.active != null) {
-            this.changeDraw(d, dr);
-            return;
-          }
-        }
-      }
-      return this.changeDraw(this.props.days[0], this.props.days[0].draws[0]);
-    },
-    refreshActiveDraw: function() {
-      var d, dr, _i, _j, _len, _len1, _ref4, _ref5;
-      if (!((this.state.draw != null) && (this.state.day != null))) {
-        return;
-      }
-      _ref4 = this.props.days;
-      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-        d = _ref4[_i];
-        if (d.id === this.state.day.id) {
-          _ref5 = d.draws;
-          for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
-            dr = _ref5[_j];
-            if (dr.id === this.state.draw.id) {
-              this.state.day = d;
-              this.state.draw = dr;
-              return;
-            }
-          }
-        }
-      }
-    },
-    componentWillMount: function() {
-      return this.discoverActiveDraw();
-    },
-    render: function() {
-      var competition, day, days, draw, location_str, scoreboard, _ref4, _ref5;
-      _ref4 = this.props, competition = _ref4.competition, days = _ref4.days, scoreboard = _ref4.scoreboard;
-      this.refreshActiveDraw();
-      _ref5 = this.state, day = _ref5.day, draw = _ref5.draw;
-      if ((day == null) || (draw == null)) {
-        return div({
-          className: 'col-xs-12'
-        }, 'Loading Competition...');
-      }
-      location_str = '';
-      if ((scoreboard.location != null) && (scoreboard.venue != null)) {
-        location_str = [scoreboard.venue, scoreboard.location].join(', ');
-      }
-      return div({
-        className: 'row'
-      }, div({
-        className: 'col-xs-12 col-sm-10'
-      }, div({
-        className: 'row'
-      }, div({
-        className: 'col-xs-12'
-      }, p({}, location_str, br({}), scoreboard.starts_on, ' to ', scoreboard.ends_on), CompetitionDayList({
-        days: days,
-        day: day,
-        changeDraw: this.changeDraw
-      }), h3({
-        className: 'hidden-xs'
-      }, day.starts_on), h4({
-        className: 'visible-xs'
-      }, day.starts_on)))), div({
-        className: 'col-sm-2 hidden-xs'
-      }, h6({
-        className: 'text-right'
-      }, 'Current Time', br({}), scoreboard.time_now)), div({
-        className: 'col-xs-12'
-      }, div({
-        className: 'row'
-      }, div({
-        className: 'col-xs-12'
-      }, DrawList({
-        competition: competition,
-        draws: day.draws,
-        day: day,
-        draw: draw,
-        changeDraw: this.changeDraw
-      }), DrawContentList({
-        competition: competition,
-        draws: day.draws,
-        day: day,
-        draw: draw
-      }), p({}, 'LSFE: Last shot in the first end')))));
-    }
-  });
-
-  Scoreboard = React.createClass({
-    getInitialState: function() {
-      return {
-        scoreboard: null,
-        days: []
-      };
-    },
-    drawChanged: function() {
-      return this.props.fixLinks();
-    },
-    loadDataFromServer: function() {
-      return jQuery.ajax({
-        url: this.props.url,
-        dataType: 'jsonp',
-        cache: true,
-        jsonpCallback: 'curlcastJSONP',
-        success: (function(_this) {
-          return function(results) {
-            var d, days, draw, id, k, last_day, last_day_id, obj, _i, _len, _ref4;
-            days = [];
-            last_day_id = -1;
-            id = 0;
-            _ref4 = results.draws;
-            for (k = _i = 0, _len = _ref4.length; _i < _len; k = ++_i) {
-              draw = _ref4[k];
-              d = days[days.length - 1] || null;
-              if (d) {
-                last_day = d.day;
-              }
-              if (last_day !== draw.starts_at_day) {
-                obj = {
-                  day: draw.starts_at_day,
-                  draws: [],
-                  date: draw.starts_at_date,
-                  id: id,
-                  starts_on: draw.starts_on,
-                  starts_at_timestamp: draw.starts_at_timestamp
-                };
-                days.push(obj);
-                last_day_id = days.length - 1;
-                id++;
-              }
-              days[last_day_id].draws.push(draw);
-            }
-            _this.setState({
-              scoreboard: results,
-              days: days
-            });
-            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
-          };
-        })(this)
-      });
-    },
-    componentWillMount: function() {
-      return this.loadDataFromServer();
-    },
-    componentDidUpdate: function() {
-      return this.props.fixLinks();
-    },
-    componentDidMount: function() {
-      return this.props.fixLinks();
-    },
-    render: function() {
-      var days, pathPrefix, scoreboard, _ref4;
-      if (this.state.scoreboard == null) {
-        return div({
-          className: 'row'
-        }, div({
-          className: 'col-xs-12'
-        }, 'Loading Scoreboard...'));
-      }
-      pathPrefix = this.props.pathPrefix;
-      _ref4 = this.state, days = _ref4.days, scoreboard = _ref4.scoreboard;
-      return Competition({
-        competition: this.props.competition,
-        days: days,
-        scoreboard: scoreboard,
-        pathPrefix: pathPrefix,
-        drawChanged: this.drawChanged
-      });
-    }
-  });
-
-  window.CurlcastScoreboard = Scoreboard;
-
-}).call(this);
-(function() {
-  var BoxScore, BoxScoreAnalysis, BoxScoreAnalysisTeam, BoxScoreBoard, BoxScoreBoardPositions, BoxScoreContent, BoxScoreShootingPercentages, BoxScoreShootingPercentagesAthletes, BoxScoreTeamRoster, BoxScoreTeamRosterAthlete, BoxScoreTeamRosters, BreadCrumbDraw, BreadCrumbGame, BreadCrumbNavigation, a, div, h1, h6, li, ol, span, table, tbody, td, tfoot, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
   _ref = React.DOM, div = _ref.div, span = _ref.span, a = _ref.a;
 
@@ -31085,22 +29615,15 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   _ref3 = React.DOM, h1 = _ref3.h1, h6 = _ref3.h6;
 
-<<<<<<< HEAD
   Link = ReactRouter.Link;
 
   BreadCrumbDraw = React.createClass({
     render: function() {
       var active_class, dayParam, drawParam;
-=======
-  BreadCrumbDraw = React.createClass({
-    render: function() {
-      var active_class;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       active_class = '';
       if (this.props.active === true) {
         active_class = 'active';
       }
-<<<<<<< HEAD
       dayParam = this.props.dayToStr(this.props.dayFromDraw(this.props.draw));
       drawParam = this.props.drawToStr(this.props.draw);
       return li({
@@ -31114,12 +29637,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         },
         href: '#',
         role: 'menuitem'
-=======
-      return li({
-        className: active_class
-      }, a({
-        href: this.props.draw.game_url
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, "Draw " + this.props.draw.label + ", " + this.props.draw.start_at_hour));
     }
   });
@@ -31132,7 +29649,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         active_class = 'active';
       }
       return li({
-<<<<<<< HEAD
         className: active_class,
         role: 'presentation'
       }, Link({
@@ -31143,18 +29659,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         },
         href: '#',
         role: 'menuitem'
-=======
-        className: active_class
-      }, a({
-        href: this.props.game.boxscore_url
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, this.props.game.display_name));
     }
   });
 
   BreadCrumbNavigation = React.createClass({
     render: function() {
-<<<<<<< HEAD
       var dayParam, draw, drawParam, draws, game, _ref4;
       _ref4 = this.props, draws = _ref4.draws, draw = _ref4.draw, game = _ref4.game;
       if ((draw == null) || (game == null)) {
@@ -31180,22 +29690,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           draw: drawParam
         }
       }, "Draw " + draw.label + ", " + draw.start_at_hour), a({
-=======
-      var active_draw, active_game, draws, scoreboard_url, _ref4;
-      _ref4 = this.props, scoreboard_url = _ref4.scoreboard_url, draws = _ref4.draws, active_draw = _ref4.active_draw, active_game = _ref4.active_game;
-      if ((active_draw == null) || (active_game == null)) {
-        return span({}, "Waiting for navigation data...");
-      }
-      return ol({
-        className: 'breadcrumb'
-      }, li({}, a({
-        href: scoreboard_url || "#"
-      }, 'Scores')), li({
-        className: 'dropdown hidden-xs'
-      }, a({
-        href: active_draw.game_url
-      }, "Draw " + active_draw.label + ", " + active_draw.start_at_hour), a({
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         href: '#',
         className: 'dropdown-toggle',
         'data-toggle': 'dropdown'
@@ -31204,7 +29698,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       })), ul({
         className: 'dropdown-menu',
         role: 'menu'
-<<<<<<< HEAD
       }, draws.map((function(_this) {
         return function(draw_item) {
           var drawProps;
@@ -31217,17 +29710,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       })(this)))), li({
         className: 'dropdown active'
       }, "" + game.display_name, a({
-=======
-      }, draws.map(function(draw_item) {
-        return BreadCrumbDraw({
-          key: draw_item.id,
-          draw: draw_item,
-          active: draw_item.id === active_draw.id
-        });
-      }))), li({
-        className: 'dropdown active'
-      }, "" + active_game.display_name, a({
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         href: '#',
         className: 'dropdown-toggle',
         'data-toggle': 'dropdown'
@@ -31236,7 +29718,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       })), ul({
         className: 'dropdown-menu',
         role: 'menu'
-<<<<<<< HEAD
       }, draw.games.map((function(_this) {
         return function(game_item) {
           var gameProps;
@@ -31247,25 +29728,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return BreadCrumbGame(gameProps);
         };
       })(this)))));
-=======
-      }, active_draw.games.map(function(game_item) {
-        return BreadCrumbGame({
-          key: game_item.id,
-          game: game_item,
-          active: game_item.id === active_game.id
-        });
-      }))));
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
   BoxScoreBoardPositions = React.createClass({
     render: function() {
-<<<<<<< HEAD
-      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, teamParam, team_url, team_url_parts, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
-=======
-      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
+      var end_score, end_scores, ends, game, is_final, lsfe, minutes, position, seconds, teamParam, time_remaining, total, _i, _j, _len, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -31295,11 +29763,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         seconds = "0" + seconds;
       }
       time_remaining = "" + minutes + ":" + seconds;
-<<<<<<< HEAD
-      team_url_parts = position.team.url.split('/');
-      team_url_parts.shift();
-      team_url_parts.pop();
-      team_url = team_url_parts.join('/') + "#!" + position.team.url;
       teamParam = this.props.teamToStr(position.team);
       return tr({}, td({}, position.team != null ? Link({
         to: 'teams-show',
@@ -31307,10 +29770,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           competition_id: this.props.routerState.params.competition_id,
           team_id: teamParam
         }
-=======
-      return tr({}, td({}, position.team != null ? a({
-        href: position.team.url
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, span({
         className: 'hidden-xs'
       }, position.team.name), span({
@@ -31386,7 +29845,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, 'Time')))), game.positions != null ? tbody({}, BoxScoreBoardPositions({
         position: game.positions[0],
         ends: num_ends,
-<<<<<<< HEAD
         game: game,
         routerState: this.props.routerState,
         teamToStr: this.props.teamToStr
@@ -31396,13 +29854,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         game: game,
         routerState: this.props.routerState,
         teamToStr: this.props.teamToStr
-=======
-        game: game
-      }), BoxScoreBoardPositions({
-        position: game.positions[1],
-        ends: num_ends,
-        game: game
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       })) : void 0)))));
     }
   });
@@ -31611,7 +30062,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   BoxScoreContent = React.createClass({
     componentDidMount: function() {},
     render: function() {
-<<<<<<< HEAD
       var competition, competitions, contentProps, d, draws, g, position, _i, _j, _k, _len, _len1, _len2, _ref4, _ref5, _ref6;
       _ref4 = this.props, draws = _ref4.draws, competitions = _ref4.competitions, competition = _ref4.competition;
       contentProps = this.props;
@@ -31636,31 +30086,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         for (_k = 0, _len2 = _ref6.length; _k < _len2; _k++) {
           position = _ref6[_k];
           contentProps.teams.push(position.team);
-=======
-      var competition, competitions, d, draw, draws, g, game, navigation, position, teams, _i, _j, _k, _len, _len1, _len2, _ref4, _ref5, _ref6, _ref7;
-      _ref4 = this.props, navigation = _ref4.navigation, draws = _ref4.draws, competitions = _ref4.competitions, competition = _ref4.competition;
-      draw = game = null;
-      _ref5 = this.props.draws;
-      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
-        d = _ref5[_i];
-        _ref6 = d.games;
-        for (_j = 0, _len1 = _ref6.length; _j < _len1; _j++) {
-          g = _ref6[_j];
-          if (g.active == null) {
-            continue;
-          }
-          draw = d;
-          game = g;
-          break;
-        }
-      }
-      teams = [];
-      if (game != null) {
-        _ref7 = game.positions;
-        for (_k = 0, _len2 = _ref7.length; _k < _len2; _k++) {
-          position = _ref7[_k];
-          teams.push(position.team);
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         }
       } else {
         return div({
@@ -31673,26 +30098,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'row'
       }, div({
         className: 'col-xs-12'
-<<<<<<< HEAD
       }, BreadCrumbNavigation(contentProps), BoxScoreBoard(contentProps), ((contentProps.game.positions[0].team != null) && (contentProps.game.positions[0].team.athletes.length > 0)) || ((contentProps.game.positions[1].team != null) && (contentProps.game.positions[1].team.athletes.length > 0)) ? BoxScoreTeamRosters(contentProps) : void 0, (contentProps.game.positions[0].team != null) && (contentProps.game.positions[1].team != null) ? BoxScoreAnalysis(contentProps) : void 0, contentProps.game.shot_by_shot === true ? BoxScoreShootingPercentages(contentProps) : void 0));
-=======
-      }, BreadCrumbNavigation({
-        scoreboard_url: navigation.scoreboard,
-        draws: draws,
-        active_draw: draw,
-        active_game: game
-      }), BoxScoreBoard({
-        draw: draw,
-        game: game,
-        competition: competition
-      }), ((game.positions[0].team != null) && (game.positions[0].team.athletes.length > 0)) || ((game.positions[1].team != null) && (game.positions[1].team.athletes.length > 0)) ? BoxScoreTeamRosters({
-        positions: game.positions
-      }) : void 0, (game.positions[0].team != null) && (game.positions[1].team != null) ? BoxScoreAnalysis({
-        teams: teams
-      }) : void 0, game.shot_by_shot === true ? BoxScoreShootingPercentages({
-        teams: teams
-      }) : void 0));
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
@@ -31703,7 +30109,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         draws: []
       };
     },
-<<<<<<< HEAD
     processServerData: function(props) {
       var results;
       results = props.data;
@@ -31720,34 +30125,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     },
     render: function() {
       var props;
-=======
-    loadDataFromServer: function() {
-      return jQuery.ajax({
-        url: this.props.url,
-        dataType: 'jsonp',
-        cache: true,
-        jsonpCallback: 'curlcastJSONP',
-        success: (function(_this) {
-          return function(results) {
-            _this.setState({
-              game: results,
-              draws: results.draws,
-              draw_games: results.draw_games
-            });
-            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
-          };
-        })(this)
-      });
-    },
-    componentWillMount: function() {
-      return this.loadDataFromServer();
-    },
-    componentDidUpdate: function() {
-      return this.props.fixLinks();
-    },
-    render: function() {
-      var draws, game, pathPrefix, _ref4;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       if (this.state.game == null) {
         return div({
           className: 'row'
@@ -31755,20 +30132,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'col-xs-12'
         }, 'Loading Boxscore...'));
       }
-<<<<<<< HEAD
       props = this.props;
       props.draws = this.state.draws;
       props.game = this.state.game;
       return BoxScoreContent(props);
-=======
-      pathPrefix = this.props.pathPrefix;
-      _ref4 = this.state, game = _ref4.game, draws = _ref4.draws;
-      return BoxScoreContent({
-        draws: draws,
-        competition: this.props.competition,
-        navigation: this.props.navigation
-      });
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
@@ -31776,21 +30143,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var CompetitionBox, CompetitionItem, CompetitionList, CompetitionSearch, Link, a, button, div, form, input, nav, span, table, tbody, td, th, thead, tr, _ref, _ref1;
-=======
-  var CompetitionBox, CompetitionItem, CompetitionList, CompetitionSearch, a, button, div, form, input, nav, span, table, tbody, td, th, thead, tr, _ref, _ref1;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
   _ref = React.DOM, nav = _ref.nav, div = _ref.div, button = _ref.button, span = _ref.span, a = _ref.a, form = _ref.form, input = _ref.input;
 
   _ref1 = React.DOM, table = _ref1.table, thead = _ref1.thead, tr = _ref1.tr, th = _ref1.th, tbody = _ref1.tbody, td = _ref1.td;
 
-<<<<<<< HEAD
   Link = ReactRouter.Link;
 
-=======
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
   CompetitionSearch = React.createClass({
     cancelSubmission: function(e) {
       e.preventDefault();
@@ -31843,7 +30203,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   CompetitionItem = React.createClass({
     render: function() {
-<<<<<<< HEAD
       var competition, competition_id;
       competition = this.props.competition;
       competition_id = competition.to_param;
@@ -31852,12 +30211,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         params: {
           competition_id: competition_id
         }
-=======
-      var competition;
-      competition = this.props.competition;
-      return tr({}, td({}, a({
-        href: competition.url
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, competition.title)), td({}, competition.location), td({}, competition.occurs));
     }
   });
@@ -31881,12 +30234,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     getInitialState: function() {
       return {
         competitions: null,
-<<<<<<< HEAD
         search: null,
         status: 'Loading curling data...'
-=======
-        search: null
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       };
     },
     changeFilter: function(search) {
@@ -31899,8 +30248,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return this.loadDataFromServer();
     },
     loadDataFromServer: function() {
-<<<<<<< HEAD
-      console.log('CompetitionBox.loadDataFromServer');
       return jQuery.ajax({
         url: this.props.apiRoot + 'competitions.js',
         type: 'GET',
@@ -31922,20 +30269,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
               status: 'Error contacting server, retrying in 10 seconds'
             });
             return setTimeout(_this.loadDataFromServer, 1000);
-=======
-      return jQuery.ajax({
-        url: this.props.url,
-        type: 'GET',
-        data: this.state.search,
-        dataType: 'jsonp',
-        cache: true,
-        jsonpCallback: 'curlcastJSONP',
-        success: (function(_this) {
-          return function(results) {
-            return _this.setState({
-              competitions: results.competitions
-            });
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
           };
         })(this)
       });
@@ -31943,38 +30276,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     componentWillMount: function() {
       return this.loadDataFromServer();
     },
-<<<<<<< HEAD
-=======
-    fixLinks: function() {
-      var pathPrefix;
-      pathPrefix = this.props.pathPrefix;
-      return jQuery(this.getDOMNode()).find("a").each(function() {
-        var i, pieces, url, _i;
-        url = jQuery(this).attr("href");
-        if (!((url != null) && url.substr(0, 21) === '/stats/organizations/')) {
-          return;
-        }
-        pieces = url.substr(1).split("/");
-        for (i = _i = 0; _i <= 2; i = ++_i) {
-          pieces.shift();
-        }
-        pieces.unshift(pathPrefix);
-        return jQuery(this).attr("href", pieces.join("/"));
-      });
-    },
-    componentDidUpdate: function() {
-      return this.fixLinks();
-    },
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     render: function() {
       if (this.state.competitions == null) {
         return div({
           className: 'col-xs-12'
-<<<<<<< HEAD
         }, this.state.status);
-=======
-        }, 'Loading competition list...');
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }
       return div({
         className: 'col-xs-12'
@@ -31990,11 +30296,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var Link, Standings, StandingsBracket, StandingsBracketGame, StandingsBracketGameTeam, StandingsBracketGroup, StandingsPanel, StandingsRoundRobin, StandingsTab, StandingsTabContainer, a, div, h4, li, p, table, tbody, td, th, thead, tr, ul, _ref, _ref1;
-=======
-  var Standings, StandingsBracket, StandingsBracketGame, StandingsBracketGameTeam, StandingsBracketGroup, StandingsPanel, StandingsRoundRobin, StandingsTab, StandingsTabContainer, a, div, h4, li, p, table, tbody, td, th, thead, tr, ul, _ref, _ref1;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
   _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, a = _ref.a, p = _ref.p;
 
@@ -32002,11 +30304,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   _ref1 = React.DOM, table = _ref1.table, thead = _ref1.thead, tr = _ref1.tr, th = _ref1.th, tbody = _ref1.tbody, td = _ref1.td;
 
-<<<<<<< HEAD
   Link = ReactRouter.Link;
 
-=======
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
   StandingsBracketGameTeam = React.createClass({
     render: function() {
       var position;
@@ -32126,19 +30425,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'row'
       }, div({
         className: 'col-xs-12'
-<<<<<<< HEAD
       }, p({}, 'Mouse-over or tap on a game below to view game details.'), this.props.round.groups.map((function(_this) {
-=======
-      }, p({}, 'Mouse-over or tap on a game below to view game details.'), this.props.round.groups.length > 1 ? ul({
-        className: 'pagination'
-      }, this.props.round.groups.map(function(group, idx) {
-        return li({
-          key: idx
-        }, a({
-          href: "#" + group.id
-        }, group.name || 'A Event'));
-      })) : void 0, this.props.round.groups.map((function(_this) {
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         return function(group, idx) {
           return StandingsBracketGroup({
             key: idx,
@@ -32182,20 +30469,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       if (this.props.round.type === "bracket") {
         active_class = ' bracket';
       }
-<<<<<<< HEAD
       if (this.props.round.active === true) {
-=======
-      if (this.props.isActive(this.props.round) === true) {
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         active_class += ' active in';
       }
       return div({
         className: 'tab-pane fade' + active_class,
-<<<<<<< HEAD
         id: this.props.round.to_param
-=======
-        id: this.props.id
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, div({
         className: 'row'
       }, div({
@@ -32208,7 +30487,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   });
 
   StandingsTab = React.createClass({
-<<<<<<< HEAD
     render: function() {
       return li({
         className: (this.props.round.active === true ? 'active' : ''),
@@ -32220,35 +30498,17 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           round_id: this.props.round.to_param
         },
         className: 'tab-link'
-=======
-    propogateTab: function() {
-      return this.props.setActive(this.props.round.type, this.props.round.id);
-    },
-    render: function() {
-      return li({
-        className: (this.props.isActive(this.props.round) === true ? 'active' : '')
-      }, a({
-        href: this.props.href,
-        'data-toggle': 'tab',
-        onClick: this.propogateTab
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, this.props.round.name));
     }
   });
 
   StandingsTabContainer = React.createClass({
     render: function() {
-<<<<<<< HEAD
-=======
-      var rounds;
-      rounds = this.props.rounds;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       return div({
         className: 'col-xs-12'
       }, ul({
         className: 'nav nav-tabs',
         role: 'tablist'
-<<<<<<< HEAD
       }, this.props.rounds.map((function(_this) {
         return function(round, idx) {
           var roundProps;
@@ -32266,28 +30526,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           roundProps.key = "pane-" + round.to_param;
           roundProps.round = round;
           return StandingsPanel(roundProps);
-=======
-      }, rounds.map((function(_this) {
-        return function(round, idx) {
-          return StandingsTab({
-            key: "tab-" + round.type + "-" + round.id,
-            href: "#tab" + (idx + 1),
-            round: round,
-            setActive: _this.props.setActive,
-            isActive: _this.props.isActive
-          });
-        };
-      })(this))), div({
-        className: 'tab-content'
-      }, rounds.map((function(_this) {
-        return function(round, idx) {
-          return StandingsPanel({
-            key: "pane-" + round.type + "-" + round.id,
-            round: round,
-            id: "tab" + (idx + 1),
-            isActive: _this.props.isActive
-          });
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         };
       })(this))));
     }
@@ -32296,7 +30534,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   Standings = React.createClass({
     getInitialState: function() {
       return {
-<<<<<<< HEAD
         rounds: null
       };
     },
@@ -32392,157 +30629,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return div({
         className: 'row'
       }, StandingsTabContainer(roundProps));
-=======
-        active: null,
-        rounds: null
-      };
-    },
-    updateActive: function(rounds) {
-      var active;
-      if (rounds == null) {
-        rounds = this.state.rounds;
-      }
-      active = this.state.active;
-      if ((active != null) && (active.type != null) && (active.id != null)) {
-        return active;
-      }
-      if (rounds.length > 0) {
-        return {
-          type: rounds[0].type,
-          id: rounds[0].id
-        };
-      }
-      return null;
-    },
-    isActive: function(round) {
-      var active;
-      active = this.updateActive();
-      if (!((round != null) && (active != null))) {
-        return false;
-      }
-      if (round.type === active.type && round.id === active.id) {
-        return true;
-      }
-      return false;
-    },
-    getActive: function() {
-      var active, round, _i, _len, _ref2;
-      active = this.updateActive();
-      if (active == null) {
-        return null;
-      }
-      _ref2 = this.state.rounds;
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        round = _ref2[_i];
-        if (round.type === active.type && round.id === active.id) {
-          return round;
-        }
-      }
-      this.state.active = null;
-      return this.getActive();
-    },
-    setActive: function(type, id) {
-      return this.setState({
-        active: {
-          type: type,
-          id: id
-        }
-      });
-    },
-    doPlumbing: function() {
-      var connectPoints;
-      connectPoints = function(game, position) {
-        var jpObj, targetY, _ref2;
-        if (game.attr("data-" + position + "-connecting-input") && game.attr('data-group') === game.attr("data-" + position + "-connecting-input-group")) {
-          jpObj = jsPlumb.getInstance();
-          jpObj.importDefaults({
-            Connector: "Flowchart"
-          });
-          targetY = (_ref2 = game.attr("data-" + position + "-connecting-input-result") === 'W') != null ? _ref2 : {
-            0.25: 0.75
-          };
-          return jpObj.connect({
-            source: game.attr('id'),
-            target: game.attr("data-" + position + "-connecting-input"),
-            endpoint: "Blank",
-            anchors: [[0, 0.5, -1, 0], [1, 0.5, 1, 0]],
-            paintStyle: {
-              strokeStyle: "#ccc",
-              lineWidth: 1
-            }
-          });
-        }
-      };
-      jQuery("a[data-toggle='tab']").on("shown.bs.tab", function(e) {
-        var activeTab;
-        activeTab = jQuery(jQuery(e.target).attr("href"));
-        return activeTab.find('.game').each(function() {
-          var game;
-          game = jQuery(this);
-          connectPoints(jQuery(this), 'top');
-          return connectPoints(jQuery(this), 'bottom');
-        });
-      });
-      return jQuery("a[data-toggle='tab']").first().trigger("shown.bs.tab");
-    },
-    loadDataFromServer: function() {
-      return jQuery.ajax({
-        url: this.props.url,
-        dataType: 'jsonp',
-        cache: true,
-        jsonpCallback: 'curlcastJSONP',
-        success: (function(_this) {
-          return function(results) {
-            var rounds;
-            rounds = [];
-            results.round_robins.map(function(roundRobin, idx) {
-              var round;
-              round = roundRobin;
-              round.type = "round_robin";
-              round.index = idx + 1;
-              return rounds.push(round);
-            });
-            results.brackets.map(function(bracket, idx) {
-              var round;
-              round = bracket;
-              round.type = "bracket";
-              round.index = results.round_robins.length + idx + 1;
-              return rounds.push(round);
-            });
-            _this.setState({
-              rounds: rounds,
-              active: _this.updateActive(rounds)
-            });
-            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
-          };
-        })(this)
-      });
-    },
-    componentWillMount: function() {
-      return this.loadDataFromServer();
-    },
-    componentDidUpdate: function() {
-      this.props.fixLinks();
-      return this.doPlumbing();
-    },
-    componentDidMount: function() {
-      return this.doPlumbing();
-    },
-    render: function() {
-      var pathPrefix, rounds;
-      pathPrefix = this.props.pathPrefix;
-      rounds = this.state.rounds;
-      if (rounds == null) {
-        return div({}, 'Loading Standings...');
-      }
-      return div({
-        className: 'row'
-      }, StandingsTabContainer({
-        rounds: rounds,
-        isActive: this.isActive,
-        setActive: this.setActive
-      }));
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
     }
   });
 
@@ -32550,11 +30636,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-<<<<<<< HEAD
   var Link, TeamList, TeamListItem, TeamShow, TeamShowAthlete, TeamShowAthleteList, TeamShowBreadcrumb, TeamShowScores, TeamShowScoresGame, TeamShowScoringAnalysis, Teams, a, br, div, h3, h4, h6, hr, img, li, ol, p, table, tbody, td, th, thead, tr, _ref, _ref1, _ref2, _ref3;
-=======
-  var TeamList, TeamListItem, TeamShow, TeamShowAthlete, TeamShowAthleteList, TeamShowBreadcrumb, TeamShowScores, TeamShowScoresGame, TeamShowScoringAnalysis, Teams, a, br, div, h3, h4, h6, hr, img, li, ol, p, table, tbody, td, th, thead, tr, _ref, _ref1, _ref2, _ref3;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
   _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, hr = _ref.hr, img = _ref.img, br = _ref.br;
 
@@ -32564,25 +30646,17 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   _ref3 = React.DOM, ol = _ref3.ol, li = _ref3.li;
 
-<<<<<<< HEAD
   Link = ReactRouter.Link;
 
-=======
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
   TeamShowBreadcrumb = React.createClass({
     render: function() {
       return ol({
         className: 'breadcrumb'
-<<<<<<< HEAD
       }, li({}, Link({
         to: 'teams',
         params: {
           competition_id: this.props.routerState.params.competition_id
         }
-=======
-      }, li({}, a({
-        href: '../'
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, 'Teams')), li({
         className: 'active'
       }, this.props.team.name));
@@ -32631,13 +30705,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var game, game_position_opponent, game_position_self;
       game = this.props.game;
-<<<<<<< HEAD
       game_position_self = game.game_positions[0].name === this.props.team.name ? 0 : 1;
       game_position_opponent = game_position_self === 0 ? 1 : 0;
-=======
-      game_position_self = game.game_positions[0].team_id === this.props.team.id ? 0 : 1;
-      game_position_opponent = game_position_self === 1 ? 0 : 1;
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       return tr({}, td({}, game.draw.label), td({}, game.draw.starts_at), td({}, game.result), td({}, "" + (game.game_positions[game_position_self].total || '') + " - " + (game.game_positions[game_position_opponent].total || '')), td({
         className: 'hidden-xs'
       }, game.game_positions[game_position_opponent].name));
@@ -32734,12 +30803,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, div({
         className: 'col-xs-12'
       }, TeamShowBreadcrumb({
-<<<<<<< HEAD
         team: this.props.team,
         routerState: this.props.routerState
-=======
-        team: this.props.team
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       })), div({
         className: 'col-xs-12'
       }, h3({}, this.props.team.name), TeamShowAthleteList({
@@ -32758,17 +30823,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var team;
       team = this.props.team;
-<<<<<<< HEAD
       return tr({}, td({}, Link({
         to: 'teams-show',
         params: {
           competition_id: this.props.routerState.params.competition_id,
           team_id: team.to_param
         }
-=======
-      return tr({}, td({}, a({
-        href: team.url
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }, team.name)), td({}, team.coach || ''), td({}, team.affiliation), td({}, team.location));
     }
   });
@@ -32779,19 +30839,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'table table-bordered table-condensed'
       }, thead({}, tr({}, th({}, "Team Name"), th({}, "Coach"), th({}, "Affliation"), th({}, "Location"))), tbody({}, this.props.teams.map((function(_this) {
         return function(team) {
-<<<<<<< HEAD
           var teamProps;
           teamProps = _this.props;
           teamProps.key = team.id;
           teamProps.team = team;
           return TeamListItem(teamProps);
-=======
-          return TeamListItem({
-            key: team.id,
-            team: team,
-            absoluteUrl: _this.props.absoluteUrl
-          });
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
         };
       })(this))));
     }
@@ -32801,20 +30853,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     getInitialState: function() {
       return {
         teams: null,
-<<<<<<< HEAD
-        team: null,
-        base_url: null
-      };
-    },
-    baseUrl: function() {
-      return this.props.apiRoot.substr(0, this.props.apiRoot.indexOf('/', 8));
-=======
         team: null
       };
     },
     baseUrl: function() {
-      return this.props.url.substr(0, this.props.url.indexOf('/', 8));
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
+      return this.props.apiRoot.substr(0, this.props.apiRoot.indexOf('/', 8));
     },
     absoluteUrl: function() {
       var args, base_url, i, uri, url, _i, _ref4;
@@ -32828,12 +30871,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       uri = args.join("/");
       base_url = this.baseUrl();
       url = "";
-      if (uri.toLowerCase().indexOf(base_url.toLowerCase()) !== 0) {
+      if (!((uri.toLowerCase().indexOf(base_url.toLowerCase()) === 0) || (uri.indexOf('http') >= 0))) {
         url = base_url;
       }
       return url + uri;
     },
-<<<<<<< HEAD
     processServerData: function(props) {
       var results, team, _i, _len;
       results = props.data;
@@ -32860,53 +30902,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     },
     render: function() {
       var passedProps;
-=======
-    loadDataFromServer: function(url, isTeamIndex) {
-      if (isTeamIndex == null) {
-        isTeamIndex = true;
-      }
-      return jQuery.ajax({
-        url: this.props.url,
-        dataType: 'jsonp',
-        cache: true,
-        jsonpCallback: 'curlcastJSONP',
-        success: (function(_this) {
-          return function(results) {
-            if (isTeamIndex === true) {
-              _this.setState({
-                teams: results
-              });
-            } else {
-              _this.setState({
-                team: results
-              });
-            }
-            return setTimeout(_this.loadDataFromServer, _this.props.pollInterval);
-          };
-        })(this)
-      });
-    },
-    componentWillMount: function() {
-      var pieces, suffix;
-      pieces = this.props.url.split('/');
-      suffix = pieces[pieces.length - 1].split('.js')[0];
-      return this.loadDataFromServer(this.props.url, suffix === 'teams');
-    },
-    componentDidMount: function() {
-      return this.props.fixLinks();
-    },
-    componentDidUpdate: function() {
-      return this.props.fixLinks();
-    },
-    render: function() {
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       if (!((this.state.teams != null) || (this.state.team != null))) {
         return div({
           className: 'row'
         }, div({
           className: 'col-xs-12'
-<<<<<<< HEAD
-        }, 'Loading Teams...'));
+        }, 'Loading Team Data...'));
       }
       passedProps = this.props;
       passedProps.absoluteUrl = this.absoluteUrl;
@@ -32916,21 +30917,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       } else {
         passedProps.team = this.state.team;
         return TeamShow(passedProps);
-=======
-        }, 'Loading Team Data...'));
-      }
-      if (this.state.team === null) {
-        return TeamList({
-          teams: this.state.teams,
-          absoluteUrl: this.absoluteUrl
-        });
-      } else {
-        return TeamShow({
-          team: this.state.team,
-          teams: this.state.teams,
-          absoluteUrl: this.absoluteUrl
-        });
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
       }
     }
   });
@@ -32938,7 +30924,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   window.CurlcastTeams = Teams;
 
 }).call(this);
-<<<<<<< HEAD
 (function() {
   var Dummy;
 
@@ -32957,8 +30942,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 
 
-=======
->>>>>>> a7b2d0cc36b1d8b5d50fae0365fd40aef5aae6cc
 
 
 

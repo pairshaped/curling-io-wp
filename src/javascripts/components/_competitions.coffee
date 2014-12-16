@@ -63,7 +63,6 @@ CompetitionBox = React.createClass
     @loadDataFromServer()
 
   loadDataFromServer: () ->
-    console.log 'CompetitionBox.loadDataFromServer'
     jQuery.ajax
       url: @props.apiRoot + 'competitions.js'
       type: 'GET'

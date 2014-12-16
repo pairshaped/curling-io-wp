@@ -163,7 +163,7 @@ Teams = React.createClass
     uri = args.join "/"
     base_url = @baseUrl()
     url = ""
-    url = base_url unless uri.toLowerCase().indexOf(base_url.toLowerCase()) == 0
+    url = base_url unless (uri.toLowerCase().indexOf(base_url.toLowerCase()) == 0) || (uri.indexOf('http') >= 0)
     return url + uri
 
   processServerData: (props) ->
