@@ -72,7 +72,7 @@ Shell = React.createClass
       url: url
       dataType: 'jsonp'
       timeout: 10000
-      jsonpCallback: callbackName #"curlcastJSONP#{routeSuffix}"
+      jsonpCallback: callbackName
       success: (results) =>
         currentResultStr = JSON.stringify results
         if @state.lastPageDataObject != currentResultStr
@@ -183,7 +183,6 @@ Shell = React.createClass
     routedProps.drawToStr = @drawToStr
     routedProps.roundToStr = @roundToStr
     routedProps.teamToStr = @teamToStr
-    #routedProps.shellComponentChanged = @shellComponentChanged
 
     div className: 'row',
       div className: 'col-sm-3 hidden-xs',

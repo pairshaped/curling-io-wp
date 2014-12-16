@@ -207,9 +207,6 @@ Standings = React.createClass
   componentDidUpdate: ->
     @tabChanged()
 
-  #componentDidMount: ->
-  #  @doPlumbing()
-
   render: ->
     return div {}, 'Loading Standings...' unless @state.rounds?
 
@@ -219,7 +216,5 @@ Standings = React.createClass
 
     div className: 'row',
       StandingsTabContainer roundProps
-
-
 
 window.CurlcastStandings = Standings

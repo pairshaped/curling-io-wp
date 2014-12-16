@@ -175,7 +175,7 @@ Teams = React.createClass
         for team in results
           team.to_param = @props.teamToStr team
 
-      @setState teams: results, team: null #, baseUrl: @baseUrl()
+      @setState teams: results, team: null
 
   componentWillReceiveProps: (nextProps) ->
     @processServerData nextProps
