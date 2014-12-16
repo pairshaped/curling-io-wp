@@ -28699,6 +28699,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         error: (function(_this) {
           return function() {
             var newStatus, seconds;
+            console.debug('Shell.loadNavigationFromServer.ajax.error');
             seconds = _this.state.retryDelay / 1000;
             newStatus = "Could not load data, retrying in " + seconds + " seconds...";
             if (seconds > 5) {
@@ -28729,6 +28730,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return jQuery.ajax({
         url: url,
         dataType: 'jsonp',
+        timeout: 10000,
         jsonpCallback: callbackName,
         success: (function(_this) {
           return function(results) {
@@ -30228,7 +30230,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     getInitialState: function() {
       return {
         competitions: null,
-        search: null
+        search: null,
+        status: 'Loading curling data...'
       };
     },
     changeFilter: function(search) {
@@ -30241,17 +30244,28 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return this.loadDataFromServer();
     },
     loadDataFromServer: function() {
+      console.log('CompetitionBox.loadDataFromServer');
       return jQuery.ajax({
         url: this.props.apiRoot + 'competitions.js',
         type: 'GET',
         data: this.state.search,
+        timeout: 10000,
         dataType: 'jsonp',
         jsonpCallback: 'curlcastCompetitionsJSONP',
         success: (function(_this) {
           return function(results) {
             return _this.setState({
-              competitions: results.competitions
+              competitions: results.competitions,
+              status: 'Loading curling data...'
             });
+          };
+        })(this),
+        error: (function(_this) {
+          return function(xhr, status, error) {
+            _this.setState({
+              status: 'Error contacting server, retrying in 10 seconds'
+            });
+            return setTimeout(_this.loadDataFromServer, 1000);
           };
         })(this)
       });
@@ -30263,7 +30277,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       if (this.state.competitions == null) {
         return div({
           className: 'col-xs-12'
-        }, 'Loading competition list...');
+        }, this.state.status);
       }
       return div({
         className: 'col-xs-12'

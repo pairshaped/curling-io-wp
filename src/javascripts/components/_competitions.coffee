@@ -53,7 +53,9 @@ CompetitionList = React.createClass
 
 CompetitionBox = React.createClass
   getInitialState: ->
-    { competitions: null, search: null }
+    competitions: null
+    search: null
+    status: 'Loading curling data...'
 
   changeFilter: (search) ->
     return if search == window.undefined
@@ -61,37 +63,28 @@ CompetitionBox = React.createClass
     @loadDataFromServer()
 
   loadDataFromServer: () ->
+    console.log 'CompetitionBox.loadDataFromServer'
     jQuery.ajax
       url: @props.apiRoot + 'competitions.js'
       type: 'GET'
       data: @state.search
+      timeout: 10000
       dataType: 'jsonp'
       jsonpCallback: 'curlcastCompetitionsJSONP'
       success: (results) =>
-        # If we do a loadData pre-emptively, cancel the old timeout
-        @setState competitions: results.competitions
+        @setState competitions: results.competitions, status: 'Loading curling data...'
+      error: (xhr, status, error) =>
+        @setState status: 'Error contacting server, retrying in 10 seconds'
+        setTimeout @loadDataFromServer, 1000
 
   componentWillMount: ->
     @loadDataFromServer()
 
-  #fixLinks: ->
-  #  pathPrefix = @props.pathPrefix
-  #  jQuery(@getDOMNode()).find("a").each ->
-  #    url = jQuery(this).attr "href"
-  #    return unless url? && url.substr(0, 21) == '/stats/organizations/'
-  #    pieces = url.substr(1).split "/"
-  #    for i in [0..2]
-  #      pieces.shift()
-  #    pieces.unshift pathPrefix
-  #    jQuery(this).attr "href", pieces.join "/"
-
-  #componentDidUpdate: ->
-  #  @fixLinks()
-
   render: ->
-    #console.log 'Competitions', @
     unless @state.competitions?
-      return div className: 'col-xs-12', 'Loading competition list...'
+      return div className: 'col-xs-12',
+        @state.status
+
     div className: 'col-xs-12',
       CompetitionSearch({changeFilter: @changeFilter})
       CompetitionList({competitions: @state.competitions})

@@ -56,6 +56,7 @@ Shell = React.createClass
           competition: results.current_competition
           retryDelay: 5000
       error: =>
+        console.debug 'Shell.loadNavigationFromServer.ajax.error'
         seconds = @state.retryDelay / 1000
         newStatus = "Could not load data, retrying in #{seconds} seconds..."
         newStatus = "Still having connectivity problems, retrying in #{seconds} seconds..." if seconds > 5
@@ -71,17 +72,15 @@ Shell = React.createClass
     jQuery.ajax
       url: url
       dataType: 'jsonp'
-      #cache: false
+      timeout: 10000
       jsonpCallback: callbackName #"curlcastJSONP#{routeSuffix}"
       success: (results) =>
-        #console.debug 'Shell.getPageData.ajax.success'
         currentResultStr = JSON.stringify results
         if @state.lastPageDataObject != currentResultStr
           @setState rawServerData: results, lastPageDataObject: currentResultStr, rawServerDataSucceeded: true, componentStatus: 'Loading...'
           if interval?
             _pageTimeout = window.setTimeout(@getPageData, interval, url, interval)
       error: =>
-        #console.debug 'Shell.getPageData.ajax.error'
         timing = if interval? then " in #{Math.round(interval/1000)} seconds" else ''
         @setState componentStatus: "Error getting page data, retrying#{timing}...", rawServerDataSucceeded: false
         if interval?
