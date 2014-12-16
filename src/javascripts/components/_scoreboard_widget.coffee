@@ -1,4 +1,10 @@
 {div, p, a, strong, br, h4, table, tbody, tr, td} = React.DOM
+Link = ReactRouter.Link
+
+scoreboardUrl = (prefix, url) ->
+  return "#{prefix}#{url}" if window.history.pushState?
+  "#{prefix}##{url}"
+
 
 Scoreboard = React.createClass
   getInitialState: ->
@@ -15,7 +21,8 @@ Scoreboard = React.createClass
         @setState
           placeholderMessage: "There are no active competitions."
           competitions: results
-      error: -> console.log "there was an error"
+      error: ->
+        @setState placeholderMessage: "There was an error getting active competitions, retrying..."
     )
 
   componentWillMount: ->
@@ -52,7 +59,7 @@ Competition = React.createClass
             div className: "col-xs-12",
               if current_draw?
                 p null,
-                  a href: "/#{@props.pathPrefix}#{path}", dangerouslySetInnerHTML: {__html: "Full Scoreboard &raquo;"}
+                  a href: scoreboardUrl(@props.pathPrefix, path), dangerouslySetInnerHTML: {__html: "Full Scoreboard &raquo;"}
               else
                 p null,
                   "No Draws Scheduled Yet"
@@ -86,7 +93,7 @@ Game = React.createClass
           strong null,
             state
           br null
-          a href: "/#{@props.pathPrefix}#{path}",
+          a href: scoreboardUrl(@props.pathPrefix, path),
             "Box"
       tr null,
         GamePositionName({key: game_positions[1].id, game_position: game_positions[1], pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
@@ -98,8 +105,8 @@ GamePositionName = React.createClass
     {name, short_name, team_path, team_path_url, result} = @props.game_position
     path = "#{@props.pathPrefix}#{team_path}"
     td className: "game-name",
-      if team_path?
-        a href: path, title: name,
+      if team_path != null
+        a href: scoreboardUrl(@props.pathPrefix, team_path), title: name,
           if result == 'won'
             strong null,
               short_name

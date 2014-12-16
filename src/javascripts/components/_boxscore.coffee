@@ -2,43 +2,65 @@
 {ol, ul, li} = React.DOM
 {table, thead, tr, th, tbody, td, tfoot} = React.DOM
 {h1, h6} = React.DOM
+Link = ReactRouter.Link
 
 BreadCrumbDraw = React.createClass
   render: ->
+    #console.log 'Boxscore.BreadCrumbDraw', @props
     active_class = ''
     active_class = 'active' if @props.active == true
-    li className: active_class,
-      a href: @props.draw.game_url, "Draw #{@props.draw.label}, #{@props.draw.start_at_hour}"
+
+    dayParam = @props.dayToStr @props.dayFromDraw( @props.draw )
+    drawParam = @props.drawToStr @props.draw
+
+    li className: active_class, role: 'presentation',
+      Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: @props.draw.games[0].id }, href: '#', role: 'menuitem',
+        "Draw #{@props.draw.label}, #{@props.draw.start_at_hour}"
 
 BreadCrumbGame = React.createClass
   render: ->
     active_class = ''
     active_class = 'active' if @props.active == true
-    li className: active_class,
-      a href: @props.game.boxscore_url, @props.game.display_name
+    li className: active_class, role: 'presentation',
+      Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: @props.game.id }, href: '#', role: 'menuitem',
+        @props.game.display_name
 
 BreadCrumbNavigation = React.createClass
   render: ->
-    {scoreboard_url, draws, active_draw, active_game} = @props
-    if !active_draw? || !active_game?
+    {draws, draw, game} = @props
+    if !draw? || !game?
       return span {}, "Waiting for navigation data..."
+
+    dayParam = @props.dayToStr @props.dayFromDraw( @props.draw )
+    drawParam = @props.drawToStr @props.draw
+
     ol className: 'breadcrumb',
       li {},
-        a href: scoreboard_url || "#", 'Scores'
+        Link to: 'scoreboard', params: { competition_id: @props.routerState.params.competition_id, day: dayParam },
+          'Scores'
       li className: 'dropdown hidden-xs',
-        a href: active_draw.game_url, "Draw #{active_draw.label}, #{active_draw.start_at_hour}"
+        Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam },
+          "Draw #{draw.label}, #{draw.start_at_hour}"
         a href: '#', className: 'dropdown-toggle', 'data-toggle': 'dropdown',
           span className: 'caret'
         ul className: 'dropdown-menu', role: 'menu',
-          draws.map (draw_item) ->
-            BreadCrumbDraw({ key: draw_item.id, draw: draw_item, active: (draw_item.id == active_draw.id) })
+          draws.map (draw_item) =>
+            drawProps = @props
+            drawProps.key = draw_item.id
+            drawProps.draw = draw_item
+            drawProps.active = (draw_item.id == draw.id)
+            BreadCrumbDraw drawProps
       li className: 'dropdown active',
-        "#{active_game.display_name}"
+        "#{game.display_name}"
         a href: '#', className: 'dropdown-toggle', 'data-toggle': 'dropdown',
           span className: 'caret'
         ul className: 'dropdown-menu', role: 'menu',
-          active_draw.games.map (game_item) ->
-            BreadCrumbGame({key: game_item.id, game: game_item, active: (game_item.id == active_game.id)})
+          draw.games.map (game_item) =>
+            gameProps = @props
+            gameProps.key = game_item.id
+            gameProps.game = game_item
+            gameProps.active = (game_item.d == game.id)
+            BreadCrumbGame gameProps
 
 BoxScoreBoardPositions = React.createClass
   render: ->
@@ -62,10 +84,12 @@ BoxScoreBoardPositions = React.createClass
     seconds = "0" + seconds if seconds < 10
     time_remaining = "#{minutes}:#{seconds}"
 
+    teamParam = @props.teamToStr( position.team )
+
     tr {},
       td {},
         if position.team?
-          a href: position.team.url,
+          Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: teamParam },
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
@@ -108,8 +132,8 @@ BoxScoreBoard = React.createClass
                     span className: 'hidden-xs', 'Time'
               if game.positions?
                 tbody {},
-                  BoxScoreBoardPositions({position: game.positions[0], ends: num_ends, game: game})
-                  BoxScoreBoardPositions({position: game.positions[1], ends: num_ends, game: game})
+                  BoxScoreBoardPositions position: game.positions[0], ends: num_ends, game: game, routerState: @props.routerState, teamToStr: @props.teamToStr
+                  BoxScoreBoardPositions position: game.positions[1], ends: num_ends, game: game, routerState: @props.routerState, teamToStr: @props.teamToStr
 
 BoxScoreTeamRosterAthlete = React.createClass
   render: ->
@@ -327,65 +351,61 @@ BoxScoreShootingPercentages = React.createClass
 BoxScoreContent = React.createClass
   componentDidMount: ->
   render: ->
-    {navigation, draws, competitions, competition} = @props
-    draw = game = null
-    for d in @props.draws
-      for g in d.games
-        continue unless g.active?
-        draw = d
-        game = g
+    {draws, competitions, competition} = @props
+
+    contentProps = @props
+    contentProps.draw = null
+    contentProps.game = null
+    contentProps.teams = []
+
+    for draw in draws
+      for game in draw.games
+        continue unless game.active?
+        contentProps.draw = draw
+        contentProps.game = game
         break
 
-    teams = []
-    if game?
-      for position in game.positions
-        teams.push position.team
+    if contentProps.game?
+      for position in contentProps.game.positions
+        contentProps.teams.push position.team
     else
       return div className: 'row',
         div className: 'col-xs-12', 'Loading Boxscore...'
+
     div className: 'row',
       div className: 'col-xs-12',
-        BreadCrumbNavigation({scoreboard_url: navigation.scoreboard, draws: draws, active_draw: draw, active_game: game})
-        BoxScoreBoard({draw: draw, game: game, competition: competition})
-        if (game.positions[0].team? && (game.positions[0].team.athletes.length > 0)) || (game.positions[1].team? && (game.positions[1].team.athletes.length > 0))
-          BoxScoreTeamRosters({positions: game.positions})
-        if game.positions[0].team? && game.positions[1].team?
-          BoxScoreAnalysis({teams: teams})
-        if game.shot_by_shot == true
-          BoxScoreShootingPercentages({teams: teams})
+        BreadCrumbNavigation contentProps
+        BoxScoreBoard contentProps
+        if (contentProps.game.positions[0].team? && (contentProps.game.positions[0].team.athletes.length > 0)) ||
+           (contentProps.game.positions[1].team? && (contentProps.game.positions[1].team.athletes.length > 0))
+          BoxScoreTeamRosters contentProps
+        if contentProps.game.positions[0].team? && contentProps.game.positions[1].team?
+          BoxScoreAnalysis contentProps
+        if contentProps.game.shot_by_shot == true
+          BoxScoreShootingPercentages contentProps
 
 BoxScore = React.createClass
   getInitialState: ->
     {game: null, draws: []}
 
-  loadDataFromServer: ->
-    jQuery.ajax(
-      url: @props.url
-      dataType: 'jsonp'
-      cache: true
-      jsonpCallback: 'curlcastJSONP'
-      success: (results) =>
-        @setState({
-          game: results
-          draws: results.draws
-          draw_games: results.draw_games
-        })
-        setTimeout @loadDataFromServer, @props.pollInterval
-    )
+  processServerData: (props) ->
+    results = props.data
+    return unless results?
+    @setState
+      game: results
+      draws: results.draws
 
-  componentWillMount: ->
-    @loadDataFromServer()
-
-  componentDidUpdate: ->
-    @props.fixLinks()
+  componentWillReceiveProps: (nextProps) ->
+    @processServerData nextProps
 
   render: ->
     unless @state.game?
       return div className: 'row',
         div className: 'col-xs-12', 'Loading Boxscore...'
 
-    pathPrefix = @props.pathPrefix
-    {game, draws} = @state
-    BoxScoreContent({ draws: draws, competition: @props.competition, navigation: @props.navigation })
+    props = @props
+    props.draws = @state.draws
+    props.game = @state.game
+    BoxScoreContent props
 
 window.CurlcastBoxScore = BoxScore

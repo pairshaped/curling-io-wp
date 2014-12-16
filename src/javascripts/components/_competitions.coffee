@@ -1,6 +1,8 @@
 {nav, div, button, span, a, form, input} = React.DOM
 {table, thead, tr, th, tbody, td}= React.DOM
 
+Link = ReactRouter.Link
+
 CompetitionSearch = React.createClass
   cancelSubmission: (e) ->
     e.preventDefault()
@@ -27,9 +29,10 @@ CompetitionSearch = React.createClass
 CompetitionItem = React.createClass
   render: ->
     competition = @props.competition
+    competition_id = competition.to_param
     tr {},
       td {},
-        a href: competition.url, competition.title
+        Link to: 'scoreboard', params: { competition_id: competition_id }, competition.title
       td {},
         competition.location
       td {},
@@ -50,7 +53,9 @@ CompetitionList = React.createClass
 
 CompetitionBox = React.createClass
   getInitialState: ->
-    { competitions: null, search: null }
+    competitions: null
+    search: null
+    status: 'Loading curling data...'
 
   changeFilter: (search) ->
     return if search == window.undefined
@@ -59,36 +64,26 @@ CompetitionBox = React.createClass
 
   loadDataFromServer: () ->
     jQuery.ajax
-      url: @props.url
+      url: @props.apiRoot + 'competitions.js'
       type: 'GET'
       data: @state.search
+      timeout: 10000
       dataType: 'jsonp'
-      cache: true
-      jsonpCallback: 'curlcastJSONP'
+      jsonpCallback: 'curlcastCompetitionsJSONP'
       success: (results) =>
-        # If we do a loadData pre-emptively, cancel the old timeout
-        @setState competitions: results.competitions
+        @setState competitions: results.competitions, status: 'Loading curling data...'
+      error: (xhr, status, error) =>
+        @setState status: 'Error contacting server, retrying in 10 seconds'
+        setTimeout @loadDataFromServer, 1000
 
   componentWillMount: ->
     @loadDataFromServer()
 
-  fixLinks: ->
-    pathPrefix = @props.pathPrefix
-    jQuery(@getDOMNode()).find("a").each ->
-      url = jQuery(this).attr "href"
-      return unless url? && url.substr(0, 21) == '/stats/organizations/'
-      pieces = url.substr(1).split "/"
-      for i in [0..2]
-        pieces.shift()
-      pieces.unshift pathPrefix
-      jQuery(this).attr "href", pieces.join "/"
-
-  componentDidUpdate: ->
-    @fixLinks()
-
   render: ->
     unless @state.competitions?
-      return div className: 'col-xs-12', 'Loading competition list...'
+      return div className: 'col-xs-12',
+        @state.status
+
     div className: 'col-xs-12',
       CompetitionSearch({changeFilter: @changeFilter})
       CompetitionList({competitions: @state.competitions})

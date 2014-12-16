@@ -1,5 +1,6 @@
 //= require lib/react-with-addons
-//= require lib/0_mdn-bind-polyfill
+//= require lib/react-router
+//= require lib/mdn-bind-polyfill
 //= require lib/es5-sham
 //= require lib/es5-shim
 //= require lib/jquery.jsplumb-1.6.2-min
@@ -7,14 +8,19 @@
 //= require lib/bootstrap/popover
 //= require lib/bootstrap/tab
 //= require lib/bootstrap/dropdown
+//= require lib/bootstrap/collapse
+//= require lib/bootstrap/transition
 //= require_tree ./lib/jsplumb
 //= require ./components/_nav_organization
 //= require ./components/_nav_competition
 //= require ./components/_shell
 //= require ./components/_scoreboard_widget
 //= require ./components/_scoreboard
+//= require ./components/_scoreboard_day
+//= require ./components/_scoreboard_draw
 //= require ./components/_boxscore
 //= require ./components/_competitions
 //= require ./components/_standings
 //= require ./components/_teams
+//= require ./components/_dummy
 //= require_self

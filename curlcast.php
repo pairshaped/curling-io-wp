@@ -49,13 +49,8 @@ if (!class_exists('curlcast')) {
     static $tabs;
     // TODO - refactor the url matching to be a bitmore robust so itcan never match on prefix for example.
     static $templates = array(
-      '\/games' => ['boxscore.php', true],
-      '\/teams' => ['teams.php', true],
-      '\/standings$' => ['standings.php', true],
-      'scoreboard$' => ['scoreboard.php', true],
       'widget' => 'scoreboard_mini.php',
-      'competitions' => [ 'competitions.php', true ],
-      'default' => ['competitions.php', true]
+      'default' => ['routed.php', true]
     );
 
     /**
@@ -309,10 +304,8 @@ if (!class_exists('curlcast')) {
 
       $params = array_merge($params, $_GET);
       $query = http_build_query($params);
-      if($curlcast_array[0] === '') $curlcast_array = array('competitions');
 
       $url = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . implode('/', $curlcast_array);
-      //if ( end($curlcast_array) == 'scoreboard' || in_array( "games", $curlcast_array ) || in_array( "competitions", $curlcast_array ) ) $url .= '.js';
 
       foreach (self::$templates as $pattern => $section) {
         if (preg_match("/$pattern/", implode('/', $curlcast_array))) {
@@ -320,7 +313,6 @@ if (!class_exists('curlcast')) {
           break;
         }
       }
-      $url .= '?'.$query;
       $template_file = plugin_dir_path(__FILE__) . 'templates/' . $section[0];
 
       $template = file_get_contents($template_file);
@@ -543,7 +535,7 @@ if (!class_exists('curlcast')) {
         echo $args['before_title'] . $title . $args['after_title'];
       }
 
-      $access_key  = get_option('curlcast_api_key');
+      $access_key  = (defined('WP_CURLCAST_ACCESS_KEY_OVERRIDE') && WP_CURLCAST_ACCESS_KEY_OVERRIDE) ? WP_CURLCAST_ACCESS_KEY_OVERRIDE : get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url() . '/' . $page_prefix;
       $url         = WP_CURLCAST_BASE_URL . '/' . $access_key . '/' . WP_CURLCAST_WIDGET_URL . '?base_url=' . urlencode($base_url);
