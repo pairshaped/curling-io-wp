@@ -125,7 +125,6 @@ TeamListItem = React.createClass
     team = @props.team
     tr {},
       td {},
-        #a href: "#!" + team.url, onClick: @showTeam,
         Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: team.to_param },
           team.name
       td {}, team.coach || ''
@@ -151,7 +150,7 @@ TeamList = React.createClass
 
 Teams = React.createClass
   getInitialState: ->
-    {teams: null, team: null, base_url: null}
+    {teams: null, team: null}
 
   baseUrl: ->
     @props.apiRoot.substr(0, @props.apiRoot.indexOf('/', 8))
@@ -184,7 +183,7 @@ Teams = React.createClass
   render: ->
     unless @state.teams? || @state.team?
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading Teams...'
+        div className: 'col-xs-12', 'Loading Team Data...'
 
     passedProps = @props
     passedProps.absoluteUrl = @absoluteUrl

@@ -48,7 +48,6 @@ Shell = React.createClass
     jQuery.ajax
       url: competition_url
       dataType: 'jsonp'
-      #cache: true
       jsonpCallback: 'curlcastJSONP2'
       success: (results) =>
         @setState

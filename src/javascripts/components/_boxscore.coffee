@@ -84,10 +84,6 @@ BoxScoreBoardPositions = React.createClass
     seconds = position.time_remaining - (minutes * 60)
     seconds = "0" + seconds if seconds < 10
     time_remaining = "#{minutes}:#{seconds}"
-    team_url_parts = position.team.url.split('/')
-    team_url_parts.shift()
-    team_url_parts.pop()
-    team_url = team_url_parts.join('/') + "#!" + position.team.url
 
     teamParam = @props.teamToStr( position.team )
 
