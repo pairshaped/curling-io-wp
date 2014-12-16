@@ -24,7 +24,6 @@ BreadCrumbGame = React.createClass
     li className: active_class, role: 'presentation',
       Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: @props.game.id }, href: '#', role: 'menuitem',
         @props.game.display_name
-      #a href: @props.game.boxscore_url, @props.game.display_name
 
 BreadCrumbNavigation = React.createClass
   render: ->
@@ -91,7 +90,6 @@ BoxScoreBoardPositions = React.createClass
       td {},
         if position.team?
           Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: teamParam },
-          #a href: position.team.url || "#team-url",  # FIXME: team url
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
@@ -360,11 +358,11 @@ BoxScoreContent = React.createClass
     contentProps.game = null
     contentProps.teams = []
 
-    for d in draws
-      for g in d.games
-        continue unless g.active?
-        contentProps.draw = d
-        contentProps.game = g
+    for draw in draws
+      for game in draw.games
+        continue unless game.active?
+        contentProps.draw = draw
+        contentProps.game = game
         break
 
     if contentProps.game?
@@ -401,7 +399,6 @@ BoxScore = React.createClass
     @processServerData nextProps
 
   render: ->
-    #console.log 'Boxscore.render', @state.game?, @state
     unless @state.game?
       return div className: 'row',
         div className: 'col-xs-12', 'Loading Boxscore...'
