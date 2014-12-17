@@ -30062,22 +30062,22 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   BoxScoreContent = React.createClass({
     componentDidMount: function() {},
     render: function() {
-      var competition, competitions, contentProps, d, draws, g, position, _i, _j, _k, _len, _len1, _len2, _ref4, _ref5, _ref6;
+      var competition, competitions, contentProps, draw, draws, game, position, _i, _j, _k, _len, _len1, _len2, _ref4, _ref5, _ref6;
       _ref4 = this.props, draws = _ref4.draws, competitions = _ref4.competitions, competition = _ref4.competition;
       contentProps = this.props;
       contentProps.draw = null;
       contentProps.game = null;
       contentProps.teams = [];
       for (_i = 0, _len = draws.length; _i < _len; _i++) {
-        d = draws[_i];
-        _ref5 = d.games;
+        draw = draws[_i];
+        _ref5 = draw.games;
         for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
-          g = _ref5[_j];
-          if (g.active == null) {
+          game = _ref5[_j];
+          if (game.active == null) {
             continue;
           }
-          contentProps.draw = d;
-          contentProps.game = g;
+          contentProps.draw = draw;
+          contentProps.game = game;
           break;
         }
       }
