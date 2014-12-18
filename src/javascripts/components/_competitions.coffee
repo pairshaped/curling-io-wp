@@ -55,7 +55,7 @@ CompetitionBox = React.createClass
   getInitialState: ->
     competitions: null
     search: null
-    status: 'Loading curling data...'
+    status: 'Loading data...'
 
   changeFilter: (search) ->
     return if search == window.undefined
@@ -71,9 +71,9 @@ CompetitionBox = React.createClass
       dataType: 'jsonp'
       jsonpCallback: 'curlcastCompetitionsJSONP'
       success: (results) =>
-        @setState competitions: results.competitions, status: 'Loading curling data...'
+        @setState competitions: results.competitions, status: 'Loading data...'
       error: (xhr, status, error) =>
-        @setState status: 'Error contacting server, retrying in 10 seconds'
+        @setState status: 'Error loading data, retrying...'
         setTimeout @loadDataFromServer, 1000
 
   componentWillMount: ->
@@ -89,5 +89,3 @@ CompetitionBox = React.createClass
       CompetitionList({competitions: @state.competitions})
 
 window.CurlcastCompetitions = CompetitionBox
-
-

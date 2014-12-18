@@ -1,4 +1,3 @@
-
 {div, p, a, strong, br, nav, button, span, strong} = React.DOM
 {table, thead, tbody, tr, td, th} = React.DOM
 {h6, h4, h3} = React.DOM
@@ -55,7 +54,7 @@ ScoreboardDay = React.createClass
     day = @state.day
 
     unless day?
-      return div className: 'col-xs-12', 'Loading competition...'
+      return div className: 'col-xs-12', 'Loading data...'
 
     location_str = ''
     if scoreboard.location? && scoreboard.venue?
@@ -71,7 +70,7 @@ ScoreboardDay = React.createClass
         h4 className: 'visible-xs', day.starts_on
       div className: 'col-sm-2 hidden-xs',
         h6 className: 'text-right',
-          'Current Time'
+          CULRCAST_LANG.common.current_time
           br {}
           scoreboard.time_now
       div className: 'col-xs-12',
@@ -81,4 +80,3 @@ ScoreboardDay = React.createClass
           CurlcastScoreboardDraw drawProps
 
 window.CurlcastScoreboardDay = ScoreboardDay
-

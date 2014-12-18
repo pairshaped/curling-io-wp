@@ -14,8 +14,7 @@ Scoreboard = React.createClass
   processServerData: (props) ->
     results = props.data
     unless results?
-      loadingStatus = 'Loading...'
-      loadingStatus = "Loading #{props.competition.title}..." if props.competition?
+      loadingStatus = 'Loading data...'
       @setState scoreboard: null, days: null, loadingStatus: loadingStatus
       return
 
@@ -55,4 +54,3 @@ Scoreboard = React.createClass
       CurlcastScoreboardDay dayProps
 
 window.CurlcastScoreboard = Scoreboard
-

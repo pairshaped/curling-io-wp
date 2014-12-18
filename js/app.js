@@ -28643,8 +28643,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         rawServerData: null,
         rawServerDataSucceeded: true,
         queryInterval: null,
-        status: 'Loading curling data...',
-        componentStatus: 'Loading...',
+        status: 'Loading data...',
+        componentStatus: 'Loading data...',
         retryDelay: 5000,
         lastPageDataObject: null,
         currentRoute: null
@@ -28701,10 +28701,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             var newStatus, seconds;
             console.debug('Shell.loadNavigationFromServer.ajax.error');
             seconds = _this.state.retryDelay / 1000;
-            newStatus = "Could not load data, retrying in " + seconds + " seconds...";
-            if (seconds > 5) {
-              newStatus = "Still having connectivity problems, retrying in " + seconds + " seconds...";
-            }
+            newStatus = "Error loading data, retrying...";
             _this.setState({
               status: newStatus,
               retryDelay: _this.state.retryDelay >= 30000 ? _this.state.retryDelay : _this.state.retryDelay + 5000
@@ -28754,7 +28751,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             var timing;
             timing = interval != null ? " in " + (Math.round(interval / 1000)) + " seconds" : '';
             _this.setState({
-              componentStatus: "Error getting page data, retrying" + timing + "...",
+              componentStatus: "Error loading data, retrying...",
               rawServerDataSucceeded: false
             });
             if (interval != null) {
@@ -28881,13 +28878,15 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         key: 'org-nav',
         competitions: other_competitions,
         competitionChanged: this.competitionChanged,
-        routerState: this.props.routerState
+        routerState: this.props.routerState,
+        lang: this.props.lang
       })), div({
         className: 'col-sm-9 col-xs-12'
       }, CompetitionNavigation({
         key: 'comp-nav',
         competition: competition,
-        currentRoute: this.state.currentRoute
+        currentRoute: this.state.currentRoute,
+        lang: this.props.lang
       }), this.state.rawServerDataSucceeded === false ? this.state.componentStatus : void 0, ReactRouter.RouteHandler(routedProps)));
     }
   });
@@ -28932,7 +28931,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         })(this),
         error: function() {
           return this.setState({
-            placeholderMessage: "There was an error getting active competitions, retrying..."
+            placeholderMessage: "Error loading data, retrying..."
           });
         }
       });
@@ -29011,7 +29010,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       _ref1 = this.props.draw, id = _ref1.id, label = _ref1.label, starts = _ref1.starts, games = _ref1.games;
       return div({
         className: "col-xs-12"
-      }, p(null, strong(null, "Draw " + label + ": "), starts), games.length === 0 ? p(null, "No Games Scheduled Yet") : (p(null, "Prefix: " + this.props.pathPrefix), table({
+      }, p(null, strong(null, "Draw " + label + ": "), starts), games.length === 0 ? p(null, "No Games Scheduled Yet") : table({
         className: "table table-bordered table-condensed"
       }, games.map((function(_this) {
         return function(game) {
@@ -29022,7 +29021,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             baseUrl: _this.props.baseUrl
           });
         };
-      })(this)))));
+      })(this))));
     }
   });
 
@@ -29108,10 +29107,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       var d, days, draw, id, k, last_day, last_day_id, loadingStatus, obj, results, _i, _len, _ref4;
       results = props.data;
       if (results == null) {
-        loadingStatus = 'Loading...';
-        if (props.competition != null) {
-          loadingStatus = "Loading " + props.competition.title + "...";
-        }
+        loadingStatus = 'Loading data...';
         this.setState({
           scoreboard: null,
           days: null,
@@ -29283,7 +29279,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       if (day == null) {
         return div({
           className: 'col-xs-12'
-        }, 'Loading competition...');
+        }, 'Loading data...');
       }
       location_str = '';
       if ((scoreboard.location != null) && (scoreboard.venue != null)) {
@@ -29311,7 +29307,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'col-sm-2 hidden-xs'
       }, h6({
         className: 'text-right'
-      }, 'Current Time', br({}), scoreboard.time_now)), div({
+      }, CULRCAST_LANG.common.current_time, br({}), scoreboard.time_now)), div({
         className: 'col-xs-12'
       }, this.props.routerState.params.draw != null ? ReactRouter.RouteHandler(drawProps) : CurlcastScoreboardDraw(drawProps)));
     }
@@ -29637,7 +29633,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         },
         href: '#',
         role: 'menuitem'
-      }, "Draw " + this.props.draw.label + ", " + this.props.draw.start_at_hour));
+      }, "" + CURLCAST_LANG.common.draw + " " + this.props.draw.label + ", " + this.props.draw.start_at_hour));
     }
   });
 
@@ -29667,9 +29663,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var dayParam, draw, drawParam, draws, game, _ref4;
       _ref4 = this.props, draws = _ref4.draws, draw = _ref4.draw, game = _ref4.game;
-      if ((draw == null) || (game == null)) {
-        return span({}, "Waiting for navigation data...");
-      }
       dayParam = this.props.dayToStr(this.props.dayFromDraw(this.props.draw));
       drawParam = this.props.drawToStr(this.props.draw);
       return ol({
@@ -29680,7 +29673,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           competition_id: this.props.routerState.params.competition_id,
           day: dayParam
         }
-      }, 'Scores')), li({
+      }, CURLCAST_LANG.common.scores)), li({
         className: 'dropdown hidden-xs'
       }, Link({
         to: 'scoreboard-draw',
@@ -29689,7 +29682,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           day: dayParam,
           draw: drawParam
         }
-      }, "Draw " + draw.label + ", " + draw.start_at_hour), a({
+      }, "" + CURLCAST_LANG.common.draw + " " + draw.label + ", " + draw.start_at_hour), a({
         href: '#',
         className: 'dropdown-toggle',
         'data-toggle': 'dropdown'
@@ -29774,7 +29767,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'hidden-xs'
       }, position.team.name), span({
         className: 'visible-xs'
-      }, position.team.short_name)) : 'TBD'), td({
+      }, position.team.short_name)) : CURLCAST_LANG.common.tbd), td({
         className: 'lsfe'
       }, lsfe), (function() {
         _results = [];
@@ -29797,7 +29790,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var competition, draw, game, num_ends, _i, _ref4, _results;
       if (this.props.draw == null) {
-        return span({}, "Loading Scores...");
+        return span({}, CURLCAST_LANG.common.ajax_loading);
       }
       _ref4 = this.props, competition = _ref4.competition, game = _ref4.game, draw = _ref4.draw;
       num_ends = Math.max(competition.number_of_ends || (game.positions[0].end_scores || []).length, (game.positions[1].end_scores || []).length);
@@ -29905,7 +29898,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             team: position.team
           });
         }
-      }) : span({}, "Loading positions..."));
+      }) : span({}, "Loading data..."));
     }
   });
 
@@ -29980,7 +29973,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         team: teams[1],
         counter: 0
       };
-      ranking = ["Fourth", "Third", "Second", "Lead"];
+      ranking = [CURLCAST_LANG.common.fourth, CURLCAST_LANG.common.third, CURLCAST_LANG.common.second, CURLCAST_LANG.common.lead];
       players = [];
       num = Math.max(left.team.athletes.length, right.team.athletes.length);
       for (i = _i = 0; 0 <= num ? _i < num : _i > num; i = 0 <= num ? ++_i : --_i) {
@@ -30092,7 +30085,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'row'
         }, div({
           className: 'col-xs-12'
-        }, 'Loading Boxscore...'));
+        }, 'Loading data...'));
       }
       return div({
         className: 'row'
@@ -30130,7 +30123,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'row'
         }, div({
           className: 'col-xs-12'
-        }, 'Loading Boxscore...'));
+        }, 'Loading data...'));
       }
       props = this.props;
       props.draws = this.state.draws;
@@ -30235,7 +30228,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return {
         competitions: null,
         search: null,
-        status: 'Loading curling data...'
+        status: 'Loading data...'
       };
     },
     changeFilter: function(search) {
@@ -30259,14 +30252,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return function(results) {
             return _this.setState({
               competitions: results.competitions,
-              status: 'Loading curling data...'
+              status: 'Loading data...'
             });
           };
         })(this),
         error: (function(_this) {
           return function(xhr, status, error) {
             _this.setState({
-              status: 'Error contacting server, retrying in 10 seconds'
+              status: 'Error loading data, retrying...'
             });
             return setTimeout(_this.loadDataFromServer, 1000);
           };
@@ -30621,7 +30614,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var roundProps;
       if (this.state.rounds == null) {
-        return div({}, 'Loading Standings...');
+        return div({}, 'Loading data...');
       }
       roundProps = this.props;
       roundProps.rounds = this.state.rounds;
@@ -30837,7 +30830,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       return table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, "Team Name"), th({}, "Coach"), th({}, "Affliation"), th({}, "Location"))), tbody({}, this.props.teams.map((function(_this) {
+      }, thead({}, tr({}, th({}, "Team"), th({}, "Coach"), th({}, "Affliation"), th({}, "Location"))), tbody({}, this.props.teams.map((function(_this) {
         return function(team) {
           var teamProps;
           teamProps = _this.props;
@@ -30907,7 +30900,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'row'
         }, div({
           className: 'col-xs-12'
-        }, 'Loading Team Data...'));
+        }, 'Loading data...'));
       }
       passedProps = this.props;
       passedProps.absoluteUrl = this.absoluteUrl;

@@ -132,7 +132,6 @@ StandingsTab = React.createClass
     li className: (if @props.round.active == true then 'active' else ''), 'data-tab-target': @props.round.to_param,
       Link to: 'standings-round', params: { competition_id: @props.routerState.params.competition_id, round_id: @props.round.to_param }, className: 'tab-link',
         @props.round.name
-      #a href: @props.href, 'data-toggle': 'tab', onClick: @propogateTab, @props.round.name
 
 StandingsTabContainer = React.createClass
   render: ->
@@ -208,7 +207,7 @@ Standings = React.createClass
     @tabChanged()
 
   render: ->
-    return div {}, 'Loading Standings...' unless @state.rounds?
+    return div {}, 'Loading data...' unless @state.rounds?
 
     roundProps = @props
     roundProps.rounds = @state.rounds

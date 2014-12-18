@@ -22,7 +22,7 @@ Scoreboard = React.createClass
           placeholderMessage: "There are no active competitions."
           competitions: results
       error: ->
-        @setState placeholderMessage: "There was an error getting active competitions, retrying..."
+        @setState placeholderMessage: "Error loading data, retrying..."
     )
 
   componentWillMount: ->
@@ -76,8 +76,6 @@ Draw = React.createClass
         p null,
           "No Games Scheduled Yet"
       else
-        p null,
-          "Prefix: #{@props.pathPrefix}"
         table className: "table table-bordered table-condensed",
           games.map (game) =>
             Game({key: game.id, game: game, pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})

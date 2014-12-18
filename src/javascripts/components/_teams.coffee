@@ -137,7 +137,7 @@ TeamList = React.createClass
     table className: 'table table-bordered table-condensed',
       thead {},
         tr {},
-          th {}, "Team Name"
+          th {}, "Team"
           th {}, "Coach"
           th {}, "Affliation"
           th {}, "Location"
@@ -183,7 +183,7 @@ Teams = React.createClass
   render: ->
     unless @state.teams? || @state.team?
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading Team Data...'
+        div className: 'col-xs-12', 'Loading data...'
 
     passedProps = @props
     passedProps.absoluteUrl = @absoluteUrl
@@ -196,4 +196,3 @@ Teams = React.createClass
       TeamShow passedProps
 
 window.CurlcastTeams = Teams
-

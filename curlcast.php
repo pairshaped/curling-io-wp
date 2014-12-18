@@ -1,6 +1,5 @@
 <?php
-/*
-Plugin Name: Curlcast Stats
+/*Plugin Name: Curlcast Stats
 Description: Displays Curlcast Stats.
 Version: __CURLCAST_VERSION__
 Author: Pair Shaped Inc.
@@ -49,8 +48,8 @@ if (!class_exists('curlcast')) {
     static $tabs;
     // TODO - refactor the url matching to be a bitmore robust so itcan never match on prefix for example.
     static $templates = array(
-      'widget' => 'scoreboard_mini.php',
-      'default' => ['routed.php', true]
+      'widget' => 'scoreboard_widget.php',
+      'default' => ['main.php', true]
     );
 
     /**
@@ -91,6 +90,17 @@ if (!class_exists('curlcast')) {
               'default' => 'stats',
               'required' => 'yes',
               'type' => 'text'
+            ),
+            'curlcast_default_language' => array(
+              'name' => __('Default language', 'curlcast'),
+              'helptext' => __('Default language used in the stats pages', 'curlcast'),
+              'default' => 'en',
+              'required' => 'yes',
+              'type' => 'dropdown',
+              'values' => array(
+                'en' => __('Engish', 'curlcast'),
+                'fr' => __('Français', 'curlcast')
+              )
             )
           )
         )
@@ -273,7 +283,7 @@ if (!class_exists('curlcast')) {
 
       $page_id  = get_option('curlcast_page_id');
       if ($curlcast_page != '') {
-		$wp_query->query_vars['curlcast_page'] = $curlcast_page;
+        $wp_query->query_vars['curlcast_page'] = $curlcast_page;
       }
     }
 
@@ -282,9 +292,11 @@ if (!class_exists('curlcast')) {
      */
     function enqueue_styles() {
       if(!is_admin()) {
+        $lang = get_option('curlcast_default_language');
+        echo "<!-- $lang -->";
         wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
-        // wp_enqueue_script('jquery.postmessage', plugins_url('js/jquery.postmessage.min.js', __FILE__));
         wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
+        wp_enqueue_script('curlcast-lang-script', plugins_url("js/$lang.js", __FILE__));
       }
     }
 
@@ -298,6 +310,7 @@ if (!class_exists('curlcast')) {
       $access_key  = (defined('WP_CURLCAST_ACCESS_KEY_OVERRIDE') && WP_CURLCAST_ACCESS_KEY_OVERRIDE) ? WP_CURLCAST_ACCESS_KEY_OVERRIDE : get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url().'/'.$page_prefix;
+      $lang        = get_option('curlcast_default_language');
 
       $params = array();
       $params['base_url'] = $base_url;
@@ -318,6 +331,8 @@ if (!class_exists('curlcast')) {
       $template = file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
       $template = str_replace('{path_prefix}', $base_url, $template);
+      $template = str_replace('{active_language}', get_option('curlcast_default_language'), $template);
+      $template = str_replace('{lang_json}', file_get_contents("i18n/{$lang}.js"), $template);
 
       return $template;
     }
@@ -445,6 +460,16 @@ if (!class_exists('curlcast')) {
           case 'textarea':
             $edit = '<textarea id="' . htmlspecialchars($option) . '" name="' . htmlspecialchars($option) . '" style="width:100%;height:70px;">' . htmlspecialchars(stripslashes($value)) . '</textarea>
                 <p style="margin:2px 0;color:#aaa"><i>' . $help . '</i></p>';
+            break;
+
+          case 'dropdown':
+            $edit = '<select id="' . htmlspecialchars($option . $option_key) . '" name="' . htmlspecialchars($option) . '">';
+            foreach($params['values'] as $key => $val)
+            {
+              $edit .= '<option value="' . $key . '"' . ($key == $value ? ' selected' : '') . '>' . $val . '</option>';
+            }
+            $edit .= '</select>';
+            $edit .= '<p style="margin:2px 0; color:#aaa"><i>' . $help . '</i></p>';
             break;
 
           case 'dropdown_pages':

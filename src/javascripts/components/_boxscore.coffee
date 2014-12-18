@@ -15,7 +15,7 @@ BreadCrumbDraw = React.createClass
 
     li className: active_class, role: 'presentation',
       Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: @props.draw.games[0].id }, href: '#', role: 'menuitem',
-        "Draw #{@props.draw.label}, #{@props.draw.start_at_hour}"
+        "#{CURLCAST_LANG.common.draw} #{@props.draw.label}, #{@props.draw.start_at_hour}"
 
 BreadCrumbGame = React.createClass
   render: ->
@@ -28,8 +28,6 @@ BreadCrumbGame = React.createClass
 BreadCrumbNavigation = React.createClass
   render: ->
     {draws, draw, game} = @props
-    if !draw? || !game?
-      return span {}, "Waiting for navigation data..."
 
     dayParam = @props.dayToStr @props.dayFromDraw( @props.draw )
     drawParam = @props.drawToStr @props.draw
@@ -37,10 +35,10 @@ BreadCrumbNavigation = React.createClass
     ol className: 'breadcrumb',
       li {},
         Link to: 'scoreboard', params: { competition_id: @props.routerState.params.competition_id, day: dayParam },
-          'Scores'
+          CURLCAST_LANG.common.scores
       li className: 'dropdown hidden-xs',
         Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam },
-          "Draw #{draw.label}, #{draw.start_at_hour}"
+          "#{CURLCAST_LANG.common.draw} #{draw.label}, #{draw.start_at_hour}"
         a href: '#', className: 'dropdown-toggle', 'data-toggle': 'dropdown',
           span className: 'caret'
         ul className: 'dropdown-menu', role: 'menu',
@@ -93,7 +91,7 @@ BoxScoreBoardPositions = React.createClass
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
-          'TBD'
+          CURLCAST_LANG.common.tbd
       td className: 'lsfe', lsfe
       [0..(ends-1)].map (endscore, key) ->
         td key: key, className: 'end-score', end_scores[endscore].score
@@ -103,7 +101,7 @@ BoxScoreBoardPositions = React.createClass
 BoxScoreBoard = React.createClass
   render: ->
     unless @props.draw?
-      return span {}, "Loading Scores..."
+      return span {}, CURLCAST_LANG.common.ajax_loading
 
     {competition, game, draw} = @props
     num_ends = Math.max competition.number_of_ends || (game.positions[0].end_scores || []).length, (game.positions[1].end_scores || []).length
@@ -171,7 +169,7 @@ BoxScoreTeamRosters = React.createClass
           if position.team? && position.team.athletes.length > 0
             BoxScoreTeamRoster({key: position.team.id, team: position.team})
       else
-        span {}, "Loading positions..."
+        span {}, "Loading data..."
 
 BoxScoreAnalysisTeam = React.createClass
   render: ->
@@ -267,7 +265,7 @@ BoxScoreShootingPercentages = React.createClass
     right = { team: teams[1], counter: 0 }
 
     # Set the rank order
-    ranking = [ "Fourth", "Third", "Second", "Lead" ]
+    ranking = [ CURLCAST_LANG.common.fourth, CURLCAST_LANG.common.third, CURLCAST_LANG.common.second, CURLCAST_LANG.common.lead ]
     players = []
     # Set the maximum number of athletes available between both teams
     num = Math.max left.team.athletes.length, right.team.athletes.length
@@ -370,7 +368,7 @@ BoxScoreContent = React.createClass
         contentProps.teams.push position.team
     else
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading Boxscore...'
+        div className: 'col-xs-12', 'Loading data...'
 
     div className: 'row',
       div className: 'col-xs-12',
@@ -401,7 +399,7 @@ BoxScore = React.createClass
   render: ->
     unless @state.game?
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading Boxscore...'
+        div className: 'col-xs-12', 'Loading data...'
 
     props = @props
     props.draws = @state.draws
