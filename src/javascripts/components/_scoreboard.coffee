@@ -37,10 +37,13 @@ Scoreboard = React.createClass
   componentWillReceiveProps: (nextProps) ->
     @processServerData nextProps
 
+  componentWillMount: ->
+    @processServerData @props
+
   render: ->
-    unless @state.days?
-      return div className: 'row',
-        div className: 'col-xs-12', @state.loadingStatus
+    #unless @state.days?
+    #  return div className: 'row',
+    #    div className: 'col-xs-12', @state.loadingStatus
 
     { days, scoreboard, day, draw } = @state
 

@@ -12,7 +12,7 @@ StandingsBracketGame = React.createClass
   popoverHtml: ->
     game = @props.game
     game_date = "Not yet scheduled"
-    game_date = "Draw #{game.draw.label}, #{game.draw.starts_at_formatted}" if game.draw?
+    game_date = "#{CURLCAST_LANG.common.draw} #{game.draw.label}, #{game.draw.starts_at_formatted}" if game.draw?
 
     game_moves_to = []
     game_moves_to.push "#{CURLCAST_LANG.standings.winner_to} #{game.winner_to.game.name}" if game.winner_to?
@@ -104,9 +104,9 @@ StandingsRoundRobin = React.createClass
         table className: 'table table-bordered table-condensed',
           thead {},
             tr {},
-              th {}, CURLCAST_LANG.table.team
-              th className: 'round-robin-won', 'W'
-              th className: 'round-robin-lost', 'L'
+              th {}, CURLCAST_LANG.common.table.team
+              th className: 'round-robin-won', CURLCAST_LANG.common.table.w
+              th className: 'round-robin-lost', CURLCAST_LANG.common.table.l
           tbody {}, # TODO: Refactor into it's own component
             @props.round.teams.map (team, idx) ->
               tr key: idx,
@@ -203,11 +203,17 @@ Standings = React.createClass
   componentWillReceiveProps: (nextProps) ->
     @processServerData nextProps
 
+  componentWillMount: ->
+    @processServerData @props
+
+  componentDidMount: ->
+    @tabChanged()
+
   componentDidUpdate: ->
     @tabChanged()
 
   render: ->
-    return div {}, CURLCAST_LANG.common.ajax_loading unless @state.rounds?
+    # return div {}, CURLCAST_LANG.common.ajax_loading unless @state.rounds?
 
     roundProps = @props
     roundProps.rounds = @state.rounds

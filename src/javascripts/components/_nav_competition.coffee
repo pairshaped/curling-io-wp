@@ -18,16 +18,16 @@ CompetitionNavigation = React.createClass
         ul className: 'nav navbar-nav',
           li className: (if currentRoute == 'scoreboard' || currentRoute == 'boxscore' then 'active' else null), # TODO: Set className: 'active' on proper route(s)
             Link to: 'scoreboard', params: { competition_id: competition.to_param }, #, onClick: @props.shellComponentChanged,
-              CURLCAST_LANG.nav.scoreboard
+              CURLCAST_LANG.common.nav.scoreboard
           li className: (if currentRoute == 'standings' then 'active' else null),
             Link to: 'standings', params: { competition_id: competition.to_param },
-              CURLCAST_LANG.nav.standings_draw
+              CURLCAST_LANG.common.nav.standings_draw
           li className: (if currentRoute == 'teams' then 'active' else null),
             Link to: 'teams', params: { competition_id: competition.to_param },
-              CURLCAST_LANG.nav.teams
+              CURLCAST_LANG.common.nav.teams
           li className: 'visible-xs',
             Link to: 'competitions',
-              CURLCAST_LANG.nav.more_competitions
+              CURLCAST_LANG.common.nav.more_competitions
 
 window.CompetitionNavigation = CompetitionNavigation
 

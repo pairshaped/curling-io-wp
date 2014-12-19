@@ -193,8 +193,9 @@ Shell = React.createClass
         OrganizationNavigation key: 'org-nav', competitions: other_competitions, competitionChanged: @competitionChanged, routerState: @props.routerState, lang: @props.lang
       div className: 'col-sm-9 col-xs-12',
         CompetitionNavigation key: 'comp-nav', competition: competition, currentRoute: @state.currentRoute, lang: @props.lang
-        if @state.rawServerDataSucceeded == false
-          @state.componentStatus
-        ReactRouter.RouteHandler routedProps
+        if routedProps.data
+          ReactRouter.RouteHandler routedProps
+        else
+          CURLCAST_LANG.common.ajax_loading
 
 window.CurlcastShell = Shell

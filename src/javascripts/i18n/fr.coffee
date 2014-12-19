@@ -21,6 +21,11 @@ window.CURLCAST_LANG =
     scores: 'CHANGEME'
     vs: 'CHANGEME'
     boxscore: 'CHANGEME'
+    won: 'CHANGEME'
+    lost: 'CHANGEME'
+    conceded: 'CHANGEME'
+    forfeited: 'CHANGEME'
+    time_penalized: 'CHANGEME'
 
     nav:
       scoreboard: 'CHANGEME'
@@ -57,6 +62,7 @@ window.CURLCAST_LANG =
       position: 'CHANGEME'
       delivery: 'CHANGEME'
       shots: 'CHANGEME'
+      point: 'CHANGEME'
       points: 'CHANGEME'
       team_total: 'CHANGEME'
 

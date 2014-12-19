@@ -44,12 +44,12 @@ CompetitionList = React.createClass
       table className: 'table table-bordered table-striped',
         thead {},
           tr {},
-            th {}, CURLCAST_LANG.table.competition
-            th {}, CURLCAST_LANG.table.location
-            th {}, CURLCAST_LANG.table.occurs_at
+            th {}, CURLCAST_LANG.common.table.competition
+            th {}, CURLCAST_LANG.common.table.location
+            th {}, CURLCAST_LANG.common.table.occurs_at
         tbody {},
           @props.competitions.map (competition) ->
-            CompetitionItem({key: competition.id, competition: competition})
+            CompetitionItem key: competition.id, competition: competition
 
 CompetitionBox = React.createClass
   getInitialState: ->

@@ -29,9 +29,8 @@
     ReactRouter.run(routes, opt, function(Handler, state){
       React.renderComponent( React.createElement( Handler, {
         apiRoot: '{url}',
-        prefix: '{path_prefix}',
-        lang: CURLCAST_LANG,
-        routerState: state,
+        //prefix: '{path_prefix}',
+        routerState: state
       }), document.getElementById('curlcast') );
     });
 

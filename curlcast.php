@@ -7,6 +7,8 @@ Author: Pair Shaped Inc.
 if (!class_exists('curlcast')) {
   define('WP_CURLCAST_VERSION', '__CURLCAST_VERSION__');
 
+  define('WP_CURLCAST_DEFAULT_LANGUAGE', 'en');
+
   # Set environment
   # Ideally, we should be setting/including this using a env.php file with the appropriate configuration
   define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
@@ -292,8 +294,7 @@ if (!class_exists('curlcast')) {
      */
     function enqueue_styles() {
       if(!is_admin()) {
-        $lang = get_option('curlcast_default_language');
-        echo "<!-- $lang -->";
+        $lang = get_option('curlcast_default_language', WP_CURLCAST_DEFAULT_LANGUAGE);
         wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
         wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
         wp_enqueue_script('curlcast-lang-script', plugins_url("js/$lang.js", __FILE__));
@@ -331,8 +332,6 @@ if (!class_exists('curlcast')) {
       $template = file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
       $template = str_replace('{path_prefix}', $base_url, $template);
-      $template = str_replace('{active_language}', get_option('curlcast_default_language'), $template);
-      $template = str_replace('{lang_json}', file_get_contents("i18n/{$lang}.js"), $template);
 
       return $template;
     }

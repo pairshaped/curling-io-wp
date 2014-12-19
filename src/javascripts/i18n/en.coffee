@@ -21,6 +21,11 @@ window.CURLCAST_LANG =
     scores: 'Scores'
     vs: 'vs'
     boxscore: 'Boxscore'
+    won: 'Won'
+    lost: 'Lost'
+    conceded: 'Conceded'
+    forfeited: 'Forfeited'
+    time_penalized: 'Time Penalized'
 
     nav:
       scoreboard: 'Scoreboard'
@@ -57,6 +62,7 @@ window.CURLCAST_LANG =
       position: 'Position'
       delivery: 'Delivery'
       shots: 'Shots'
+      point: 'Pt'
       points: 'Pts'
       team_total: 'Team Total'
 

@@ -97,12 +97,12 @@ DrawSheetItem = React.createClass
                 th {},
                   strong {}, sheet_name
                 th className: 'lsfe',
-                  span className: 'hidden-xs', CURLCAST_LANG.table.lsfe
+                  span className: 'hidden-xs', CURLCAST_LANG.common.table.lsfe
                 [1..number_of_ends].map (endscore, key) ->
                   th className: 'end-score', key: key, "#{endscore}"
                 th className: 'total',
-                  span className: 'hidden-xs', CURLCAST_LANG.table.total
-                  span className: 'visible-xs', CURLCAST_LANG.table.total_xs
+                  span className: 'hidden-xs', CURLCAST_LANG.common.table.total
+                  span className: 'visible-xs', CURLCAST_LANG.common.table.total_xs
                 if boxscore_display
                   th className: 'hidden-xs', width: '10%', ''
             tbody {},

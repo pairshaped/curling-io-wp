@@ -70,7 +70,7 @@ ScoreboardDay = React.createClass
         h4 className: 'visible-xs', day.starts_on
       div className: 'col-sm-2 hidden-xs',
         h6 className: 'text-right',
-          CULRCAST_LANG.common.current_time
+          CURLCAST_LANG.common.current_time
           br {}
           scoreboard.time_now
       div className: 'col-xs-12',
