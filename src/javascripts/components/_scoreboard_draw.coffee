@@ -15,7 +15,6 @@ DrawListItem = React.createClass
 
     li className: active_class,
       Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam }, activeClassName: 'router-active',
-      #a {},
         "#{CURLCAST_LANG.common.draw} #{draw.label}"
         br {}
         draw.starts_at
@@ -64,7 +63,6 @@ DrawSheetPosition = React.createClass
       td {},
         if position.team?
           Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: team_id },
-          #a href: @props.teams_url + '#!' + position.team.url,
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
@@ -75,7 +73,7 @@ DrawSheetPosition = React.createClass
       td className: 'total', total
       if boxscore == true
         td rowSpan: '2', className: 'hidden-xs',
-          strong {}, game.state
+          strong {}, CURLCAST_LANG.common['state_' + game.state.toLowerCase()] || game.state
           br {}
           Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: game.id }, onClick: @props.shellComponentChanged,
             CURLCAST_LANG.common.boxscore

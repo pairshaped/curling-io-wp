@@ -1,8 +1,4 @@
-{div, p, a, strong, br, nav, button, span, strong} = React.DOM
-{table, thead, tbody, tr, td, th} = React.DOM
-{h6, h4, h3} = React.DOM
-{ul, li} = React.DOM
-{Link, RouteHandler} = ReactRouter
+{RouteHandler} = ReactRouter
 
 Scoreboard = React.createClass
   getInitialState: ->
@@ -41,10 +37,6 @@ Scoreboard = React.createClass
     @processServerData @props
 
   render: ->
-    #unless @state.days?
-    #  return div className: 'row',
-    #    div className: 'col-xs-12', @state.loadingStatus
-
     { days, scoreboard, day, draw } = @state
 
     dayProps = @props

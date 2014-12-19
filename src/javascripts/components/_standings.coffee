@@ -213,8 +213,6 @@ Standings = React.createClass
     @tabChanged()
 
   render: ->
-    # return div {}, CURLCAST_LANG.common.ajax_loading unless @state.rounds?
-
     roundProps = @props
     roundProps.rounds = @state.rounds
     roundProps.isActive = @isActive

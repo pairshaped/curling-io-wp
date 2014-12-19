@@ -1,10 +1,12 @@
 {div, p, a, strong, br, h4, table, tbody, tr, td} = React.DOM
 Link = ReactRouter.Link
 
+# FIXME: ReactRouter.HistoryLocation doesn't seem to actually
+#        work, and there is a lack of documentation, so we
+#        should assume that we are always using hash urls
 scoreboardUrl = (prefix, url) ->
-  return "#{prefix}#{url}" if window.history.pushState?
+  #return "#{prefix}#{url}" if window.history.pushState?
   "#{prefix}##{url}"
-
 
 Scoreboard = React.createClass
   getInitialState: ->

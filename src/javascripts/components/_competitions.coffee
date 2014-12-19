@@ -1,4 +1,4 @@
-{nav, div, button, span, a, form, input} = React.DOM
+{div, form, input} = React.DOM
 {table, thead, tr, th, tbody, td}= React.DOM
 
 Link = ReactRouter.Link
@@ -85,7 +85,7 @@ CompetitionBox = React.createClass
         @state.status
 
     div className: 'col-xs-12',
-      CompetitionSearch({changeFilter: @changeFilter})
-      CompetitionList({competitions: @state.competitions})
+      CompetitionSearch changeFilter: @changeFilter
+      CompetitionList competitions: @state.competitions
 
 window.CurlcastCompetitions = CompetitionBox
