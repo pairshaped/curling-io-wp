@@ -29040,7 +29040,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }), td({
         className: "game-state",
         rowSpan: "2"
-      }, strong(null, state), br(null), a({
+      }, strong(null, CURLCAST_LANG.common[state.toLowerCase()]), br(null), a({
         href: scoreboardUrl(this.props.pathPrefix, path)
       }, CURLCAST_LANG.scoreboard_widget.boxscore_link))), tr(null, GamePositionName({
         key: game_positions[1].id,
@@ -29372,7 +29372,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   DrawSheetPosition = React.createClass({
     render: function() {
-      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, team_id, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
+      var boxscore, end_scores, ends, es, game, is_final, lsfe, padding, position, score, state_for_lang, team_id, total, _i, _j, _k, _l, _len, _len1, _ref4, _ref5, _results;
       _ref4 = this.props, game = _ref4.game, position = _ref4.position, boxscore = _ref4.boxscore, ends = _ref4.ends;
       lsfe = '';
       if (position.first_hammer === true) {
@@ -29432,17 +29432,17 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         }, end_scores[endscore].score);
       }), td({
         className: 'total'
-      }, total), boxscore === true ? td({
+      }, total), boxscore === true ? (state_for_lang = game.state.toLowerCase(), state_for_lang.indexOf('after') > -1 ? state_for_lang = 'after' : void 0, td({
         rowSpan: '2',
         className: 'hidden-xs'
-      }, strong({}, game.state), br({}), Link({
+      }, strong({}, CURLCAST_LANG.common["state_" + state_for_lang]), br({}), Link({
         to: 'boxscore',
         params: {
           competition_id: this.props.routerState.params.competition_id,
           game_id: game.id
         },
         onClick: this.props.shellComponentChanged
-      }, CURLCAST_LANG.common.boxscore)) : void 0);
+      }, CURLCAST_LANG.common.boxscore))) : void 0);
     }
   });
 

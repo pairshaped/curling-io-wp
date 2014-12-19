@@ -10,6 +10,7 @@
       state_upcoming: 'CHANGEME',
       state_live: 'CHANGEME',
       state_final: 'CHANGEME',
+      state_after: 'CHANGEME',
       legend_lsfe: 'CHANGEME',
       event: 'CHANGEME',
       winner: 'CHANGEME',

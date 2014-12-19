@@ -89,7 +89,7 @@ Game = React.createClass
         GamePositionScore({key: "score-#{game_positions[0].id}", game_position: game_positions[0]})
         td className: "game-state", rowSpan: "2",
           strong null,
-            state
+            CURLCAST_LANG.common[state.toLowerCase()]
           br null
           a href: scoreboardUrl(@props.pathPrefix, path),
             CURLCAST_LANG.scoreboard_widget.boxscore_link

@@ -10,6 +10,7 @@
       state_upcoming: 'Upcoming',
       state_live: 'Live',
       state_final: 'Final',
+      state_after: 'After',
       legend_lsfe: 'LSFE: Last shot in the first end',
       event: 'Event',
       winner: 'Winner',

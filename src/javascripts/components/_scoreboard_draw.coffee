@@ -74,8 +74,11 @@ DrawSheetPosition = React.createClass
         td key: key, className: 'end-score', end_scores[endscore].score
       td className: 'total', total
       if boxscore == true
+        state_for_lang = game.state.toLowerCase()
+        if state_for_lang.indexOf('after') > -1
+          state_for_lang = 'after'
         td rowSpan: '2', className: 'hidden-xs',
-          strong {}, game.state
+          strong {}, CURLCAST_LANG.common["state_#{state_for_lang}"]
           br {}
           Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: game.id }, onClick: @props.shellComponentChanged,
             CURLCAST_LANG.common.boxscore
