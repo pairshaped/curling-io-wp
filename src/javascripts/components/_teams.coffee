@@ -9,7 +9,7 @@ TeamShowBreadcrumb = React.createClass
     ol className: 'breadcrumb',
       li {},
         Link to: 'teams', params: { competition_id: @props.routerState.params.competition_id },
-          'Teams'
+          CURLCAST_LANG.common.nav.teams
       li className: 'active',
         @props.team.name
 
@@ -38,12 +38,18 @@ TeamShowScoresGame = React.createClass
     game = @props.game
     game_position_self = if game.game_positions[0].name == @props.team.name then 0 else 1
     game_position_opponent = if game_position_self == 0 then 1 else 0
-    #console.log 'TeamShowScoreGame.render', @props.team, game.game_positions
+    game_result = ''
+    if game.result?
+      game_result = CURLCAST_LANG.common[game.result.toLowerCase()] || game.result
     tr {},
       td {}, game.draw.label
       td {}, game.draw.starts_at
-      td {}, game.result
-      td {}, "#{game.game_positions[game_position_self].total || ''} - #{game.game_positions[game_position_opponent].total || ''}"
+      td {}, game_result
+      td {},
+        if !(game.game_positions[0].total? && game.game_positions[1].total?)
+          ' - '
+        else
+          "#{game.game_positions[game_position_self].total} - #{game.game_positions[game_position_opponent].total}"
       td className: 'hidden-xs', game.game_positions[game_position_opponent].name
 
 
@@ -52,11 +58,11 @@ TeamShowScores = React.createClass
     table className: 'table table-bordered table-condensed',
       thead {},
         tr {},
-          th {}, 'Draw'
-          th {}, 'Started at'
-          th {}, 'Result'
-          th {}, 'Score'
-          th className: 'hidden-xs', 'Opponent'
+          th {}, CURLCAST_LANG.common.draw
+          th {}, CURLCAST_LANG.common.table.started_at
+          th {}, CURLCAST_LANG.common.table.result
+          th {}, CURLCAST_LANG.common.table.score
+          th className: 'hidden-xs', CURLCAST_LANG.common.table.opponent
       tbody {},
         @props.games.map (game) =>
           TeamShowScoresGame key: game.id, game: game, team: @props.team
@@ -64,46 +70,47 @@ TeamShowScores = React.createClass
 TeamShowScoringAnalysis = React.createClass
   render: ->
     team = @props.team
-    table className: 'table table-bordered table-condensed',
-      thead {},
-        tr {},
-          th {}, 'Games'
-          th className: 'hidden-xs', 'Ends'
-          th {}
-          th className: 'hidden-xs', 'LSFE'
-          th className: 'hidden-xs', 'Blank Ends'
-          th className: 'hidden-xs', '1pt'
-          th className: 'hidden-xs', '2pt'
-          th className: 'hidden-xs', '3pt'
-          th className: 'hidden-xs', '4pt'
-          th className: 'hidden-xs', '>4pt'
-          th {}, 'Tot'
-          th className: 'hidden-xs', 'Avg'
-      tbody {},
-        tr {},
-          td rowSpan: '2', team.games_started
-          td rowSpan: '2', className: 'hidden-xs', team.number_of_ends
-          td {}, 'For'
-          td className: 'hidden-xs', team.lsfe_for
-          td className: 'hidden-xs', team.blank_ends_for
-          td className: 'hidden-xs', team.ends_for_with_1pt
-          td className: 'hidden-xs', team.ends_for_with_2pt
-          td className: 'hidden-xs', team.ends_for_with_3pt
-          td className: 'hidden-xs', team.ends_for_with_4pt
-          td className: 'hidden-xs', team.ends_for_with_gt_4pt
-          td {}, team.ends_for_total_points
-          td className: 'hidden-xs', team.games_for_average_points
-        tr {},
-          td {}, 'Against'
-          td className: 'hidden-xs', team.lsfe_against
-          td className: 'hidden-xs', team.blank_ends_against
-          td className: 'hidden-xs', team.ends_against_with_1pt
-          td className: 'hidden-xs', team.ends_against_with_2pt
-          td className: 'hidden-xs', team.ends_against_with_3pt
-          td className: 'hidden-xs', team.ends_against_with_4pt
-          td className: 'hidden-xs', team.ends_against_with_gt_4pt
-          td {}, team.ends_against_total_points
-          td className: 'hidden-xs', team.games_against_average_points
+    div className: 'table-responsive',
+      table className: 'table table-bordered table-condensed',
+        thead {},
+          tr {},
+            th {}, CURLCAST_LANG.common.table.games
+            th className: 'hidden-xs', CURLCAST_LANG.common.table.ends
+            th {}
+            th className: 'hidden-xs', CURLCAST_LANG.common.table.lsfe
+            th className: 'hidden-xs', CURLCAST_LANG.common.table.blank_ends
+            th className: 'hidden-xs', "1#{CURLCAST_LANG.common.table.point}"
+            th className: 'hidden-xs', "2#{CURLCAST_LANG.common.table.points}"
+            th className: 'hidden-xs', "3#{CURLCAST_LANG.common.table.points}"
+            th className: 'hidden-xs', "4#{CURLCAST_LANG.common.table.points}"
+            th className: 'hidden-xs', ">4#{CURLCAST_LANG.common.table.points}"
+            th {}, CURLCAST_LANG.common.table.total
+            th className: 'hidden-xs', CURLCAST_LANG.common.table.average
+        tbody {},
+          tr {},
+            td rowSpan: '2', team.games_started
+            td rowSpan: '2', className: 'hidden-xs', team.number_of_ends
+            td {}, CURLCAST_LANG.common.table.for
+            td className: 'hidden-xs', team.lsfe_for
+            td className: 'hidden-xs', team.blank_ends_for
+            td className: 'hidden-xs', team.ends_for_with_1pt
+            td className: 'hidden-xs', team.ends_for_with_2pt
+            td className: 'hidden-xs', team.ends_for_with_3pt
+            td className: 'hidden-xs', team.ends_for_with_4pt
+            td className: 'hidden-xs', team.ends_for_with_gt_4pt
+            td {}, team.ends_for_total_points
+            td className: 'hidden-xs', team.games_for_average_points
+          tr {},
+            td {}, CURLCAST_LANG.common.table.against
+            td className: 'hidden-xs', team.lsfe_against
+            td className: 'hidden-xs', team.blank_ends_against
+            td className: 'hidden-xs', team.ends_against_with_1pt
+            td className: 'hidden-xs', team.ends_against_with_2pt
+            td className: 'hidden-xs', team.ends_against_with_3pt
+            td className: 'hidden-xs', team.ends_against_with_4pt
+            td className: 'hidden-xs', team.ends_against_with_gt_4pt
+            td {}, team.ends_against_total_points
+            td className: 'hidden-xs', team.games_against_average_points
 
 
 TeamShow = React.createClass
@@ -115,9 +122,9 @@ TeamShow = React.createClass
         h3 {}, @props.team.name
         TeamShowAthleteList team_athletes: @props.team.team_athletes, absoluteUrl: @props.absoluteUrl
         hr {}
-        h3 {}, 'Team Scores'
+        h3 {}, CURLCAST_LANG.common.team_scores
         TeamShowScores games: @props.team.games, team: @props.team
-        h3 {}, 'Scoring Analysis'
+        h3 {}, CURLCAST_LANG.common.scoring_analysis
         TeamShowScoringAnalysis team: @props.team
 
 TeamListItem = React.createClass
@@ -137,10 +144,10 @@ TeamList = React.createClass
     table className: 'table table-bordered table-condensed',
       thead {},
         tr {},
-          th {}, "Team Name"
-          th {}, "Coach"
-          th {}, "Affliation"
-          th {}, "Location"
+          th {}, CURLCAST_LANG.common.table.team
+          th {}, CURLCAST_LANG.common.table.coach
+          th {}, CURLCAST_LANG.common.table.affiliation
+          th {}, CURLCAST_LANG.common.table.location
       tbody {},
         @props.teams.map (team) =>
           teamProps = @props
@@ -180,11 +187,10 @@ Teams = React.createClass
   componentWillReceiveProps: (nextProps) ->
     @processServerData nextProps
 
-  render: ->
-    unless @state.teams? || @state.team?
-      return div className: 'row',
-        div className: 'col-xs-12', 'Loading Team Data...'
+  componentWillMount: ->
+    @processServerData @props
 
+  render: ->
     passedProps = @props
     passedProps.absoluteUrl = @absoluteUrl
 
@@ -196,4 +202,3 @@ Teams = React.createClass
       TeamShow passedProps
 
 window.CurlcastTeams = Teams
-

@@ -1,4 +1,4 @@
-{nav, div, button, span, a, form, input} = React.DOM
+{div, form, input} = React.DOM
 {table, thead, tr, th, tbody, td}= React.DOM
 
 Link = ReactRouter.Link
@@ -24,7 +24,7 @@ CompetitionSearch = React.createClass
       div style: { display: 'none' },
         input name:'utf8', type: 'hidden', value: '✓', ref: 'utf8'
       div className: 'form-group string optional search_q',
-        input className: 'string optional form-control', ref: 'search', placeholder: 'Search Competitions', autoComplete: 'off', type: 'text', onChange: @filterChanged
+        input className: 'string optional form-control', ref: 'search', placeholder: CURLCAST_LANG.competitions.search_placeholder, autoComplete: 'off', type: 'text', onChange: @filterChanged
 
 CompetitionItem = React.createClass
   render: ->
@@ -44,18 +44,18 @@ CompetitionList = React.createClass
       table className: 'table table-bordered table-striped',
         thead {},
           tr {},
-            th {}, 'Competition'
-            th {}, 'Location'
-            th {}, 'Occurs'
+            th {}, CURLCAST_LANG.common.table.competition
+            th {}, CURLCAST_LANG.common.table.location
+            th {}, CURLCAST_LANG.common.table.occurs_at
         tbody {},
           @props.competitions.map (competition) ->
-            CompetitionItem({key: competition.id, competition: competition})
+            CompetitionItem key: competition.id, competition: competition
 
 CompetitionBox = React.createClass
   getInitialState: ->
     competitions: null
     search: null
-    status: 'Loading curling data...'
+    status: CURLCAST_LANG.common.ajax_loading
 
   changeFilter: (search) ->
     return if search == window.undefined
@@ -71,9 +71,9 @@ CompetitionBox = React.createClass
       dataType: 'jsonp'
       jsonpCallback: 'curlcastCompetitionsJSONP'
       success: (results) =>
-        @setState competitions: results.competitions, status: 'Loading curling data...'
+        @setState competitions: results.competitions, status: CURLCAST_LANG.common.ajax_loading
       error: (xhr, status, error) =>
-        @setState status: 'Error contacting server, retrying in 10 seconds'
+        @setState status: CURLCAST_LANG.common.ajax_error
         setTimeout @loadDataFromServer, 1000
 
   componentWillMount: ->
@@ -85,9 +85,7 @@ CompetitionBox = React.createClass
         @state.status
 
     div className: 'col-xs-12',
-      CompetitionSearch({changeFilter: @changeFilter})
-      CompetitionList({competitions: @state.competitions})
+      CompetitionSearch changeFilter: @changeFilter
+      CompetitionList competitions: @state.competitions
 
 window.CurlcastCompetitions = CompetitionBox
-
-

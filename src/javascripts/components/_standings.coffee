@@ -12,11 +12,11 @@ StandingsBracketGame = React.createClass
   popoverHtml: ->
     game = @props.game
     game_date = "Not yet scheduled"
-    game_date = "Draw #{game.draw.label}, #{game.draw.starts_at_formatted}" if game.draw?
+    game_date = "#{CURLCAST_LANG.common.draw} #{game.draw.label}, #{game.draw.starts_at_formatted}" if game.draw?
 
     game_moves_to = []
-    game_moves_to.push "Winner to #{game.winner_to.game.name}" if game.winner_to?
-    game_moves_to.push "Loser to #{game.loser_to.game.name}" if game.loser_to?
+    game_moves_to.push "#{CURLCAST_LANG.standings.winner_to} #{game.winner_to.game.name}" if game.winner_to?
+    game_moves_to.push "#{CURLCAST_LANG.standings.loser_to} #{game.loser_to.game.name}" if game.loser_to?
     game_moves_to = game_moves_to.join ", "
 
     "<div class='game-positions'>" + \
@@ -74,7 +74,7 @@ StandingsBracketGroup = React.createClass
     style = { height:  Math.round( (@props.group.games[@props.group.games.length-1].y + 200 - group.y) * zoom_factor.y) + "px" } if group.games.length > 0
     div className: 'bracket-group', id: group.id, style: style,
       unless @props.bracket.groups.length == 1
-        h4 className: 'group-name', group.name || 'A Event'
+        h4 className: 'group-name', group.name || "A #{CURLCAST_LANG.common.event}"
       group.games.map (game, idx) =>
         StandingsBracketGame key: game.id, group: group, game: game, zoom_factor: zoom_factor
 
@@ -85,13 +85,13 @@ StandingsBracket = React.createClass
   render: ->
     div className: 'row',
       div className: 'col-xs-12',
-        p {}, 'Mouse-over or tap on a game below to view game details.'
+        p {}, CURLCAST_LANG.standings.instructions
         # TODO: Might need to bring in a plugin to handle scrolling?
         #if @props.round.groups.length > 1
         #  ul className: 'pagination',
         #    @props.round.groups.map (group, idx) ->
         #      li key: idx,
-        #        a href: "##{group.id}", group.name || 'A Event'
+        #        a href: "##{group.id}", group.name || "A #{CURLCAST_LANG.common.event}"
         @props.round.groups.map (group, idx) =>
           StandingsBracketGroup key: idx, bracket: @props.round, group: group, zoom_factor: @state.zoom_factor
 
@@ -104,9 +104,9 @@ StandingsRoundRobin = React.createClass
         table className: 'table table-bordered table-condensed',
           thead {},
             tr {},
-              th {}, 'Team'
-              th className: 'round-robin-won', 'W'
-              th className: 'round-robin-lost', 'L'
+              th {}, CURLCAST_LANG.common.table.team
+              th className: 'round-robin-won', CURLCAST_LANG.common.table.w
+              th className: 'round-robin-lost', CURLCAST_LANG.common.table.l
           tbody {}, # TODO: Refactor into it's own component
             @props.round.teams.map (team, idx) ->
               tr key: idx,
@@ -132,7 +132,6 @@ StandingsTab = React.createClass
     li className: (if @props.round.active == true then 'active' else ''), 'data-tab-target': @props.round.to_param,
       Link to: 'standings-round', params: { competition_id: @props.routerState.params.competition_id, round_id: @props.round.to_param }, className: 'tab-link',
         @props.round.name
-      #a href: @props.href, 'data-toggle': 'tab', onClick: @propogateTab, @props.round.name
 
 StandingsTabContainer = React.createClass
   render: ->
@@ -204,12 +203,16 @@ Standings = React.createClass
   componentWillReceiveProps: (nextProps) ->
     @processServerData nextProps
 
+  componentWillMount: ->
+    @processServerData @props
+
+  componentDidMount: ->
+    @tabChanged()
+
   componentDidUpdate: ->
     @tabChanged()
 
   render: ->
-    return div {}, 'Loading Standings...' unless @state.rounds?
-
     roundProps = @props
     roundProps.rounds = @state.rounds
     roundProps.isActive = @isActive

@@ -16,8 +16,8 @@ Shell = React.createClass
     rawServerData: null
     rawServerDataSucceeded: true
     queryInterval: null
-    status: 'Loading curling data...'
-    componentStatus: 'Loading...'
+    status: CURLCAST_LANG.common.ajax_loading
+    componentStatus: CURLCAST_LANG.common.ajax_loading
     retryDelay: 5000
     lastPageDataObject: null
     currentRoute: null
@@ -57,8 +57,7 @@ Shell = React.createClass
       error: =>
         console.debug 'Shell.loadNavigationFromServer.ajax.error'
         seconds = @state.retryDelay / 1000
-        newStatus = "Could not load data, retrying in #{seconds} seconds..."
-        newStatus = "Still having connectivity problems, retrying in #{seconds} seconds..." if seconds > 5
+        newStatus = CURLCAST_LANG.common.ajax_error
         @setState status: newStatus, retryDelay: if (@state.retryDelay >= 30000) then @state.retryDelay else (@state.retryDelay + 5000)
         setTimeout @loadNavigationFromServer, (seconds * 1000)
 
@@ -81,7 +80,7 @@ Shell = React.createClass
             _pageTimeout = window.setTimeout(@getPageData, interval, url, interval)
       error: =>
         timing = if interval? then " in #{Math.round(interval/1000)} seconds" else ''
-        @setState componentStatus: "Error getting page data, retrying#{timing}...", rawServerDataSucceeded: false
+        @setState componentStatus: CURLCAST_LANG.common.ajax_error, rawServerDataSucceeded: false
         if interval?
           _pageTimeout = window.setTimeout(@getPageData, interval, url, interval)
 
@@ -121,6 +120,11 @@ Shell = React.createClass
     interval = null
 
     # TODO: Loop this!
+    # $.each(['scoreboard', 'boxscore', 'standings', 'teams'], (page) ->
+    #   path = nextProps.routerState.path.split('/').slice(r.urlParts[0], r.urlParts[1]).join('/')
+    #   new_url = nextProps.apiRoot + path + '.js'
+    #   interval = r.pollInterval
+
     if r.name == 'scoreboard'
       scoreboard_path = nextProps.routerState.path.split('/').slice(1, 4).join('/')
       new_url = nextProps.apiRoot + scoreboard_path + '.js'
@@ -186,11 +190,12 @@ Shell = React.createClass
 
     div className: 'row',
       div className: 'col-sm-3 hidden-xs',
-        OrganizationNavigation key: 'org-nav', competitions: other_competitions, competitionChanged: @competitionChanged, routerState: @props.routerState #, shellComponentChanged: @shellComponentChanged
+        OrganizationNavigation key: 'org-nav', competitions: other_competitions, competitionChanged: @competitionChanged, routerState: @props.routerState, lang: @props.lang
       div className: 'col-sm-9 col-xs-12',
-        CompetitionNavigation key: 'comp-nav', competition: competition, currentRoute: @state.currentRoute #, shellComponentChanged: @shellComponentChanged
-        if @state.rawServerDataSucceeded == false
-          @state.componentStatus
-        ReactRouter.RouteHandler routedProps
+        CompetitionNavigation key: 'comp-nav', competition: competition, currentRoute: @state.currentRoute, lang: @props.lang
+        if routedProps.data
+          ReactRouter.RouteHandler routedProps
+        else
+          CURLCAST_LANG.common.ajax_loading
 
 window.CurlcastShell = Shell

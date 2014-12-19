@@ -2,6 +2,7 @@
   <div class="container-fluid" id="curlcast">
   </div>
 </div>
+
 <script type="text/javascript">
   (function(){
     'use strict';
@@ -28,11 +29,10 @@
     ReactRouter.run(routes, opt, function(Handler, state){
       React.renderComponent( React.createElement( Handler, {
         apiRoot: '{url}',
-        prefix: '{path_prefix}',
+        //prefix: '{path_prefix}',
         routerState: state
       }), document.getElementById('curlcast') );
     });
 
   })();
-
 </script>

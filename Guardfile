@@ -10,11 +10,18 @@ clearing :on
 
 guard :sprockets,
       destination: 'js',
-      root_file: ['app.js'],
+      root_file: ['app.js', 'en.js', 'fr.js'],
       js_minify: true,
       asset_paths: ['src/javascripts'] do
   watch(%r{src/javascripts/.+\.(js|coffee)$})
 end
+
+# guard :sprockets,
+#       destination: 'i18n',
+#       root_file: ['en.js', 'fr.js'],
+#       asset_paths: ['src/i18n'] do
+#   watch(%r{src/i18n/.+\.coffee$})
+# end
 
 guard :sass,
       input: 'src/stylesheets/app.sass',

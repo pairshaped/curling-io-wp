@@ -1,10 +1,12 @@
 {div, p, a, strong, br, h4, table, tbody, tr, td} = React.DOM
 Link = ReactRouter.Link
 
+# FIXME: ReactRouter.HistoryLocation doesn't seem to actually
+#        work, and there is a lack of documentation, so we
+#        should assume that we are always using hash urls
 scoreboardUrl = (prefix, url) ->
-  return "#{prefix}#{url}" if window.history.pushState?
+  #return "#{prefix}#{url}" if window.history.pushState?
   "#{prefix}##{url}"
-
 
 Scoreboard = React.createClass
   getInitialState: ->
@@ -19,10 +21,10 @@ Scoreboard = React.createClass
       jsonpCallback: 'curlcastJSONP'
       success: (results) =>
         @setState
-          placeholderMessage: "There are no active competitions."
+          placeholderMessage: CURLCAST_LANG.scoreboard_widget.no_competitions
           competitions: results
       error: ->
-        @setState placeholderMessage: "There was an error getting active competitions, retrying..."
+        @setState placeholderMessage: CURLCAST_LANG.common.ajax_error
     )
 
   componentWillMount: ->
@@ -59,10 +61,10 @@ Competition = React.createClass
             div className: "col-xs-12",
               if current_draw?
                 p null,
-                  a href: scoreboardUrl(@props.pathPrefix, path), dangerouslySetInnerHTML: {__html: "Full Scoreboard &raquo;"}
+                  a href: scoreboardUrl(@props.pathPrefix, path), dangerouslySetInnerHTML: {__html: "#{CURLCAST_LANG.scoreboard_widget.full_scoreboard_link} &raquo;"}
               else
                 p null,
-                  "No Draws Scheduled Yet"
+                  CURLCAST_LANG.scoreboard_widget.no_draws_scheduled
 
 Draw = React.createClass
   render: ->
@@ -70,14 +72,12 @@ Draw = React.createClass
     div className: "col-xs-12",
       p null,
         strong null,
-          "Draw #{label}: "
+          "#{CURLCAST_LANG.common.draw} #{label}: "
         starts
       if games.length == 0
         p null,
-          "No Games Scheduled Yet"
+          CURLCAST_LANG.scoreboard_widget.no_games_scheduled
       else
-        p null,
-          "Prefix: #{@props.pathPrefix}"
         table className: "table table-bordered table-condensed",
           games.map (game) =>
             Game({key: game.id, game: game, pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
@@ -85,16 +85,22 @@ Draw = React.createClass
 Game = React.createClass
   render: ->
     {id, state, path, game_positions} = @props.game
+    state_for_lang = state.toLowerCase()
+    if state_for_lang.indexOf('after') >= 0
+      num = state_for_lang.split(' ')[1]
+      state_for_lang = CURLCAST_LANG.common['state_after'] + " #{num}"
+    else
+      state_for_lang = CURLCAST_LANG.common["state_#{state_for_lang}"]
     tbody null,
       tr null,
         GamePositionName({key: game_positions[0].id, game_position: game_positions[0], pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
         GamePositionScore({key: "score-#{game_positions[0].id}", game_position: game_positions[0]})
         td className: "game-state", rowSpan: "2",
           strong null,
-            state
+            state_for_lang
           br null
           a href: scoreboardUrl(@props.pathPrefix, path),
-            "Box"
+            CURLCAST_LANG.scoreboard_widget.boxscore_link
       tr null,
         GamePositionName({key: game_positions[1].id, game_position: game_positions[1], pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
         GamePositionScore({key: "score-#{game_positions[1].id}", game_position: game_positions[1]})

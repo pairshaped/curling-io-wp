@@ -15,8 +15,7 @@ DrawListItem = React.createClass
 
     li className: active_class,
       Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam }, activeClassName: 'router-active',
-      #a {},
-        "Draw #{draw.label}"
+        "#{CURLCAST_LANG.common.draw} #{draw.label}"
         br {}
         draw.starts_at
 
@@ -64,22 +63,26 @@ DrawSheetPosition = React.createClass
       td {},
         if position.team?
           Link to: 'teams-show', params: { competition_id: @props.routerState.params.competition_id, team_id: team_id },
-          #a href: @props.teams_url + '#!' + position.team.url,
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
-          'TBD'
+          CURLCAST_LANG.common.tbd
       td className: 'lsfe', "#{lsfe}"
       [0..(ends-1)].map (endscore, key) ->
         td key: key, className: 'end-score', end_scores[endscore].score
       td className: 'total', total
       if boxscore == true
+        state_for_lang = game.state.toLowerCase()
+        if state_for_lang.indexOf('after') > -1
+          num = state_for_lang.split(' ')[1]
+          state_for_lang = "#{CURLCAST_LANG.common.state_after} #{num}"
+        else
+          state_for_lang = CURLCAST_LANG.common["state_#{state_for_lang}"]
         td rowSpan: '2', className: 'hidden-xs',
-          strong {}, game.state
+          strong {}, state_for_lang
           br {}
           Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: game.id }, onClick: @props.shellComponentChanged,
-            'Boxscore'
-          #a href: game.boxscore_url || '#boxscore-missing', 'Boxscore'
+            CURLCAST_LANG.common.boxscore
 
 DrawSheetItem = React.createClass
   render: ->
@@ -98,12 +101,12 @@ DrawSheetItem = React.createClass
                 th {},
                   strong {}, sheet_name
                 th className: 'lsfe',
-                  span className: 'hidden-xs', 'LSFE'
+                  span className: 'hidden-xs', CURLCAST_LANG.common.table.lsfe
                 [1..number_of_ends].map (endscore, key) ->
                   th className: 'end-score', key: key, "#{endscore}"
                 th className: 'total',
-                  span className: 'hidden-xs', 'TOT'
-                  span className: 'visible-xs', 'T'
+                  span className: 'hidden-xs', CURLCAST_LANG.common.table.total
+                  span className: 'visible-xs', CURLCAST_LANG.common.table.total_xs
                 if boxscore_display
                   th className: 'hidden-xs', width: '10%', ''
             tbody {},
@@ -163,7 +166,7 @@ ScoreboardDraw = React.createClass
       div className: 'col-xs-12',
         DrawList drawProps
         DrawContentList drawProps
-        p {}, 'LSFE: Last shot in the first end'
+        p {}, CURLCAST_LANG.common.legend_lsfe
 
 window.CurlcastScoreboardDraw = ScoreboardDraw
 

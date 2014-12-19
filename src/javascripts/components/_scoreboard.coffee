@@ -1,8 +1,4 @@
-{div, p, a, strong, br, nav, button, span, strong} = React.DOM
-{table, thead, tbody, tr, td, th} = React.DOM
-{h6, h4, h3} = React.DOM
-{ul, li} = React.DOM
-{Link, RouteHandler} = ReactRouter
+{RouteHandler} = ReactRouter
 
 Scoreboard = React.createClass
   getInitialState: ->
@@ -14,8 +10,7 @@ Scoreboard = React.createClass
   processServerData: (props) ->
     results = props.data
     unless results?
-      loadingStatus = 'Loading...'
-      loadingStatus = "Loading #{props.competition.title}..." if props.competition?
+      loadingStatus = CURLCAST_LANG.common.ajax_loading
       @setState scoreboard: null, days: null, loadingStatus: loadingStatus
       return
 
@@ -38,11 +33,10 @@ Scoreboard = React.createClass
   componentWillReceiveProps: (nextProps) ->
     @processServerData nextProps
 
-  render: ->
-    unless @state.days?
-      return div className: 'row',
-        div className: 'col-xs-12', @state.loadingStatus
+  componentWillMount: ->
+    @processServerData @props
 
+  render: ->
     { days, scoreboard, day, draw } = @state
 
     dayProps = @props
@@ -55,4 +49,3 @@ Scoreboard = React.createClass
       CurlcastScoreboardDay dayProps
 
 window.CurlcastScoreboard = Scoreboard
-
