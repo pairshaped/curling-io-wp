@@ -24,7 +24,7 @@ CompetitionSearch = React.createClass
       div style: { display: 'none' },
         input name:'utf8', type: 'hidden', value: '✓', ref: 'utf8'
       div className: 'form-group string optional search_q',
-        input className: 'string optional form-control', ref: 'search', placeholder: CURLCAST_LANG.common.search_competitions, autoComplete: 'off', type: 'text', onChange: @filterChanged
+        input className: 'string optional form-control', ref: 'search', placeholder: CURLCAST_LANG.competitions.search_placeholder, autoComplete: 'off', type: 'text', onChange: @filterChanged
 
 CompetitionItem = React.createClass
   render: ->

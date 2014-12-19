@@ -20,10 +20,11 @@ window.CURLCAST_LANG =
     tbd: 'CHANGEME'
     scores: 'CHANGEME'
     vs: 'CHANGEME'
+    boxscore: 'CHANGEME'
 
     nav:
       scoreboard: 'CHANGEME'
-      standings: 'CHANGEME'
+      standings_draw: 'CHANGEME'
       teams: 'CHANGEME'
       more_competitions: 'CHANGEME'
 

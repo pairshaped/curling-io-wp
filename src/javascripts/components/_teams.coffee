@@ -9,7 +9,7 @@ TeamShowBreadcrumb = React.createClass
     ol className: 'breadcrumb',
       li {},
         Link to: 'teams', params: { competition_id: @props.routerState.params.competition_id },
-          'Teams'
+          CURLCAST_LANG.nav.teams
       li className: 'active',
         @props.team.name
 
@@ -38,7 +38,6 @@ TeamShowScoresGame = React.createClass
     game = @props.game
     game_position_self = if game.game_positions[0].name == @props.team.name then 0 else 1
     game_position_opponent = if game_position_self == 0 then 1 else 0
-    #console.log 'TeamShowScoreGame.render', @props.team, game.game_positions
     tr {},
       td {}, game.draw.label
       td {}, game.draw.starts_at

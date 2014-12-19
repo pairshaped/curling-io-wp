@@ -78,8 +78,7 @@ DrawSheetPosition = React.createClass
           strong {}, game.state
           br {}
           Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: game.id }, onClick: @props.shellComponentChanged,
-            'Boxscore'
-          #a href: game.boxscore_url || '#boxscore-missing', 'Boxscore'
+            CURLCAST_LANG.common.boxscore
 
 DrawSheetItem = React.createClass
   render: ->

@@ -20,10 +20,11 @@ window.CURLCAST_LANG =
     tbd: 'TBD'
     scores: 'Scores'
     vs: 'vs'
+    boxscore: 'Boxscore'
 
     nav:
       scoreboard: 'Scoreboard'
-      standings: 'Standings / Draw'
+      standings_draw: 'Standings / Draw'
       teams: 'Teams'
       more_competitions: 'More Competitions'
 
@@ -60,9 +61,6 @@ window.CURLCAST_LANG =
 
   competitions:
     search_placeholder: 'Search Competitions'
-
-  scoreboard:
-    boxscore_link: 'Boxscore'
 
   scoreboard_widget:
     no_competitions: 'There are no active competitions.'
