@@ -20,14 +20,15 @@
       tbd: 'TBD',
       scores: 'Scores',
       vs: 'vs',
+      boxscore: 'Boxscore',
       nav: {
         scoreboard: 'Scoreboard',
-        standings: 'Standings / Draw',
+        standings_draw: 'Standings / Draw',
         teams: 'Teams',
         more_competitions: 'More Competitions'
       },
       table: {
-        lfse: 'LSFE',
+        lsfe: 'LSFE',
         total: 'Tot',
         total_xs: 'T',
         time: 'Time',
@@ -52,7 +53,8 @@
         location: 'Location',
         occurs_at: 'Occurs',
         athlete: 'Athlete',
-        position: 'Positions',
+        position: 'Position',
+        delivery: 'Delivery',
         shots: 'Shots',
         points: 'Pts',
         team_total: 'Team Total'
@@ -61,14 +63,12 @@
     competitions: {
       search_placeholder: 'Search Competitions'
     },
-    scoreboard: {
-      boxscore_link: 'Boxscore'
-    },
     scoreboard_widget: {
       no_competitions: 'There are no active competitions.',
       no_draws_scheduled: 'No Draws Scheduled Yet',
       no_games_scheduled: 'No Games Scheduled Yet',
-      boxscore_link: 'Box'
+      boxscore_link: 'Box',
+      full_scoreboard_link: 'Full Scoreboard'
     },
     games: {
       team_rosters: 'Team Rosters',

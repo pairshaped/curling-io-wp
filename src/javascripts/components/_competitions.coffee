@@ -44,9 +44,9 @@ CompetitionList = React.createClass
       table className: 'table table-bordered table-striped',
         thead {},
           tr {},
-            th {}, 'Competition'
-            th {}, 'Location'
-            th {}, 'Occurs'
+            th {}, CURLCAST_LANG.table.competition
+            th {}, CURLCAST_LANG.table.location
+            th {}, CURLCAST_LANG.table.occurs_at
         tbody {},
           @props.competitions.map (competition) ->
             CompetitionItem({key: competition.id, competition: competition})

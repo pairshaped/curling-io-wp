@@ -19,7 +19,7 @@ Scoreboard = React.createClass
       jsonpCallback: 'curlcastJSONP'
       success: (results) =>
         @setState
-          placeholderMessage: "There are no active competitions."
+          placeholderMessage: CURLCAST_LANG.scoreboard_widget.no_competitions
           competitions: results
       error: ->
         @setState placeholderMessage: CURLCAST_LANG.common.ajax_error
@@ -62,7 +62,7 @@ Competition = React.createClass
                   a href: scoreboardUrl(@props.pathPrefix, path), dangerouslySetInnerHTML: {__html: "#{CURLCAST_LANG.common.full_scoreboard} &raquo;"}
               else
                 p null,
-                  "No Draws Scheduled Yet"
+                  CURLCAST_LANG.scoreboard_widget.no_draws_scheduled
 
 Draw = React.createClass
   render: ->
@@ -74,7 +74,7 @@ Draw = React.createClass
         starts
       if games.length == 0
         p null,
-          "No Games Scheduled Yet"
+          CURLCAST_LANG.scoreboard_widget.no_games_scheduled
       else
         table className: "table table-bordered table-condensed",
           games.map (game) =>
@@ -92,7 +92,7 @@ Game = React.createClass
             state
           br null
           a href: scoreboardUrl(@props.pathPrefix, path),
-            "Box"
+            CURLCAST_LANG.scoreboard_widget.boxscore_link
       tr null,
         GamePositionName({key: game_positions[1].id, game_position: game_positions[1], pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
         GamePositionScore({key: "score-#{game_positions[1].id}", game_position: game_positions[1]})

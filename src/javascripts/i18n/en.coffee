@@ -29,7 +29,7 @@ window.CURLCAST_LANG =
       more_competitions: 'More Competitions'
 
     table:
-      lfse: 'LSFE'
+      lsfe: 'LSFE'
       total: 'Tot'
       total_xs: 'T'
       time: 'Time'
@@ -54,7 +54,8 @@ window.CURLCAST_LANG =
       location: 'Location'
       occurs_at: 'Occurs'
       athlete: 'Athlete'
-      position: 'Positions'
+      position: 'Position'
+      delivery: 'Delivery'
       shots: 'Shots'
       points: 'Pts'
       team_total: 'Team Total'

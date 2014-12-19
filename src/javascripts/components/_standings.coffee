@@ -85,7 +85,7 @@ StandingsBracket = React.createClass
   render: ->
     div className: 'row',
       div className: 'col-xs-12',
-        p {}, 'Mouse-over or tap on a game below to view game details.'
+        p {}, CURLCAST_LANG.standings.instructions
         # TODO: Might need to bring in a plugin to handle scrolling?
         #if @props.round.groups.length > 1
         #  ul className: 'pagination',
@@ -104,7 +104,7 @@ StandingsRoundRobin = React.createClass
         table className: 'table table-bordered table-condensed',
           thead {},
             tr {},
-              th {}, 'Team'
+              th {}, CURLCAST_LANG.table.team
               th className: 'round-robin-won', 'W'
               th className: 'round-robin-lost', 'L'
           tbody {}, # TODO: Refactor into it's own component

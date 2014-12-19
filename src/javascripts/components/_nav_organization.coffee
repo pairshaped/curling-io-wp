@@ -30,7 +30,7 @@ OrganizationNavigation = React.createClass
           current_id: current_id
           setCompetition: @setCompetition
       Link to: 'competitions', className: 'list-group-item',
-        strong {}, 'More Competitions'
+        strong {}, CURLCAST_LANG.nav.more_competitions
 
 
 window.OrganizationNavigation = OrganizationNavigation

@@ -28522,7 +28522,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       })(this)), Link({
         to: 'competitions',
         className: 'list-group-item'
-      }, strong({}, 'More Competitions')));
+      }, strong({}, CURLCAST_LANG.nav.more_competitions)));
     }
   });
 
@@ -28573,25 +28573,25 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         params: {
           competition_id: competition.to_param
         }
-      }, 'Scoreboard')), li({
+      }, CURLCAST_LANG.nav.scoreboard)), li({
         className: (currentRoute === 'standings' ? 'active' : null)
       }, Link({
         to: 'standings',
         params: {
           competition_id: competition.to_param
         }
-      }, 'Standings / Draw')), li({
+      }, CURLCAST_LANG.nav.standings_draw)), li({
         className: (currentRoute === 'teams' ? 'active' : null)
       }, Link({
         to: 'teams',
         params: {
           competition_id: competition.to_param
         }
-      }, 'Teams')), li({
+      }, CURLCAST_LANG.nav.teams)), li({
         className: 'visible-xs'
       }, Link({
         to: 'competitions'
-      }, 'More Competitions')))));
+      }, CURLCAST_LANG.nav.more_competitions)))));
     }
   });
 
@@ -28643,8 +28643,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         rawServerData: null,
         rawServerDataSucceeded: true,
         queryInterval: null,
-        status: 'Loading data...',
-        componentStatus: 'Loading data...',
+        status: CURLCAST_LANG.common.ajax_loading,
+        componentStatus: CURLCAST_LANG.common.ajax_loading,
         retryDelay: 5000,
         lastPageDataObject: null,
         currentRoute: null
@@ -28701,7 +28701,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             var newStatus, seconds;
             console.debug('Shell.loadNavigationFromServer.ajax.error');
             seconds = _this.state.retryDelay / 1000;
-            newStatus = "Error loading data, retrying...";
+            newStatus = CURLCAST_LANG.common.ajax_error;
             _this.setState({
               status: newStatus,
               retryDelay: _this.state.retryDelay >= 30000 ? _this.state.retryDelay : _this.state.retryDelay + 5000
@@ -28751,7 +28751,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             var timing;
             timing = interval != null ? " in " + (Math.round(interval / 1000)) + " seconds" : '';
             _this.setState({
-              componentStatus: "Error loading data, retrying...",
+              componentStatus: CURLCAST_LANG.common.ajax_error,
               rawServerDataSucceeded: false
             });
             if (interval != null) {
@@ -28924,14 +28924,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         success: (function(_this) {
           return function(results) {
             return _this.setState({
-              placeholderMessage: "There are no active competitions.",
+              placeholderMessage: CURLCAST_LANG.scoreboard_widget.no_competitions,
               competitions: results
             });
           };
         })(this),
         error: function() {
           return this.setState({
-            placeholderMessage: "Error loading data, retrying..."
+            placeholderMessage: CURLCAST_LANG.common.ajax_error
           });
         }
       });
@@ -28998,9 +28998,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, current_draw != null ? p(null, a({
         href: scoreboardUrl(this.props.pathPrefix, path),
         dangerouslySetInnerHTML: {
-          __html: "Full Scoreboard &raquo;"
+          __html: "" + CURLCAST_LANG.common.full_scoreboard + " &raquo;"
         }
-      })) : p(null, "No Draws Scheduled Yet"))))));
+      })) : p(null, CURLCAST_LANG.scoreboard_widget.no_draws_scheduled))))));
     }
   });
 
@@ -29010,7 +29010,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       _ref1 = this.props.draw, id = _ref1.id, label = _ref1.label, starts = _ref1.starts, games = _ref1.games;
       return div({
         className: "col-xs-12"
-      }, p(null, strong(null, "Draw " + label + ": "), starts), games.length === 0 ? p(null, "No Games Scheduled Yet") : table({
+      }, p(null, strong(null, "" + CURLCAST_LANG.common.draw + " " + label + ": "), starts), games.length === 0 ? p(null, CURLCAST_LANG.scoreboard_widget.no_games_scheduled) : table({
         className: "table table-bordered table-condensed"
       }, games.map((function(_this) {
         return function(game) {
@@ -29042,7 +29042,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         rowSpan: "2"
       }, strong(null, state), br(null), a({
         href: scoreboardUrl(this.props.pathPrefix, path)
-      }, "Box"))), tr(null, GamePositionName({
+      }, CURLCAST_LANG.scoreboard_widget.boxscore_link))), tr(null, GamePositionName({
         key: game_positions[1].id,
         game_position: game_positions[1],
         pathPrefix: this.props.pathPrefix,
@@ -29107,7 +29107,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       var d, days, draw, id, k, last_day, last_day_id, loadingStatus, obj, results, _i, _len, _ref4;
       results = props.data;
       if (results == null) {
-        loadingStatus = 'Loading data...';
+        loadingStatus = CURLCAST_LANG.common.ajax_loading;
         this.setState({
           scoreboard: null,
           days: null,
@@ -29279,7 +29279,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       if (day == null) {
         return div({
           className: 'col-xs-12'
-        }, 'Loading data...');
+        }, CURLCAST_LANG.common.ajax_loading);
       }
       location_str = '';
       if ((scoreboard.location != null) && (scoreboard.venue != null)) {
@@ -29349,7 +29349,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           draw: drawParam
         },
         activeClassName: 'router-active'
-      }, "Draw " + draw.label, br({}), draw.starts_at));
+      }, "" + CURLCAST_LANG.common.draw + " " + draw.label, br({}), draw.starts_at));
     }
   });
 
@@ -29423,7 +29423,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'hidden-xs'
       }, position.team.name), span({
         className: 'visible-xs'
-      }, position.team.short_name)) : 'TBD'), td({
+      }, position.team.short_name)) : CURLCAST_LANG.common.tbd), td({
         className: 'lsfe'
       }, "" + lsfe), (function() {
         _results = [];
@@ -29446,7 +29446,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           game_id: game.id
         },
         onClick: this.props.shellComponentChanged
-      }, 'Boxscore')) : void 0);
+      }, CURLCAST_LANG.common.boxscore)) : void 0);
     }
   });
 
@@ -29473,7 +29473,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'lsfe'
       }, span({
         className: 'hidden-xs'
-      }, 'LSFE')), (function() {
+      }, CURLCAST_LANG.table.lsfe)), (function() {
         _results = [];
         for (var _i = 1; 1 <= number_of_ends ? _i <= number_of_ends : _i >= number_of_ends; 1 <= number_of_ends ? _i++ : _i--){ _results.push(_i); }
         return _results;
@@ -29486,9 +29486,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'total'
       }, span({
         className: 'hidden-xs'
-      }, 'TOT'), span({
+      }, CURLCAST_LANG.table.total), span({
         className: 'visible-xs'
-      }, 'T')), boxscore_display ? th({
+      }, CURLCAST_LANG.table.total_xs)), boxscore_display ? th({
         className: 'hidden-xs',
         width: '10%'
       }, '') : void 0)), tbody({}, DrawSheetPosition({
@@ -29593,7 +29593,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'row'
       }, div({
         className: 'col-xs-12'
-      }, DrawList(drawProps), DrawContentList(drawProps), p({}, 'LSFE: Last shot in the first end')));
+      }, DrawList(drawProps), DrawContentList(drawProps), p({}, CURLCAST_LANG.common.legend_lsfe)));
     }
   });
 
@@ -29814,7 +29814,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'lsfe'
       }, span({
         className: 'hidden-xs'
-      }, 'LSFE')), (function() {
+      }, CURLCAST_LANG.table.lsfe)), (function() {
         _results = [];
         for (var _i = 1; 1 <= num_ends ? _i <= num_ends : _i >= num_ends; 1 <= num_ends ? _i++ : _i--){ _results.push(_i); }
         return _results;
@@ -29827,15 +29827,15 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'total'
       }, span({
         className: 'hidden-xs'
-      }, 'TOT'), span({
+      }, CURLCAST_LANG.table.total), span({
         className: 'visible-xs'
-      }, 'T')), th({
+      }, CURLCAST_LANG.table.total_xs)), th({
         className: 'time-remaining'
       }, span({
-        className: 'visible-xs'
-      }, ''), span({
         className: 'hidden-xs'
-      }, 'Time')))), game.positions != null ? tbody({}, BoxScoreBoardPositions({
+      }, CURLCAST_LANG.table.time), span({
+        className: 'visible-xs'
+      }, '')))), game.positions != null ? tbody({}, BoxScoreBoardPositions({
         position: game.positions[0],
         ends: num_ends,
         game: game,
@@ -29869,12 +29869,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'table table-bordered table-condensed table-striped'
       }, thead({}, tr({}, th({
         colSpan: '3'
-      }, team.name)), tr({}, th({}, "Athlete"), th({
+      }, team.name)), tr({}, th({}, CURLCAST_LANG.table.athlete), th({
         width: '35%'
-      }, "Position"), th({
+      }, CURLCAST_LANG.table.position), th({
         className: 'hidden-xs',
         width: '25%'
-      }, "Delivery"))), tbody({}, team.athletes.map(function(athlete) {
+      }, CURLCAST_LANG.table.delivery))), tbody({}, team.athletes.map(function(athlete) {
         return BoxScoreTeamRosterAthlete({
           key: athlete.id,
           athlete: athlete
@@ -29891,14 +29891,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'row'
       }, div({
         className: 'col-xs-12'
-      }, h1({}, 'Team Rosters')), positions != null ? positions.map(function(position) {
+      }, h1({}, CURLCAST_LANG.games.team_rosters)), positions != null ? positions.map(function(position) {
         if ((position.team != null) && position.team.athletes.length > 0) {
           return BoxScoreTeamRoster({
             key: position.team.id,
             team: position.team
           });
         }
-      }) : span({}, "Loading data..."));
+      }) : span({}, CURLCAST_LANG.common.ajax_loading));
     }
   });
 
@@ -29916,7 +29916,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         rowSpan: '2'
       }, team.games_started || 0), td({
         rowSpan: '2'
-      }, team.number_of_ends || 0), td({}, "For"), td({}, team.lsfe_for || 0), td({}, team.blank_ends_for || 0), td({}, team.ends_for_with_points_1 || 0), td({}, team.ends_for_with_points_2 || 0), td({}, team.ends_for_with_points_3 || 0), td({}, team.ends_for_with_points_4 || 0), td({}, team.ends_for_with_points_gt_4 || 0), td({}, team.ends_for_total_points || 0), td({}, team.games_for_average_points || 0)), tr({}, td({}, "Against"), td({}, team.lsfe_against || 0), td({}, team.blank_ends_against || 0), td({}, team.ends_against_with_points_1 || 0), td({}, team.ends_against_with_points_2 || 0), td({}, team.ends_against_with_points_3 || 0), td({}, team.ends_against_with_points_4 || 0), td({}, team.ends_against_with_points_gt_4 || 0), td({}, team.ends_against_total_points || 0), td({}, team.games_against_average_points || 0)));
+      }, team.number_of_ends || 0), td({}, CURLCAST_LANG.table["for"]), td({}, team.lsfe_for || 0), td({}, team.blank_ends_for || 0), td({}, team.ends_for_with_points_1 || 0), td({}, team.ends_for_with_points_2 || 0), td({}, team.ends_for_with_points_3 || 0), td({}, team.ends_for_with_points_4 || 0), td({}, team.ends_for_with_points_gt_4 || 0), td({}, team.ends_for_total_points || 0), td({}, team.games_for_average_points || 0)), tr({}, td({}, CURLCAST_LANG.table.against), td({}, team.lsfe_against || 0), td({}, team.blank_ends_against || 0), td({}, team.ends_against_with_points_1 || 0), td({}, team.ends_against_with_points_2 || 0), td({}, team.ends_against_with_points_3 || 0), td({}, team.ends_against_with_points_4 || 0), td({}, team.ends_against_with_points_gt_4 || 0), td({}, team.ends_against_total_points || 0), td({}, team.games_against_average_points || 0)));
     }
   });
 
@@ -29928,13 +29928,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'row'
       }, div({
         className: 'col-xs-12'
-      }, h1({}, 'Scoring Analysis')), div({
+      }, h1({}, CURLCAST_LANG.common.scoring_analysis)), div({
         className: 'col-xs-12'
       }, div({
         className: 'table-responsive'
       }, table({
         className: 'table table-bordered table-condensed table-striped table-hover'
-      }, thead({}, tr({}, th({}, 'Team'), th({}, 'Games'), th({}, 'Ends'), th({}), th({}, 'LSFE'), th({}, 'Blank Ends'), th({}, '1pt'), th({}, '2pt'), th({}, '3pt'), th({}, '4pt'), th({}, '>4pt'), th({}, 'Tot'), th({}, 'Avg'))), teams.map(function(team) {
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.table.team), th({}, CURLCAST_LANG.table.games), th({}, CURLCAST_LANG.table.ends), th({}), th({}, CURLCAST_LANG.table.lsfe), th({}, CURLCAST_LANG.table.blank_ends), th({}, '1pt'), th({}, '2pt'), th({}, '3pt'), th({}, '4pt'), th({}, '>4pt'), th({}, CURLCAST_LANG.table.total), th({}, CURLCAST_LANG.table.average))), teams.map(function(team) {
         return BoxScoreAnalysisTeam({
           key: team.id,
           team: team
@@ -30026,7 +30026,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'row'
       }, div({
         className: 'col-xs-12'
-      }, h1({}, 'Shooting Percentages')), [0, 1].map((function(_this) {
+      }, h1({}, CURLCAST_LANG.games.shooting_percentages)), [0, 1].map((function(_this) {
         return function(team_idx) {
           var total;
           total = _this.totalTeamScore(team_idx);
@@ -30039,14 +30039,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             className: 'table table-bordered table-condensed table-hover'
           }, thead({}, tr({}, th({
             colSpan: 5
-          }, teams[team_idx].name)), tr({}, th({}, 'Athlete'), th({}, 'Position'), th({}, 'Shots'), th({}, 'Pts'), th({}, '%'))), tbody({}, players.map(function(set, index) {
+          }, teams[team_idx].name)), tr({}, th({}, CURLCAST_LANG.table.athlete), th({}, CURLCAST_LANG.table.position), th({}, CURLCAST_LANG.table.shots), th({}, CURLCAST_LANG.table.points), th({}, '%'))), tbody({}, players.map(function(set, index) {
             return BoxScoreShootingPercentagesAthletes({
               key: index,
               athlete: set[team_idx]
             });
           })), tfoot({}, tr({}, th({
             colSpan: 2
-          }, "Team Total"), td({}, total.shots), td({}, total.points), td({}, "" + total.percentage + "%"))))));
+          }, CURLCAST_LANG.table.team_total), td({}, total.shots), td({}, total.points), td({}, "" + total.percentage + "%"))))));
         };
       })(this)));
     }
@@ -30085,7 +30085,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'row'
         }, div({
           className: 'col-xs-12'
-        }, 'Loading data...'));
+        }, CURLCAST_LANG.common.ajax_loading));
       }
       return div({
         className: 'row'
@@ -30123,7 +30123,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'row'
         }, div({
           className: 'col-xs-12'
-        }, 'Loading data...'));
+        }, CURLCAST_LANG.common.ajax_loading));
       }
       props = this.props;
       props.draws = this.state.draws;
@@ -30186,7 +30186,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, input({
         className: 'string optional form-control',
         ref: 'search',
-        placeholder: 'Search Competitions',
+        placeholder: CURLCAST_LANG.competitions.search_placeholder,
         autoComplete: 'off',
         type: 'text',
         onChange: this.filterChanged
@@ -30214,7 +30214,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'table-responsive'
       }, table({
         className: 'table table-bordered table-striped'
-      }, thead({}, tr({}, th({}, 'Competition'), th({}, 'Location'), th({}, 'Occurs'))), tbody({}, this.props.competitions.map(function(competition) {
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.table.competition), th({}, CURLCAST_LANG.table.location), th({}, CURLCAST_LANG.table.occurs_at))), tbody({}, this.props.competitions.map(function(competition) {
         return CompetitionItem({
           key: competition.id,
           competition: competition
@@ -30228,7 +30228,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return {
         competitions: null,
         search: null,
-        status: 'Loading data...'
+        status: CURLCAST_LANG.common.ajax_loading
       };
     },
     changeFilter: function(search) {
@@ -30252,14 +30252,14 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           return function(results) {
             return _this.setState({
               competitions: results.competitions,
-              status: 'Loading data...'
+              status: CURLCAST_LANG.common.ajax_loading
             });
           };
         })(this),
         error: (function(_this) {
           return function(xhr, status, error) {
             _this.setState({
-              status: 'Error loading data, retrying...'
+              status: CURLCAST_LANG.common.ajax_error
             });
             return setTimeout(_this.loadDataFromServer, 1000);
           };
@@ -30319,10 +30319,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }
       game_moves_to = [];
       if (game.winner_to != null) {
-        game_moves_to.push("Winner to " + game.winner_to.game.name);
+        game_moves_to.push("" + CURLCAST_LANG.standings.winner_to + " " + game.winner_to.game.name);
       }
       if (game.loser_to != null) {
-        game_moves_to.push("Loser to " + game.loser_to.game.name);
+        game_moves_to.push("" + CURLCAST_LANG.standings.loser_to + " " + game.loser_to.game.name);
       }
       game_moves_to = game_moves_to.join(", ");
       return "<div class='game-positions'>" + game.game_positions.map(function(pos) {
@@ -30391,7 +30391,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         style: style
       }, this.props.bracket.groups.length !== 1 ? h4({
         className: 'group-name'
-      }, group.name || 'A Event') : void 0, group.games.map((function(_this) {
+      }, group.name || ("A " + CURLCAST_LANG.common.event)) : void 0, group.games.map((function(_this) {
         return function(game, idx) {
           return StandingsBracketGame({
             key: game.id,
@@ -30418,7 +30418,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'row'
       }, div({
         className: 'col-xs-12'
-      }, p({}, 'Mouse-over or tap on a game below to view game details.'), this.props.round.groups.map((function(_this) {
+      }, p({}, CURLCAST_LANG.standings.instructions), this.props.round.groups.map((function(_this) {
         return function(group, idx) {
           return StandingsBracketGroup({
             key: idx,
@@ -30439,7 +30439,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'col-sm-6'
       }, h4({}, this.props.round.name), table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, 'Team'), th({
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.table.team), th({
         className: 'round-robin-won'
       }, 'W'), th({
         className: 'round-robin-lost'
@@ -30614,7 +30614,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       var roundProps;
       if (this.state.rounds == null) {
-        return div({}, 'Loading data...');
+        return div({}, CURLCAST_LANG.common.ajax_loading);
       }
       roundProps = this.props;
       roundProps.rounds = this.state.rounds;
@@ -30650,7 +30650,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         params: {
           competition_id: this.props.routerState.params.competition_id
         }
-      }, 'Teams')), li({
+      }, CURLCAST_LANG.nav.teams)), li({
         className: 'active'
       }, this.props.team.name));
     }
@@ -30710,9 +30710,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       return table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, 'Draw'), th({}, 'Started at'), th({}, 'Result'), th({}, 'Score'), th({
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.common.draw), th({}, CURLCAST_LANG.table.started_at), th({}, CURLCAST_LANG.table.result), th({}, CURLCAST_LANG.table.score), th({
         className: 'hidden-xs'
-      }, 'Opponent'))), tbody({}, this.props.games.map((function(_this) {
+      }, CURLCAST_LANG.table.opponent))), tbody({}, this.props.games.map((function(_this) {
         return function(game) {
           return TeamShowScoresGame({
             key: game.id,
@@ -30730,13 +30730,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       team = this.props.team;
       return table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, 'Games'), th({
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.table.games), th({
         className: 'hidden-xs'
-      }, 'Ends'), th({}), th({
+      }, CURLCAST_LANG.table.ends), th({}), th({
         className: 'hidden-xs'
-      }, 'LSFE'), th({
+      }, CURLCAST_LANG.table.lsfe), th({
         className: 'hidden-xs'
-      }, 'Blank Ends'), th({
+      }, CURLCAST_LANG.table.blank_ends), th({
         className: 'hidden-xs'
       }, '1pt'), th({
         className: 'hidden-xs'
@@ -30748,12 +30748,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'hidden-xs'
       }, '>4pt'), th({}, 'Tot'), th({
         className: 'hidden-xs'
-      }, 'Avg'))), tbody({}, tr({}, td({
+      }, CURLCAST_LANG.table.average))), tbody({}, tr({}, td({
         rowSpan: '2'
       }, team.games_started), td({
         rowSpan: '2',
         className: 'hidden-xs'
-      }, team.number_of_ends), td({}, 'For'), td({
+      }, team.number_of_ends), td({}, CURLCAST_LANG.table["for"]), td({
         className: 'hidden-xs'
       }, team.lsfe_for), td({
         className: 'hidden-xs'
@@ -30769,7 +30769,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'hidden-xs'
       }, team.ends_for_with_gt_4pt), td({}, team.ends_for_total_points), td({
         className: 'hidden-xs'
-      }, team.games_for_average_points)), tr({}, td({}, 'Against'), td({
+      }, team.games_for_average_points)), tr({}, td({}, CURLCAST_LANG.table.against), td({
         className: 'hidden-xs'
       }, team.lsfe_against), td({
         className: 'hidden-xs'
@@ -30803,10 +30803,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, h3({}, this.props.team.name), TeamShowAthleteList({
         team_athletes: this.props.team.team_athletes,
         absoluteUrl: this.props.absoluteUrl
-      }), hr({}), h3({}, 'Team Scores'), TeamShowScores({
+      }), hr({}), h3({}, CURLCAST_LANG.common.team_scores), TeamShowScores({
         games: this.props.team.games,
         team: this.props.team
-      }), h3({}, 'Scoring Analysis'), TeamShowScoringAnalysis({
+      }), h3({}, CURLCAST_LANG.common.scoring_analysis), TeamShowScoringAnalysis({
         team: this.props.team
       })));
     }
@@ -30830,7 +30830,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       return table({
         className: 'table table-bordered table-condensed'
-      }, thead({}, tr({}, th({}, "Team"), th({}, "Coach"), th({}, "Affliation"), th({}, "Location"))), tbody({}, this.props.teams.map((function(_this) {
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.table.team), th({}, CURLCAST_LANG.table.coach), th({}, CURLCAST_LANG.table.affliation), th({}, CURLCAST_LANG.table.location))), tbody({}, this.props.teams.map((function(_this) {
         return function(team) {
           var teamProps;
           teamProps = _this.props;
@@ -30900,7 +30900,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           className: 'row'
         }, div({
           className: 'col-xs-12'
-        }, 'Loading data...'));
+        }, CURLCAST_LANG.common.ajax_loading));
       }
       passedProps = this.props;
       passedProps.absoluteUrl = this.absoluteUrl;

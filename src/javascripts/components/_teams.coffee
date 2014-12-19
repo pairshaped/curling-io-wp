@@ -52,10 +52,10 @@ TeamShowScores = React.createClass
       thead {},
         tr {},
           th {}, CURLCAST_LANG.common.draw
-          th {}, 'Started at'
-          th {}, 'Result'
-          th {}, 'Score'
-          th className: 'hidden-xs', 'Opponent'
+          th {}, CURLCAST_LANG.table.started_at
+          th {}, CURLCAST_LANG.table.result
+          th {}, CURLCAST_LANG.table.score
+          th className: 'hidden-xs', CURLCAST_LANG.table.opponent
       tbody {},
         @props.games.map (game) =>
           TeamShowScoresGame key: game.id, game: game, team: @props.team
@@ -66,23 +66,23 @@ TeamShowScoringAnalysis = React.createClass
     table className: 'table table-bordered table-condensed',
       thead {},
         tr {},
-          th {}, 'Games'
-          th className: 'hidden-xs', 'Ends'
+          th {}, CURLCAST_LANG.table.games
+          th className: 'hidden-xs', CURLCAST_LANG.table.ends
           th {}
-          th className: 'hidden-xs', 'LSFE'
-          th className: 'hidden-xs', 'Blank Ends'
+          th className: 'hidden-xs', CURLCAST_LANG.table.lsfe
+          th className: 'hidden-xs', CURLCAST_LANG.table.blank_ends
           th className: 'hidden-xs', '1pt'
           th className: 'hidden-xs', '2pt'
           th className: 'hidden-xs', '3pt'
           th className: 'hidden-xs', '4pt'
           th className: 'hidden-xs', '>4pt'
           th {}, 'Tot'
-          th className: 'hidden-xs', 'Avg'
+          th className: 'hidden-xs', CURLCAST_LANG.table.average
       tbody {},
         tr {},
           td rowSpan: '2', team.games_started
           td rowSpan: '2', className: 'hidden-xs', team.number_of_ends
-          td {}, 'For'
+          td {}, CURLCAST_LANG.table.for
           td className: 'hidden-xs', team.lsfe_for
           td className: 'hidden-xs', team.blank_ends_for
           td className: 'hidden-xs', team.ends_for_with_1pt
@@ -93,7 +93,7 @@ TeamShowScoringAnalysis = React.createClass
           td {}, team.ends_for_total_points
           td className: 'hidden-xs', team.games_for_average_points
         tr {},
-          td {}, 'Against'
+          td {}, CURLCAST_LANG.table.against
           td className: 'hidden-xs', team.lsfe_against
           td className: 'hidden-xs', team.blank_ends_against
           td className: 'hidden-xs', team.ends_against_with_1pt
@@ -136,10 +136,10 @@ TeamList = React.createClass
     table className: 'table table-bordered table-condensed',
       thead {},
         tr {},
-          th {}, "Team"
-          th {}, "Coach"
-          th {}, "Affliation"
-          th {}, "Location"
+          th {}, CURLCAST_LANG.table.team
+          th {}, CURLCAST_LANG.table.coach
+          th {}, CURLCAST_LANG.table.affliation
+          th {}, CURLCAST_LANG.table.location
       tbody {},
         @props.teams.map (team) =>
           teamProps = @props

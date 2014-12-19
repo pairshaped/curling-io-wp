@@ -29,7 +29,7 @@ window.CURLCAST_LANG =
       more_competitions: 'CHANGEME'
 
     table:
-      lfse: 'CHANGEME'
+      lsfe: 'CHANGEME'
       total: 'CHANGEME'
       total_xs: 'CHANGEME'
       time: 'CHANGEME'
@@ -55,6 +55,7 @@ window.CURLCAST_LANG =
       occurs_at: 'CHANGEME'
       athlete: 'CHANGEME'
       position: 'CHANGEME'
+      delivery: 'CHANGEME'
       shots: 'CHANGEME'
       points: 'CHANGEME'
       team_total: 'CHANGEME'
