@@ -14,7 +14,7 @@ Scoreboard = React.createClass
   processServerData: (props) ->
     results = props.data
     unless results?
-      loadingStatus = 'Loading data...'
+      loadingStatus = CURLCAST_LANG.common.ajax_loading
       @setState scoreboard: null, days: null, loadingStatus: loadingStatus
       return
 

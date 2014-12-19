@@ -52,7 +52,7 @@ TeamShowScores = React.createClass
     table className: 'table table-bordered table-condensed',
       thead {},
         tr {},
-          th {}, 'Draw'
+          th {}, CURLCAST_LANG.common.draw
           th {}, 'Started at'
           th {}, 'Result'
           th {}, 'Score'
@@ -115,9 +115,9 @@ TeamShow = React.createClass
         h3 {}, @props.team.name
         TeamShowAthleteList team_athletes: @props.team.team_athletes, absoluteUrl: @props.absoluteUrl
         hr {}
-        h3 {}, 'Team Scores'
+        h3 {}, CURLCAST_LANG.common.team_scores
         TeamShowScores games: @props.team.games, team: @props.team
-        h3 {}, 'Scoring Analysis'
+        h3 {}, CURLCAST_LANG.common.scoring_analysis
         TeamShowScoringAnalysis team: @props.team
 
 TeamListItem = React.createClass
@@ -183,7 +183,7 @@ Teams = React.createClass
   render: ->
     unless @state.teams? || @state.team?
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading data...'
+        div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
 
     passedProps = @props
     passedProps.absoluteUrl = @absoluteUrl

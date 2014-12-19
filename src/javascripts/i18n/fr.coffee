@@ -69,6 +69,7 @@ window.CURLCAST_LANG =
     no_draws_scheduled: 'CHANGEME'
     no_games_scheduled: 'CHANGEME'
     boxscore_link: 'CHANGEME'
+    full_scoreboard_link: 'CHANGEME'
 
   games:
     team_rosters: 'CHANGEME'

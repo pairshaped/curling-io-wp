@@ -169,7 +169,7 @@ BoxScoreTeamRosters = React.createClass
           if position.team? && position.team.athletes.length > 0
             BoxScoreTeamRoster({key: position.team.id, team: position.team})
       else
-        span {}, "Loading data..."
+        span {}, CURLCAST_LANG.common.ajax_loading
 
 BoxScoreAnalysisTeam = React.createClass
   render: ->
@@ -209,7 +209,7 @@ BoxScoreAnalysis = React.createClass
     teams = @props.teams
     div className: 'row',
       div className: 'col-xs-12',
-        h1 {}, 'Scoring Analysis'
+        h1 {}, CURLCAST_LANG.common.scoring_analysis
       div className: 'col-xs-12',
         div className: 'table-responsive',
           table className: 'table table-bordered table-condensed table-striped table-hover',
@@ -368,7 +368,7 @@ BoxScoreContent = React.createClass
         contentProps.teams.push position.team
     else
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading data...'
+        div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
 
     div className: 'row',
       div className: 'col-xs-12',
@@ -399,7 +399,7 @@ BoxScore = React.createClass
   render: ->
     unless @state.game?
       return div className: 'row',
-        div className: 'col-xs-12', 'Loading data...'
+        div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
 
     props = @props
     props.draws = @state.draws

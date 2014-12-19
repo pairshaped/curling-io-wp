@@ -16,8 +16,8 @@ Shell = React.createClass
     rawServerData: null
     rawServerDataSucceeded: true
     queryInterval: null
-    status: 'Loading data...'
-    componentStatus: 'Loading data...'
+    status: CURLCAST_LANG.common.ajax_loading
+    componentStatus: CURLCAST_LANG.common.ajax_loading
     retryDelay: 5000
     lastPageDataObject: null
     currentRoute: null
@@ -57,7 +57,7 @@ Shell = React.createClass
       error: =>
         console.debug 'Shell.loadNavigationFromServer.ajax.error'
         seconds = @state.retryDelay / 1000
-        newStatus = "Error loading data, retrying..."
+        newStatus = CURLCAST_LANG.common.ajax_error
         @setState status: newStatus, retryDelay: if (@state.retryDelay >= 30000) then @state.retryDelay else (@state.retryDelay + 5000)
         setTimeout @loadNavigationFromServer, (seconds * 1000)
 
@@ -80,7 +80,7 @@ Shell = React.createClass
             _pageTimeout = window.setTimeout(@getPageData, interval, url, interval)
       error: =>
         timing = if interval? then " in #{Math.round(interval/1000)} seconds" else ''
-        @setState componentStatus: "Error loading data, retrying...", rawServerDataSucceeded: false
+        @setState componentStatus: CURLCAST_LANG.common.ajax_error, rawServerDataSucceeded: false
         if interval?
           _pageTimeout = window.setTimeout(@getPageData, interval, url, interval)
 

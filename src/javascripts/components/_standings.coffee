@@ -15,8 +15,8 @@ StandingsBracketGame = React.createClass
     game_date = "Draw #{game.draw.label}, #{game.draw.starts_at_formatted}" if game.draw?
 
     game_moves_to = []
-    game_moves_to.push "Winner to #{game.winner_to.game.name}" if game.winner_to?
-    game_moves_to.push "Loser to #{game.loser_to.game.name}" if game.loser_to?
+    game_moves_to.push "#{CURLCAST_LANG.standings.winner_to} #{game.winner_to.game.name}" if game.winner_to?
+    game_moves_to.push "#{CURLCAST_LANG.standings.loser_to} #{game.loser_to.game.name}" if game.loser_to?
     game_moves_to = game_moves_to.join ", "
 
     "<div class='game-positions'>" + \
@@ -74,7 +74,7 @@ StandingsBracketGroup = React.createClass
     style = { height:  Math.round( (@props.group.games[@props.group.games.length-1].y + 200 - group.y) * zoom_factor.y) + "px" } if group.games.length > 0
     div className: 'bracket-group', id: group.id, style: style,
       unless @props.bracket.groups.length == 1
-        h4 className: 'group-name', group.name || 'A Event'
+        h4 className: 'group-name', group.name || "A #{CURLCAST_LANG.common.event}"
       group.games.map (game, idx) =>
         StandingsBracketGame key: game.id, group: group, game: game, zoom_factor: zoom_factor
 
@@ -91,7 +91,7 @@ StandingsBracket = React.createClass
         #  ul className: 'pagination',
         #    @props.round.groups.map (group, idx) ->
         #      li key: idx,
-        #        a href: "##{group.id}", group.name || 'A Event'
+        #        a href: "##{group.id}", group.name || "A #{CURLCAST_LANG.common.event}"
         @props.round.groups.map (group, idx) =>
           StandingsBracketGroup key: idx, bracket: @props.round, group: group, zoom_factor: @state.zoom_factor
 
@@ -207,7 +207,7 @@ Standings = React.createClass
     @tabChanged()
 
   render: ->
-    return div {}, 'Loading data...' unless @state.rounds?
+    return div {}, CURLCAST_LANG.common.ajax_loading unless @state.rounds?
 
     roundProps = @props
     roundProps.rounds = @state.rounds

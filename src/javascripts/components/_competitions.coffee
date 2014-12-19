@@ -24,7 +24,7 @@ CompetitionSearch = React.createClass
       div style: { display: 'none' },
         input name:'utf8', type: 'hidden', value: '✓', ref: 'utf8'
       div className: 'form-group string optional search_q',
-        input className: 'string optional form-control', ref: 'search', placeholder: 'Search Competitions', autoComplete: 'off', type: 'text', onChange: @filterChanged
+        input className: 'string optional form-control', ref: 'search', placeholder: CURLCAST_LANG.common.search_competitions, autoComplete: 'off', type: 'text', onChange: @filterChanged
 
 CompetitionItem = React.createClass
   render: ->
@@ -55,7 +55,7 @@ CompetitionBox = React.createClass
   getInitialState: ->
     competitions: null
     search: null
-    status: 'Loading data...'
+    status: CURLCAST_LANG.common.ajax_loading
 
   changeFilter: (search) ->
     return if search == window.undefined
@@ -71,9 +71,9 @@ CompetitionBox = React.createClass
       dataType: 'jsonp'
       jsonpCallback: 'curlcastCompetitionsJSONP'
       success: (results) =>
-        @setState competitions: results.competitions, status: 'Loading data...'
+        @setState competitions: results.competitions, status: CURLCAST_LANG.common.ajax_loading
       error: (xhr, status, error) =>
-        @setState status: 'Error loading data, retrying...'
+        @setState status: CURLCAST_LANG.common.ajax_error
         setTimeout @loadDataFromServer, 1000
 
   componentWillMount: ->

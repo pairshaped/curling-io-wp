@@ -22,7 +22,7 @@ Scoreboard = React.createClass
           placeholderMessage: "There are no active competitions."
           competitions: results
       error: ->
-        @setState placeholderMessage: "Error loading data, retrying..."
+        @setState placeholderMessage: CURLCAST_LANG.common.ajax_error
     )
 
   componentWillMount: ->
@@ -59,7 +59,7 @@ Competition = React.createClass
             div className: "col-xs-12",
               if current_draw?
                 p null,
-                  a href: scoreboardUrl(@props.pathPrefix, path), dangerouslySetInnerHTML: {__html: "Full Scoreboard &raquo;"}
+                  a href: scoreboardUrl(@props.pathPrefix, path), dangerouslySetInnerHTML: {__html: "#{CURLCAST_LANG.common.full_scoreboard} &raquo;"}
               else
                 p null,
                   "No Draws Scheduled Yet"
@@ -70,7 +70,7 @@ Draw = React.createClass
     div className: "col-xs-12",
       p null,
         strong null,
-          "Draw #{label}: "
+          "#{CURLCAST_LANG.common.draw} #{label}: "
         starts
       if games.length == 0
         p null,

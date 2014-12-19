@@ -54,7 +54,7 @@ ScoreboardDay = React.createClass
     day = @state.day
 
     unless day?
-      return div className: 'col-xs-12', 'Loading data...'
+      return div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
 
     location_str = ''
     if scoreboard.location? && scoreboard.venue?

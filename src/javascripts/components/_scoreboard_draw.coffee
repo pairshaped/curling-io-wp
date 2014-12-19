@@ -16,7 +16,7 @@ DrawListItem = React.createClass
     li className: active_class,
       Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam }, activeClassName: 'router-active',
       #a {},
-        "Draw #{draw.label}"
+        "#{CURLCAST_LANG.common.draw} #{draw.label}"
         br {}
         draw.starts_at
 
@@ -68,7 +68,7 @@ DrawSheetPosition = React.createClass
             span className: 'hidden-xs', position.team.name
             span className: 'visible-xs', position.team.short_name
         else
-          'TBD'
+          CURLCAST_LANG.common.tbd
       td className: 'lsfe', "#{lsfe}"
       [0..(ends-1)].map (endscore, key) ->
         td key: key, className: 'end-score', end_scores[endscore].score
@@ -163,7 +163,7 @@ ScoreboardDraw = React.createClass
       div className: 'col-xs-12',
         DrawList drawProps
         DrawContentList drawProps
-        p {}, 'LSFE: Last shot in the first end'
+        p {}, CURLCAST_LANG.common.legend_lsfe
 
 window.CurlcastScoreboardDraw = ScoreboardDraw
 
