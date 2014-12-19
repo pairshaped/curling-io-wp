@@ -79,7 +79,9 @@
     },
     games: {
       team_rosters: 'Team Rosters',
-      shooting_percentages: 'Shooting Percentages'
+      shooting_percentages: 'Shooting Percentages',
+      delivery_left: 'Left',
+      delivery_right: 'Right'
     },
     standings: {
       instructions: 'Mouse-over or tap on a game below to view game details.',

@@ -82,7 +82,9 @@
     },
     games: {
       team_rosters: 'CHANGEME',
-      shooting_percentages: 'CHANGEME'
+      shooting_percentages: 'CHANGEME',
+      delivery_left: 'CHANGEME',
+      delivery_right: 'CHANGEME'
     },
     standings: {
       instructions: 'CHANGEME',

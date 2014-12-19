@@ -83,6 +83,8 @@ window.CURLCAST_LANG =
   games:
     team_rosters: 'CHANGEME'
     shooting_percentages: 'CHANGEME'
+    delivery_left: 'CHANGEME'
+    delivery_right: 'CHANGEME'
 
   standings:
     instructions: 'CHANGEME'
@@ -92,3 +94,4 @@ window.CURLCAST_LANG =
 
   teams:
     team_scores: 'CHANGEME'
+

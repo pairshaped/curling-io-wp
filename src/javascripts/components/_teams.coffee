@@ -38,13 +38,18 @@ TeamShowScoresGame = React.createClass
     game = @props.game
     game_position_self = if game.game_positions[0].name == @props.team.name then 0 else 1
     game_position_opponent = if game_position_self == 0 then 1 else 0
-    console.log CURLCAST_LANG.common[game.result.toLowerCase()]
-    game_result = CURLCAST_LANG.common[game.result.toLowerCase()] || game.result
+    game_result = ''
+    if game.result?
+      game_result = CURLCAST_LANG.common[game.result.toLowerCase()] || game.result
     tr {},
       td {}, game.draw.label
       td {}, game.draw.starts_at
       td {}, game_result
-      td {}, "#{game.game_positions[game_position_self].total || ''} - #{game.game_positions[game_position_opponent].total || ''}"
+      td {},
+        if !(game.game_positions[0].total? && game.game_positions[1].total?)
+          ' - '
+        else
+          "#{game.game_positions[game_position_self].total} - #{game.game_positions[game_position_opponent].total}"
       td className: 'hidden-xs', game.game_positions[game_position_opponent].name
 
 

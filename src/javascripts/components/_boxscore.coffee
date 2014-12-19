@@ -137,8 +137,8 @@ BoxScoreTeamRosterAthlete = React.createClass
   render: ->
     tr {},
       td {}, @props.athlete.name
-      td {}, @props.athlete.position
-      td className: 'hidden-xs', @props.athlete.delivery
+      td {}, CURLCAST_LANG.common[@props.athlete.position.toLowerCase()]
+      td className: 'hidden-xs', CURLCAST_LANG.games["delivery_#{@props.athlete.delivery.toLowerCase()}"]
 
 BoxScoreTeamRoster = React.createClass
   render: ->
@@ -163,12 +163,12 @@ BoxScoreTeamRosters = React.createClass
     div className: 'row',
       div className: 'col-xs-12',
         h1 {}, CURLCAST_LANG.games.team_rosters
-      if positions?
-        positions.map (position) ->
-          if position.team? && position.team.athletes.length > 0
-            BoxScoreTeamRoster({key: position.team.id, team: position.team})
-      else
-        span {}, CURLCAST_LANG.common.ajax_loading
+      if @props.teams?
+        @props.teams.map (team) ->
+          if team? && team.athletes.length > 0
+            BoxScoreTeamRoster key: team.id, team: team
+      #else
+      #  span {}, CURLCAST_LANG.common.ajax_loading
 
 BoxScoreAnalysisTeam = React.createClass
   render: ->
@@ -220,11 +220,11 @@ BoxScoreAnalysis = React.createClass
                 th {}
                 th {}, CURLCAST_LANG.common.table.lsfe
                 th {}, CURLCAST_LANG.common.table.blank_ends
-                th {}, '1pt'
-                th {}, '2pt'
-                th {}, '3pt'
-                th {}, '4pt'
-                th {}, '>4pt'
+                th {}, "1#{CURLCAST_LANG.common.table.point}"
+                th {}, "2#{CURLCAST_LANG.common.table.points}"
+                th {}, "3#{CURLCAST_LANG.common.table.points}"
+                th {}, "4#{CURLCAST_LANG.common.table.points}"
+                th {}, ">4#{CURLCAST_LANG.common.table.points}"
                 th {}, CURLCAST_LANG.common.table.total
                 th {}, CURLCAST_LANG.common.table.average
             teams.map (team) ->
@@ -246,7 +246,7 @@ BoxScoreShootingPercentagesAthletes = React.createClass
     athlete ||= blank_athlete
     tr {},
       td {}, athlete.name
-      td {}, athlete.position
+      td {}, CURLCAST_LANG.common[athlete.position]
       td {}, athlete.statistics.shot_count
       td {}, athlete.statistics.total_actual
       td {}, athlete.statistics.percentage
@@ -336,7 +336,7 @@ BoxScoreShootingPercentages = React.createClass
                   th {}, '%'
               tbody {},
                 players.map (set, index) ->
-                  BoxScoreShootingPercentagesAthletes({key: index, athlete: set[team_idx]})
+                  BoxScoreShootingPercentagesAthletes key: index, athlete: set[team_idx]
               tfoot {},
                 tr {},
                   th colSpan: 2, CURLCAST_LANG.common.table.team_total
@@ -367,6 +367,9 @@ BoxScoreContent = React.createClass
     else
       return div className: 'row',
         div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
+
+    #for i in [0..1]
+    #  console.log contentProps.game.positions[i].team, contentProps.game.positions[i].team.athletes
 
     div className: 'row',
       div className: 'col-xs-12',
