@@ -61,7 +61,7 @@ EOS
      */
     static function guess_language( $lang_config = null ) {
       // Get the saved language from the plugin settings, otherwise attempt to use the blog's language
-      $language_setting = get_option('curlcast_default_language', substr( get_bloginfo('language'), 0, 2 ));
+      $language_setting = substr( get_bloginfo('language'), 0, 2 );
       $supported_languages = $lang_config;
       if ( !$supported_languages )
         $supported_languages = json_decode( WP_CURLCAST_SUPPORTED_LANGUAGES );
@@ -69,9 +69,8 @@ EOS
       foreach( $supported_languages as $lang )
       {
         if ( $lang[0] == $language_setting ) return $lang;
-        if ( $lang[0] == WP_CURLCAST_DEFAULT_LANGUAGE ) $default_language = $lang;
       }
-      return ($default_language != null) ? $default_language : $supported_languages[0];
+      return $supported_languages[0];
     }
 
     /**
@@ -81,15 +80,15 @@ EOS
       /*
        * Language pre-processing
        */
-      $supported_languages = json_decode( WP_CURLCAST_SUPPORTED_LANGUAGES );
-      $default_language = self::guess_language($supported_languages);
-      $language_values = array();
-      foreach( $supported_languages as $lang )
-      {
-        list( $abbr, $name ) = $lang;
-        $language_values[$abbr] = __($name, 'curlcast');
-      }
-      
+      // $supported_languages = json_decode( WP_CURLCAST_SUPPORTED_LANGUAGES );
+      // $default_language = self::guess_language($supported_languages);
+      // $language_values = array();
+      // foreach( $supported_languages as $lang )
+      // {
+      //   list( $abbr, $name ) = $lang;
+      //   $language_values[$abbr] = __($name, 'curlcast');
+      // }
+
       /*
        * Init code
        */
@@ -127,18 +126,16 @@ EOS
               'default' => 'stats',
               'required' => 'yes',
               'type' => 'text'
-            ),
+            )/*,
             'curlcast_default_language' => array(
               'name' => __('Default language', 'curlcast'),
               'helptext' => __('Default language used in the stats pages', 'curlcast'),
               'default' => $default_language,
               'required' => 'yes',
               'type' => 'dropdown',
-              'values' => $language_values /*array(
-                'en' => __('Engish', 'curlcast'),
-                'fr' => __('Français', 'curlcast')
-              )*/
+              'values' => $language_values
             )
+          )*/
           )
         )
       );
@@ -330,7 +327,7 @@ EOS
     function enqueue_styles() {
       if(!is_admin()) {
         // Get the supported languages
-        $lang = get_option('curlcast_default_language', self::guess_language() );
+        $lang = self::guess_language()[0];
         wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
         wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
         wp_enqueue_script('curlcast-lang-script', plugins_url("js/$lang.js", __FILE__));
