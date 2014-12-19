@@ -69,6 +69,7 @@ window.CURLCAST_LANG =
     no_draws_scheduled: 'No Draws Scheduled Yet'
     no_games_scheduled: 'No Games Scheduled Yet'
     boxscore_link: 'Box'
+    full_scoreboard_link: 'Full Scoreboard'
 
   games:
     team_rosters: 'Team Rosters'
