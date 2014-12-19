@@ -28902,9 +28902,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   Link = ReactRouter.Link;
 
   scoreboardUrl = function(prefix, url) {
-    if (window.history.pushState != null) {
-      return "" + prefix + url;
-    }
     return "" + prefix + "#" + url;
   };
 
@@ -29082,17 +29079,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var Link, RouteHandler, Scoreboard, a, br, button, div, h3, h4, h6, li, nav, p, span, strong, table, tbody, td, th, thead, tr, ul, _ref, _ref1, _ref2, _ref3;
+  var RouteHandler, Scoreboard;
 
-  _ref = React.DOM, div = _ref.div, p = _ref.p, a = _ref.a, strong = _ref.strong, br = _ref.br, nav = _ref.nav, button = _ref.button, span = _ref.span, strong = _ref.strong;
-
-  _ref1 = React.DOM, table = _ref1.table, thead = _ref1.thead, tbody = _ref1.tbody, tr = _ref1.tr, td = _ref1.td, th = _ref1.th;
-
-  _ref2 = React.DOM, h6 = _ref2.h6, h4 = _ref2.h4, h3 = _ref2.h3;
-
-  _ref3 = React.DOM, ul = _ref3.ul, li = _ref3.li;
-
-  Link = ReactRouter.Link, RouteHandler = ReactRouter.RouteHandler;
+  RouteHandler = ReactRouter.RouteHandler;
 
   Scoreboard = React.createClass({
     getInitialState: function() {
@@ -29104,7 +29093,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       };
     },
     processServerData: function(props) {
-      var d, days, draw, id, k, last_day, last_day_id, loadingStatus, obj, results, _i, _len, _ref4;
+      var d, days, draw, id, k, last_day, last_day_id, loadingStatus, obj, results, _i, _len, _ref;
       results = props.data;
       if (results == null) {
         loadingStatus = CURLCAST_LANG.common.ajax_loading;
@@ -29118,9 +29107,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       days = [];
       last_day_id = -1;
       id = 0;
-      _ref4 = results.draws;
-      for (k = _i = 0, _len = _ref4.length; _i < _len; k = ++_i) {
-        draw = _ref4[k];
+      _ref = results.draws;
+      for (k = _i = 0, _len = _ref.length; _i < _len; k = ++_i) {
+        draw = _ref[k];
         d = days[days.length - 1] || null;
         if (d) {
           last_day = d.day;
@@ -29154,8 +29143,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return this.processServerData(this.props);
     },
     render: function() {
-      var day, dayProps, days, draw, scoreboard, _ref4;
-      _ref4 = this.state, days = _ref4.days, scoreboard = _ref4.scoreboard, day = _ref4.day, draw = _ref4.draw;
+      var day, dayProps, days, draw, scoreboard, _ref;
+      _ref = this.state, days = _ref.days, scoreboard = _ref.scoreboard, day = _ref.day, draw = _ref.draw;
       dayProps = this.props;
       dayProps.days = this.state.days;
       dayProps.scoreboard = this.state.scoreboard;
@@ -30049,7 +30038,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   });
 
   BoxScoreContent = React.createClass({
-    componentDidMount: function() {},
     render: function() {
       var competition, competitions, contentProps, draw, draws, game, position, _i, _j, _k, _len, _len1, _len2, _ref4, _ref5, _ref6;
       _ref4 = this.props, draws = _ref4.draws, competitions = _ref4.competitions, competition = _ref4.competition;
@@ -30128,9 +30116,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var CompetitionBox, CompetitionItem, CompetitionList, CompetitionSearch, Link, a, button, div, form, input, nav, span, table, tbody, td, th, thead, tr, _ref, _ref1;
+  var CompetitionBox, CompetitionItem, CompetitionList, CompetitionSearch, Link, div, form, input, table, tbody, td, th, thead, tr, _ref, _ref1;
 
-  _ref = React.DOM, nav = _ref.nav, div = _ref.div, button = _ref.button, span = _ref.span, a = _ref.a, form = _ref.form, input = _ref.input;
+  _ref = React.DOM, div = _ref.div, form = _ref.form, input = _ref.input;
 
   _ref1 = React.DOM, table = _ref1.table, thead = _ref1.thead, tr = _ref1.tr, th = _ref1.th, tbody = _ref1.tbody, td = _ref1.td;
 

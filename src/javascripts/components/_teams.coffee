@@ -186,10 +186,6 @@ Teams = React.createClass
     @processServerData @props
 
   render: ->
-    #unless @state.teams? || @state.team?
-    #  return div className: 'row',
-    #    div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
-
     passedProps = @props
     passedProps.absoluteUrl = @absoluteUrl
 

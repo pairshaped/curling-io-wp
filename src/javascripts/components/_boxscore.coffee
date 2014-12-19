@@ -154,11 +154,10 @@ BoxScoreTeamRoster = React.createClass
             th className: 'hidden-xs', width: '25%', CURLCAST_LANG.common.table.delivery
         tbody {},
           team.athletes.map (athlete) ->
-            BoxScoreTeamRosterAthlete({key: athlete.id, athlete: athlete})
+            BoxScoreTeamRosterAthlete key: athlete.id, athlete: athlete
 
 BoxScoreTeamRosters = React.createClass
   render: ->
-
     positions = @props.positions
 
     div className: 'row',
@@ -229,11 +228,11 @@ BoxScoreAnalysis = React.createClass
                 th {}, CURLCAST_LANG.common.table.total
                 th {}, CURLCAST_LANG.common.table.average
             teams.map (team) ->
-              BoxScoreAnalysisTeam({key: team.id, team: team})
+              BoxScoreAnalysisTeam key: team.id, team: team
 
 BoxScoreShootingPercentagesAthletes = React.createClass
   render: ->
-    { athlete } = @props
+    {athlete} = @props
 
 
     blank_athlete =
@@ -347,7 +346,6 @@ BoxScoreShootingPercentages = React.createClass
 
 
 BoxScoreContent = React.createClass
-  componentDidMount: ->
   render: ->
     {draws, competitions, competition} = @props
 
@@ -400,10 +398,6 @@ BoxScore = React.createClass
     @processServerData @props
 
   render: ->
-    # unless @state.game?
-    #  return div className: 'row',
-    #    div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
-
     props = @props
     props.draws = @state.draws
     props.game = @state.game
