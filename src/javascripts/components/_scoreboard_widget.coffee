@@ -85,13 +85,16 @@ Draw = React.createClass
 Game = React.createClass
   render: ->
     {id, state, path, game_positions} = @props.game
+    state_for_lang = game.state.toLowerCase()
+    if state_for_lang.indexOf('after') > -1
+      state_for_lang = 'after'
     tbody null,
       tr null,
         GamePositionName({key: game_positions[0].id, game_position: game_positions[0], pathPrefix: @props.pathPrefix, baseUrl: @props.baseUrl})
         GamePositionScore({key: "score-#{game_positions[0].id}", game_position: game_positions[0]})
         td className: "game-state", rowSpan: "2",
           strong null,
-            CURLCAST_LANG.common[state.toLowerCase()]
+            CURLCAST_LANG.common['state_' + state_for_lang]
           br null
           a href: scoreboardUrl(@props.pathPrefix, path),
             CURLCAST_LANG.scoreboard_widget.boxscore_link

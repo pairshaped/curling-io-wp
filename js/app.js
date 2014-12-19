@@ -29037,7 +29037,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }), td({
         className: "game-state",
         rowSpan: "2"
+<<<<<<< HEAD
       }, strong(null, CURLCAST_LANG.common[state.toLowerCase()]), br(null), a({
+=======
+      }, strong(null, CURLCAST_LANG.common['state_' + state.toLowerCase()] || state), br(null), a({
+>>>>>>> 8a38fa6c07e487238cee7e0e8fba8effc191f2b3
         href: scoreboardUrl(this.props.pathPrefix, path)
       }, CURLCAST_LANG.scoreboard_widget.boxscore_link))), tr(null, GamePositionName({
         key: game_positions[1].id,
