@@ -9,10 +9,23 @@ if (!class_exists('curlcast')) {
 
   define('WP_CURLCAST_DEFAULT_LANGUAGE', 'en');
 
+  // When other languages become available, we should add them here.
+  // Note: PHP defines can't be arrays or objects, so I'm putting
+  //       this information into a JSON string.
+  // TODO: We may want to look into a system to automatically detect
+  //       language script files.
+  define('WP_CURLCAST_SUPPORTED_LANGUAGES', <<<EOS
+[
+  ["en", "English"],
+  ["fr", "Français"]
+]
+EOS
+  );
+
   # Set environment
   # Ideally, we should be setting/including this using a env.php file with the appropriate configuration
-  #define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
-  define('WP_CURLCAST_ENV', 'dev');
+  define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
+  #define('WP_CURLCAST_ENV', 'dev');
 
   switch(WP_CURLCAST_ENV) {
   case 'dev':
@@ -30,17 +43,6 @@ if (!class_exists('curlcast')) {
     define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', false);
   }
 
-  # Production
-
-  # Staging
-  # define('WP_CURLCAST_BASE_URL', 'http://curlcast-staging.ca/stats/organizations');
-
-  # Dev
-  # define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
-
-  # Old Dev
-  # define('WP_CURLCAST_BASE_URL', 'http://curling.dev/stats/organizations');
-
   define('WP_CURLCAST_WIDGET_URL', 'competitions/scoreboard_mini.js');
   define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast-staging.ca/update.php');
 
@@ -55,9 +57,42 @@ if (!class_exists('curlcast')) {
     );
 
     /**
+     * Determine the language for this plugin to use
+     */
+    static function guess_language( $lang_config = null ) {
+      // Get the saved language from the plugin settings, otherwise attempt to use the blog's language
+      $language_setting = get_option('curlcast_default_language', substr( get_bloginfo('language'), 0, 2 ));
+      $supported_languages = $lang_config;
+      if ( !$supported_languages )
+        $supported_languages = json_decode( WP_CURLCAST_SUPPORTED_LANGUAGES );
+      $default_language = null;
+      foreach( $supported_languages as $lang )
+      {
+        if ( $lang[0] == $language_setting ) return $lang;
+        if ( $lang[0] == WP_CURLCAST_DEFAULT_LANGUAGE ) $default_language = $lang;
+      }
+      return ($default_language != null) ? $default_language : $supported_languages[0];
+    }
+
+    /**
      * Create all actions and hooks
      */
     function init() {
+      /*
+       * Language pre-processing
+       */
+      $supported_languages = json_decode( WP_CURLCAST_SUPPORTED_LANGUAGES );
+      $default_language = self::guess_language($supported_languages);
+      $language_values = array();
+      foreach( $supported_languages as $lang )
+      {
+        list( $abbr, $name ) = $lang;
+        $language_values[$abbr] = __($name, 'curlcast');
+      }
+      
+      /*
+       * Init code
+       */
       self::$tabs = array(
         'settings' => array(
           'title' => __('Settings', 'curlcast'),
@@ -96,13 +131,13 @@ if (!class_exists('curlcast')) {
             'curlcast_default_language' => array(
               'name' => __('Default language', 'curlcast'),
               'helptext' => __('Default language used in the stats pages', 'curlcast'),
-              'default' => 'en',
+              'default' => $default_language,
               'required' => 'yes',
               'type' => 'dropdown',
-              'values' => array(
+              'values' => $language_values /*array(
                 'en' => __('Engish', 'curlcast'),
                 'fr' => __('Français', 'curlcast')
-              )
+              )*/
             )
           )
         )
@@ -294,7 +329,8 @@ if (!class_exists('curlcast')) {
      */
     function enqueue_styles() {
       if(!is_admin()) {
-        $lang = get_option('curlcast_default_language', WP_CURLCAST_DEFAULT_LANGUAGE);
+        // Get the supported languages
+        $lang = get_option('curlcast_default_language', self::guess_language() );
         wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
         wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
         wp_enqueue_script('curlcast-lang-script', plugins_url("js/$lang.js", __FILE__));
@@ -311,7 +347,6 @@ if (!class_exists('curlcast')) {
       $access_key  = (defined('WP_CURLCAST_ACCESS_KEY_OVERRIDE') && WP_CURLCAST_ACCESS_KEY_OVERRIDE) ? WP_CURLCAST_ACCESS_KEY_OVERRIDE : get_option('curlcast_api_key');
       $page_prefix = get_option('curlcast_page_prefix');
       $base_url    = get_site_url().'/'.$page_prefix;
-      $lang        = get_option('curlcast_default_language');
 
       $params = array();
       $params['base_url'] = $base_url;
@@ -328,6 +363,7 @@ if (!class_exists('curlcast')) {
         }
       }
       $template_file = plugin_dir_path(__FILE__) . 'templates/' . $section[0];
+      //$template_file = plugin_dir_path(__FILE__) . 'templates/main.php';
 
       $template = file_get_contents($template_file);
       $template = str_replace('{url}', $url, $template);
