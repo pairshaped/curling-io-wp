@@ -15,7 +15,7 @@
             React.createElement( ReactRouter.Route, { name: 'scoreboard-draw', path: 'draw/:draw', handler: CurlcastScoreboardDraw })
           )
         ),
-        React.createElement( ReactRouter.Route, { name: 'boxscore', path: 'games/:game_id/show', handler: CurlcastBoxScore }),
+        React.createElement( ReactRouter.Route, { name: 'boxscore', path: 'games/:game_id', handler: CurlcastBoxScore }),
         React.createElement( ReactRouter.Route, { name: 'standings', path: 'standings', handler: CurlcastStandings },
           React.createElement( ReactRouter.Route, { name: 'standings-round', path: ':round_id', handler: CurlcastDummy })
         ),
@@ -25,8 +25,7 @@
       )
     );
 
-    var opt = (window.location.pushState) ? ReactRouter.HistoryLocation : ReactRouter.HashLocation
-    ReactRouter.run(routes, opt, function(Handler, state){
+    ReactRouter.run(routes, function(Handler, state){
       React.renderComponent( React.createElement( Handler, {
         apiRoot: '{url}',
         //prefix: '{path_prefix}',
