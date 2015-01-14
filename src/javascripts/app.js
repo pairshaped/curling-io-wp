@@ -1,8 +1,8 @@
-//= require lib/react-with-addons
-//= require lib/react-router
 //= require lib/mdn-bind-polyfill
 //= require lib/es5-sham
 //= require lib/es5-shim
+//= require lib/react-with-addons
+//= require lib/react-router
 //= require lib/jquery.jsplumb-1.6.2-min
 //= require lib/bootstrap/tooltip
 //= require lib/bootstrap/popover

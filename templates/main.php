@@ -1,7 +1,8 @@
 <div class="curlcast" id="scoreboard">
-  <div class="container-fluid" id="curlcast">
+  <div class="container" id="curlcast">
   </div>
 </div>
+
 
 <script type="text/javascript">
   (function(){

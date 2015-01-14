@@ -88,7 +88,7 @@ EOS
       //   list( $abbr, $name ) = $lang;
       //   $language_values[$abbr] = __($name, 'curlcast');
       // }
-
+      
       /*
        * Init code
        */
@@ -325,10 +325,12 @@ EOS
      * Add header styles
      */
     function enqueue_styles() {
+      global $is_IE;
       if(!is_admin()) {
         // Get the supported languages
         $lang = self::guess_language()[0];
         wp_enqueue_style('curlcast-style', plugins_url('css/app.css', __FILE__));
+        if($is_IE) wp_enqueue_script('curlcast-respondjs-script', 'https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js');
         wp_enqueue_script('curlcast-script', plugins_url('js/app.js', __FILE__));
         wp_enqueue_script('curlcast-lang-script', plugins_url("js/$lang.js", __FILE__));
       }

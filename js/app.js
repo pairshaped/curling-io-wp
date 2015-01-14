@@ -1,3 +1,1932 @@
+if (!Function.prototype.bind) {
+  Function.prototype.bind = function(oThis) {
+    if (typeof this !== 'function') {
+      // closest thing possible to the ECMAScript 5
+      // internal IsCallable function
+      throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+    }
+
+    var aArgs   = Array.prototype.slice.call(arguments, 1),
+        fToBind = this,
+        fNOP    = function() {},
+        fBound  = function() {
+          return fToBind.apply(this instanceof fNOP && oThis
+                 ? this
+                 : oThis,
+                 aArgs.concat(Array.prototype.slice.call(arguments)));
+        };
+
+    fNOP.prototype = this.prototype;
+    fBound.prototype = new fNOP();
+
+    return fBound;
+  };
+}
+
+;
+/*!
+ * https://github.com/es-shims/es5-shim
+ * @license es5-shim Copyright 2009-2014 by contributors, MIT License
+ * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
+ */
+
+// vim: ts=4 sts=4 sw=4 expandtab
+
+//Add semicolon to prevent IIFE from being passed as argument to concated code.
+;
+
+// UMD (Universal Module Definition)
+// see https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    'use strict';
+    /*global define, exports, module */
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.returnExports = factory();
+  }
+}(this, function () {
+
+var call = Function.prototype.call;
+var prototypeOfObject = Object.prototype;
+var owns = call.bind(prototypeOfObject.hasOwnProperty);
+
+// If JS engine supports accessors creating shortcuts.
+var defineGetter;
+var defineSetter;
+var lookupGetter;
+var lookupSetter;
+var supportsAccessors = owns(prototypeOfObject, '__defineGetter__');
+if (supportsAccessors) {
+    defineGetter = call.bind(prototypeOfObject.__defineGetter__);
+    defineSetter = call.bind(prototypeOfObject.__defineSetter__);
+    lookupGetter = call.bind(prototypeOfObject.__lookupGetter__);
+    lookupSetter = call.bind(prototypeOfObject.__lookupSetter__);
+}
+
+// ES5 15.2.3.2
+// http://es5.github.com/#x15.2.3.2
+if (!Object.getPrototypeOf) {
+    // https://github.com/es-shims/es5-shim/issues#issue/2
+    // http://ejohn.org/blog/objectgetprototypeof/
+    // recommended by fschaefer on github
+    //
+    // sure, and webreflection says ^_^
+    // ... this will nerever possibly return null
+    // ... Opera Mini breaks here with infinite loops
+    Object.getPrototypeOf = function getPrototypeOf(object) {
+        var proto = object.__proto__;
+        if (proto || proto === null) {
+            return proto;
+        } else if (object.constructor) {
+            return object.constructor.prototype;
+        } else {
+            return prototypeOfObject;
+        }
+    };
+}
+
+//ES5 15.2.3.3
+//http://es5.github.com/#x15.2.3.3
+
+function doesGetOwnPropertyDescriptorWork(object) {
+    try {
+        object.sentinel = 0;
+        return Object.getOwnPropertyDescriptor(object, 'sentinel').value === 0;
+    } catch (exception) {
+        // returns falsy
+    }
+}
+
+//check whether getOwnPropertyDescriptor works if it's given. Otherwise,
+//shim partially.
+if (Object.defineProperty) {
+    var getOwnPropertyDescriptorWorksOnObject = doesGetOwnPropertyDescriptorWork({});
+    var getOwnPropertyDescriptorWorksOnDom = typeof document === 'undefined' ||
+    doesGetOwnPropertyDescriptorWork(document.createElement('div'));
+    if (!getOwnPropertyDescriptorWorksOnDom || !getOwnPropertyDescriptorWorksOnObject) {
+        var getOwnPropertyDescriptorFallback = Object.getOwnPropertyDescriptor;
+    }
+}
+
+if (!Object.getOwnPropertyDescriptor || getOwnPropertyDescriptorFallback) {
+    var ERR_NON_OBJECT = 'Object.getOwnPropertyDescriptor called on a non-object: ';
+
+    Object.getOwnPropertyDescriptor = function getOwnPropertyDescriptor(object, property) {
+        if ((typeof object !== 'object' && typeof object !== 'function') || object === null) {
+            throw new TypeError(ERR_NON_OBJECT + object);
+        }
+
+        // make a valiant attempt to use the real getOwnPropertyDescriptor
+        // for I8's DOM elements.
+        if (getOwnPropertyDescriptorFallback) {
+            try {
+                return getOwnPropertyDescriptorFallback.call(Object, object, property);
+            } catch (exception) {
+                // try the shim if the real one doesn't work
+            }
+        }
+
+        // If object does not owns property return undefined immediately.
+        if (!owns(object, property)) {
+            return;
+        }
+
+        // If object has a property then it's for sure both `enumerable` and
+        // `configurable`.
+        var descriptor = { enumerable: true, configurable: true };
+
+        // If JS engine supports accessor properties then property may be a
+        // getter or setter.
+        if (supportsAccessors) {
+            // Unfortunately `__lookupGetter__` will return a getter even
+            // if object has own non getter property along with a same named
+            // inherited getter. To avoid misbehavior we temporary remove
+            // `__proto__` so that `__lookupGetter__` will return getter only
+            // if it's owned by an object.
+            var prototype = object.__proto__;
+            var notPrototypeOfObject = object !== prototypeOfObject;
+            // avoid recursion problem, breaking in Opera Mini when
+            // Object.getOwnPropertyDescriptor(Object.prototype, 'toString')
+            // or any other Object.prototype accessor
+            if (notPrototypeOfObject) {
+                object.__proto__ = prototypeOfObject;
+            }
+
+            var getter = lookupGetter(object, property);
+            var setter = lookupSetter(object, property);
+
+            if (notPrototypeOfObject) {
+                // Once we have getter and setter we can put values back.
+                object.__proto__ = prototype;
+            }
+
+            if (getter || setter) {
+                if (getter) {
+                    descriptor.get = getter;
+                }
+                if (setter) {
+                    descriptor.set = setter;
+                }
+                // If it was accessor property we're done and return here
+                // in order to avoid adding `value` to the descriptor.
+                return descriptor;
+            }
+        }
+
+        // If we got this far we know that object has an own property that is
+        // not an accessor so we set it as a value and return descriptor.
+        descriptor.value = object[property];
+        descriptor.writable = true;
+        return descriptor;
+    };
+}
+
+// ES5 15.2.3.4
+// http://es5.github.com/#x15.2.3.4
+if (!Object.getOwnPropertyNames) {
+    Object.getOwnPropertyNames = function getOwnPropertyNames(object) {
+        return Object.keys(object);
+    };
+}
+
+// ES5 15.2.3.5
+// http://es5.github.com/#x15.2.3.5
+if (!Object.create) {
+
+    // Contributed by Brandon Benvie, October, 2012
+    var createEmpty;
+    var supportsProto = !({ __proto__: null } instanceof Object);
+                        // the following produces false positives
+                        // in Opera Mini => not a reliable check
+                        // Object.prototype.__proto__ === null
+    /*global document */
+    if (supportsProto || typeof document === 'undefined') {
+        createEmpty = function () {
+            return { __proto__: null };
+        };
+    } else {
+        // In old IE __proto__ can't be used to manually set `null`, nor does
+        // any other method exist to make an object that inherits from nothing,
+        // aside from Object.prototype itself. Instead, create a new global
+        // object and *steal* its Object.prototype and strip it bare. This is
+        // used as the prototype to create nullary objects.
+        createEmpty = function () {
+            var iframe = document.createElement('iframe');
+            var parent = document.body || document.documentElement;
+            iframe.style.display = 'none';
+            parent.appendChild(iframe);
+            iframe.src = 'javascript:';
+            var empty = iframe.contentWindow.Object.prototype;
+            parent.removeChild(iframe);
+            iframe = null;
+            delete empty.constructor;
+            delete empty.hasOwnProperty;
+            delete empty.propertyIsEnumerable;
+            delete empty.isPrototypeOf;
+            delete empty.toLocaleString;
+            delete empty.toString;
+            delete empty.valueOf;
+            empty.__proto__ = null;
+
+            function Empty() {}
+            Empty.prototype = empty;
+            // short-circuit future calls
+            createEmpty = function () {
+                return new Empty();
+            };
+            return new Empty();
+        };
+    }
+
+    Object.create = function create(prototype, properties) {
+
+        var object;
+        function Type() {}  // An empty constructor.
+
+        if (prototype === null) {
+            object = createEmpty();
+        } else {
+            if (typeof prototype !== 'object' && typeof prototype !== 'function') {
+                // In the native implementation `parent` can be `null`
+                // OR *any* `instanceof Object`  (Object|Function|Array|RegExp|etc)
+                // Use `typeof` tho, b/c in old IE, DOM elements are not `instanceof Object`
+                // like they are in modern browsers. Using `Object.create` on DOM elements
+                // is...err...probably inappropriate, but the native version allows for it.
+                throw new TypeError('Object prototype may only be an Object or null'); // same msg as Chrome
+            }
+            Type.prototype = prototype;
+            object = new Type();
+            // IE has no built-in implementation of `Object.getPrototypeOf`
+            // neither `__proto__`, but this manually setting `__proto__` will
+            // guarantee that `Object.getPrototypeOf` will work as expected with
+            // objects created using `Object.create`
+            object.__proto__ = prototype;
+        }
+
+        if (properties !== void 0) {
+            Object.defineProperties(object, properties);
+        }
+
+        return object;
+    };
+}
+
+// ES5 15.2.3.6
+// http://es5.github.com/#x15.2.3.6
+
+// Patch for WebKit and IE8 standard mode
+// Designed by hax <hax.github.com>
+// related issue: https://github.com/es-shims/es5-shim/issues#issue/5
+// IE8 Reference:
+//     http://msdn.microsoft.com/en-us/library/dd282900.aspx
+//     http://msdn.microsoft.com/en-us/library/dd229916.aspx
+// WebKit Bugs:
+//     https://bugs.webkit.org/show_bug.cgi?id=36423
+
+function doesDefinePropertyWork(object) {
+    try {
+        Object.defineProperty(object, 'sentinel', {});
+        return 'sentinel' in object;
+    } catch (exception) {
+        // returns falsy
+    }
+}
+
+// check whether defineProperty works if it's given. Otherwise,
+// shim partially.
+if (Object.defineProperty) {
+    var definePropertyWorksOnObject = doesDefinePropertyWork({});
+    var definePropertyWorksOnDom = typeof document === 'undefined' ||
+        doesDefinePropertyWork(document.createElement('div'));
+    if (!definePropertyWorksOnObject || !definePropertyWorksOnDom) {
+        var definePropertyFallback = Object.defineProperty,
+            definePropertiesFallback = Object.defineProperties;
+    }
+}
+
+if (!Object.defineProperty || definePropertyFallback) {
+    var ERR_NON_OBJECT_DESCRIPTOR = 'Property description must be an object: ';
+    var ERR_NON_OBJECT_TARGET = 'Object.defineProperty called on non-object: ';
+    var ERR_ACCESSORS_NOT_SUPPORTED = 'getters & setters can not be defined on this javascript engine';
+
+    Object.defineProperty = function defineProperty(object, property, descriptor) {
+        if ((typeof object !== 'object' && typeof object !== 'function') || object === null) {
+            throw new TypeError(ERR_NON_OBJECT_TARGET + object);
+        }
+        if ((typeof descriptor !== 'object' && typeof descriptor !== 'function') || descriptor === null) {
+            throw new TypeError(ERR_NON_OBJECT_DESCRIPTOR + descriptor);
+        }
+        // make a valiant attempt to use the real defineProperty
+        // for I8's DOM elements.
+        if (definePropertyFallback) {
+            try {
+                return definePropertyFallback.call(Object, object, property, descriptor);
+            } catch (exception) {
+                // try the shim if the real one doesn't work
+            }
+        }
+
+        // If it's a data property.
+        if (owns(descriptor, 'value')) {
+            // fail silently if 'writable', 'enumerable', or 'configurable'
+            // are requested but not supported
+            /*
+            // alternate approach:
+            if ( // can't implement these features; allow false but not true
+                !(owns(descriptor, 'writable') ? descriptor.writable : true) ||
+                !(owns(descriptor, 'enumerable') ? descriptor.enumerable : true) ||
+                !(owns(descriptor, 'configurable') ? descriptor.configurable : true)
+            )
+                throw new RangeError(
+                    'This implementation of Object.defineProperty does not support configurable, enumerable, or writable.'
+                );
+            */
+
+            if (supportsAccessors && (lookupGetter(object, property) || lookupSetter(object, property))) {
+                // As accessors are supported only on engines implementing
+                // `__proto__` we can safely override `__proto__` while defining
+                // a property to make sure that we don't hit an inherited
+                // accessor.
+                var prototype = object.__proto__;
+                object.__proto__ = prototypeOfObject;
+                // Deleting a property anyway since getter / setter may be
+                // defined on object itself.
+                delete object[property];
+                object[property] = descriptor.value;
+                // Setting original `__proto__` back now.
+                object.__proto__ = prototype;
+            } else {
+                object[property] = descriptor.value;
+            }
+        } else {
+            if (!supportsAccessors) {
+                throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);
+            }
+            // If we got that far then getters and setters can be defined !!
+            if (owns(descriptor, 'get')) {
+                defineGetter(object, property, descriptor.get);
+            }
+            if (owns(descriptor, 'set')) {
+                defineSetter(object, property, descriptor.set);
+            }
+        }
+        return object;
+    };
+}
+
+// ES5 15.2.3.7
+// http://es5.github.com/#x15.2.3.7
+if (!Object.defineProperties || definePropertiesFallback) {
+    Object.defineProperties = function defineProperties(object, properties) {
+        // make a valiant attempt to use the real defineProperties
+        if (definePropertiesFallback) {
+            try {
+                return definePropertiesFallback.call(Object, object, properties);
+            } catch (exception) {
+                // try the shim if the real one doesn't work
+            }
+        }
+
+        for (var property in properties) {
+            if (owns(properties, property) && property !== '__proto__') {
+                Object.defineProperty(object, property, properties[property]);
+            }
+        }
+        return object;
+    };
+}
+
+// ES5 15.2.3.8
+// http://es5.github.com/#x15.2.3.8
+if (!Object.seal) {
+    Object.seal = function seal(object) {
+        if (Object(object) !== object) {
+            throw new TypeError('Object.seal can only be called on Objects.');
+        }
+        // this is misleading and breaks feature-detection, but
+        // allows "securable" code to "gracefully" degrade to working
+        // but insecure code.
+        return object;
+    };
+}
+
+// ES5 15.2.3.9
+// http://es5.github.com/#x15.2.3.9
+if (!Object.freeze) {
+    Object.freeze = function freeze(object) {
+        if (Object(object) !== object) {
+            throw new TypeError('Object.freeze can only be called on Objects.');
+        }
+        // this is misleading and breaks feature-detection, but
+        // allows "securable" code to "gracefully" degrade to working
+        // but insecure code.
+        return object;
+    };
+}
+
+// detect a Rhino bug and patch it
+try {
+    Object.freeze(function () {});
+} catch (exception) {
+    Object.freeze = (function freeze(freezeObject) {
+        return function freeze(object) {
+            if (typeof object === 'function') {
+                return object;
+            } else {
+                return freezeObject(object);
+            }
+        };
+    }(Object.freeze));
+}
+
+// ES5 15.2.3.10
+// http://es5.github.com/#x15.2.3.10
+if (!Object.preventExtensions) {
+    Object.preventExtensions = function preventExtensions(object) {
+        if (Object(object) !== object) {
+            throw new TypeError('Object.preventExtensions can only be called on Objects.');
+        }
+        // this is misleading and breaks feature-detection, but
+        // allows "securable" code to "gracefully" degrade to working
+        // but insecure code.
+        return object;
+    };
+}
+
+// ES5 15.2.3.11
+// http://es5.github.com/#x15.2.3.11
+if (!Object.isSealed) {
+    Object.isSealed = function isSealed(object) {
+        if (Object(object) !== object) {
+            throw new TypeError('Object.isSealed can only be called on Objects.');
+        }
+        return false;
+    };
+}
+
+// ES5 15.2.3.12
+// http://es5.github.com/#x15.2.3.12
+if (!Object.isFrozen) {
+    Object.isFrozen = function isFrozen(object) {
+        if (Object(object) !== object) {
+            throw new TypeError('Object.isFrozen can only be called on Objects.');
+        }
+        return false;
+    };
+}
+
+// ES5 15.2.3.13
+// http://es5.github.com/#x15.2.3.13
+if (!Object.isExtensible) {
+    Object.isExtensible = function isExtensible(object) {
+        // 1. If Type(O) is not Object throw a TypeError exception.
+        if (Object(object) !== object) {
+            throw new TypeError('Object.isExtensible can only be called on Objects.');
+        }
+        // 2. Return the Boolean value of the [[Extensible]] internal property of O.
+        var name = '';
+        while (owns(object, name)) {
+            name += '?';
+        }
+        object[name] = true;
+        var returnValue = owns(object, name);
+        delete object[name];
+        return returnValue;
+    };
+}
+
+}));
+/*!
+ * https://github.com/es-shims/es5-shim
+ * @license es5-shim Copyright 2009-2014 by contributors, MIT License
+ * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
+ */
+
+// vim: ts=4 sts=4 sw=4 expandtab
+
+
+// UMD (Universal Module Definition)
+// see https://github.com/umdjs/umd/blob/master/returnExports.js
+// Add semicolon to prevent IIFE from being passed as argument to concatenated code.
+;(function (root, factory) {
+    'use strict';
+    /*global define, exports, module */
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.returnExports = factory();
+    }
+}(this, function () {
+
+/**
+ * Brings an environment as close to ECMAScript 5 compliance
+ * as is possible with the facilities of erstwhile engines.
+ *
+ * Annotated ES5: http://es5.github.com/ (specific links below)
+ * ES5 Spec: http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-262.pdf
+ * Required reading: http://javascriptweblog.wordpress.com/2011/12/05/extending-javascript-natives/
+ */
+
+// Shortcut to an often accessed properties, in order to avoid multiple
+// dereference that costs universally.
+var ArrayPrototype = Array.prototype;
+var ObjectPrototype = Object.prototype;
+var FunctionPrototype = Function.prototype;
+var StringPrototype = String.prototype;
+var NumberPrototype = Number.prototype;
+var array_slice = ArrayPrototype.slice;
+var array_splice = ArrayPrototype.splice;
+var array_push = ArrayPrototype.push;
+var array_unshift = ArrayPrototype.unshift;
+var call = FunctionPrototype.call;
+
+// Having a toString local variable name breaks in Opera so use to_string.
+var to_string = ObjectPrototype.toString;
+
+var isFunction = function (val) {
+    return to_string.call(val) === '[object Function]';
+};
+var isRegex = function (val) {
+    return to_string.call(val) === '[object RegExp]';
+};
+var isArray = function isArray(obj) {
+    return to_string.call(obj) === '[object Array]';
+};
+var isString = function isString(obj) {
+    return to_string.call(obj) === '[object String]';
+};
+var isArguments = function isArguments(value) {
+    var str = to_string.call(value);
+    var isArgs = str === '[object Arguments]';
+    if (!isArgs) {
+        isArgs = !isArray(value) &&
+          value !== null &&
+          typeof value === 'object' &&
+          typeof value.length === 'number' &&
+          value.length >= 0 &&
+          isFunction(value.callee);
+    }
+    return isArgs;
+};
+
+var supportsDescriptors = Object.defineProperty && (function () {
+    try {
+        Object.defineProperty({}, 'x', {});
+        return true;
+    } catch (e) { /* this is ES3 */
+        return false;
+    }
+}());
+
+// Define configurable, writable and non-enumerable props
+// if they don't exist.
+var defineProperty;
+if (supportsDescriptors) {
+    defineProperty = function (object, name, method, forceAssign) {
+        if (!forceAssign && (name in object)) { return; }
+        Object.defineProperty(object, name, {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: method
+        });
+    };
+} else {
+    defineProperty = function (object, name, method, forceAssign) {
+        if (!forceAssign && (name in object)) { return; }
+        object[name] = method;
+    };
+}
+var defineProperties = function (object, map, forceAssign) {
+    for (var name in map) {
+        if (ObjectPrototype.hasOwnProperty.call(map, name)) {
+          defineProperty(object, name, map[name], forceAssign);
+        }
+    }
+};
+
+//
+// Util
+// ======
+//
+
+// ES5 9.4
+// http://es5.github.com/#x9.4
+// http://jsperf.com/to-integer
+
+function toInteger(num) {
+    var n = +num;
+    if (n !== n) { // isNaN
+        n = 0;
+    } else if (n !== 0 && n !== (1 / 0) && n !== -(1 / 0)) {
+        n = (n > 0 || -1) * Math.floor(Math.abs(n));
+    }
+    return n;
+}
+
+function isPrimitive(input) {
+    var type = typeof input;
+    return input === null ||
+        type === 'undefined' ||
+        type === 'boolean' ||
+        type === 'number' ||
+        type === 'string';
+}
+
+function toPrimitive(input) {
+    var val, valueOf, toStr;
+    if (isPrimitive(input)) {
+        return input;
+    }
+    valueOf = input.valueOf;
+    if (isFunction(valueOf)) {
+        val = valueOf.call(input);
+        if (isPrimitive(val)) {
+            return val;
+        }
+    }
+    toStr = input.toString;
+    if (isFunction(toStr)) {
+        val = toStr.call(input);
+        if (isPrimitive(val)) {
+            return val;
+        }
+    }
+    throw new TypeError();
+}
+
+var ES = {
+    // ES5 9.9
+    // http://es5.github.com/#x9.9
+    ToObject: function (o) {
+        /*jshint eqnull: true */
+        if (o == null) { // this matches both null and undefined
+            throw new TypeError("can't convert " + o + ' to object');
+        }
+        return Object(o);
+    },
+    ToUint32: function ToUint32(x) {
+        return x >>> 0;
+    }
+};
+
+//
+// Function
+// ========
+//
+
+// ES-5 15.3.4.5
+// http://es5.github.com/#x15.3.4.5
+
+var Empty = function Empty() {};
+
+defineProperties(FunctionPrototype, {
+    bind: function bind(that) { // .length is 1
+        // 1. Let Target be the this value.
+        var target = this;
+        // 2. If IsCallable(Target) is false, throw a TypeError exception.
+        if (!isFunction(target)) {
+            throw new TypeError('Function.prototype.bind called on incompatible ' + target);
+        }
+        // 3. Let A be a new (possibly empty) internal list of all of the
+        //   argument values provided after thisArg (arg1, arg2 etc), in order.
+        // XXX slicedArgs will stand in for "A" if used
+        var args = array_slice.call(arguments, 1); // for normal call
+        // 4. Let F be a new native ECMAScript object.
+        // 11. Set the [[Prototype]] internal property of F to the standard
+        //   built-in Function prototype object as specified in 15.3.3.1.
+        // 12. Set the [[Call]] internal property of F as described in
+        //   15.3.4.5.1.
+        // 13. Set the [[Construct]] internal property of F as described in
+        //   15.3.4.5.2.
+        // 14. Set the [[HasInstance]] internal property of F as described in
+        //   15.3.4.5.3.
+        var bound;
+        var binder = function () {
+
+            if (this instanceof bound) {
+                // 15.3.4.5.2 [[Construct]]
+                // When the [[Construct]] internal method of a function object,
+                // F that was created using the bind function is called with a
+                // list of arguments ExtraArgs, the following steps are taken:
+                // 1. Let target be the value of F's [[TargetFunction]]
+                //   internal property.
+                // 2. If target has no [[Construct]] internal method, a
+                //   TypeError exception is thrown.
+                // 3. Let boundArgs be the value of F's [[BoundArgs]] internal
+                //   property.
+                // 4. Let args be a new list containing the same values as the
+                //   list boundArgs in the same order followed by the same
+                //   values as the list ExtraArgs in the same order.
+                // 5. Return the result of calling the [[Construct]] internal
+                //   method of target providing args as the arguments.
+
+                var result = target.apply(
+                    this,
+                    args.concat(array_slice.call(arguments))
+                );
+                if (Object(result) === result) {
+                    return result;
+                }
+                return this;
+
+            } else {
+                // 15.3.4.5.1 [[Call]]
+                // When the [[Call]] internal method of a function object, F,
+                // which was created using the bind function is called with a
+                // this value and a list of arguments ExtraArgs, the following
+                // steps are taken:
+                // 1. Let boundArgs be the value of F's [[BoundArgs]] internal
+                //   property.
+                // 2. Let boundThis be the value of F's [[BoundThis]] internal
+                //   property.
+                // 3. Let target be the value of F's [[TargetFunction]] internal
+                //   property.
+                // 4. Let args be a new list containing the same values as the
+                //   list boundArgs in the same order followed by the same
+                //   values as the list ExtraArgs in the same order.
+                // 5. Return the result of calling the [[Call]] internal method
+                //   of target providing boundThis as the this value and
+                //   providing args as the arguments.
+
+                // equiv: target.call(this, ...boundArgs, ...args)
+                return target.apply(
+                    that,
+                    args.concat(array_slice.call(arguments))
+                );
+
+            }
+
+        };
+
+        // 15. If the [[Class]] internal property of Target is "Function", then
+        //     a. Let L be the length property of Target minus the length of A.
+        //     b. Set the length own property of F to either 0 or L, whichever is
+        //       larger.
+        // 16. Else set the length own property of F to 0.
+
+        var boundLength = Math.max(0, target.length - args.length);
+
+        // 17. Set the attributes of the length own property of F to the values
+        //   specified in 15.3.5.1.
+        var boundArgs = [];
+        for (var i = 0; i < boundLength; i++) {
+            boundArgs.push('$' + i);
+        }
+
+        // XXX Build a dynamic function with desired amount of arguments is the only
+        // way to set the length property of a function.
+        // In environments where Content Security Policies enabled (Chrome extensions,
+        // for ex.) all use of eval or Function costructor throws an exception.
+        // However in all of these environments Function.prototype.bind exists
+        // and so this code will never be executed.
+        bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this, arguments); }')(binder);
+
+        if (target.prototype) {
+            Empty.prototype = target.prototype;
+            bound.prototype = new Empty();
+            // Clean up dangling references.
+            Empty.prototype = null;
+        }
+
+        // TODO
+        // 18. Set the [[Extensible]] internal property of F to true.
+
+        // TODO
+        // 19. Let thrower be the [[ThrowTypeError]] function Object (13.2.3).
+        // 20. Call the [[DefineOwnProperty]] internal method of F with
+        //   arguments "caller", PropertyDescriptor {[[Get]]: thrower, [[Set]]:
+        //   thrower, [[Enumerable]]: false, [[Configurable]]: false}, and
+        //   false.
+        // 21. Call the [[DefineOwnProperty]] internal method of F with
+        //   arguments "arguments", PropertyDescriptor {[[Get]]: thrower,
+        //   [[Set]]: thrower, [[Enumerable]]: false, [[Configurable]]: false},
+        //   and false.
+
+        // TODO
+        // NOTE Function objects created using Function.prototype.bind do not
+        // have a prototype property or the [[Code]], [[FormalParameters]], and
+        // [[Scope]] internal properties.
+        // XXX can't delete prototype in pure-js.
+
+        // 22. Return F.
+        return bound;
+    }
+});
+
+// _Please note: Shortcuts are defined after `Function.prototype.bind` as we
+// us it in defining shortcuts.
+var owns = call.bind(ObjectPrototype.hasOwnProperty);
+
+//
+// Array
+// =====
+//
+
+// ES5 15.4.4.12
+// http://es5.github.com/#x15.4.4.12
+var spliceNoopReturnsEmptyArray = (function () {
+    var a = [1, 2];
+    var result = a.splice();
+    return a.length === 2 && isArray(result) && result.length === 0;
+}());
+defineProperties(ArrayPrototype, {
+    // Safari 5.0 bug where .splice() returns undefined
+    splice: function splice(start, deleteCount) {
+        if (arguments.length === 0) {
+            return [];
+        } else {
+            return array_splice.apply(this, arguments);
+        }
+    }
+}, spliceNoopReturnsEmptyArray);
+
+var spliceWorksWithEmptyObject = (function () {
+    var obj = {};
+    ArrayPrototype.splice.call(obj, 0, 0, 1);
+    return obj.length === 1;
+}());
+defineProperties(ArrayPrototype, {
+    splice: function splice(start, deleteCount) {
+        if (arguments.length === 0) { return []; }
+        var args = arguments;
+        this.length = Math.max(toInteger(this.length), 0);
+        if (arguments.length > 0 && typeof deleteCount !== 'number') {
+            args = array_slice.call(arguments);
+            if (args.length < 2) {
+                args.push(this.length - start);
+            } else {
+                args[1] = toInteger(deleteCount);
+            }
+        }
+        return array_splice.apply(this, args);
+    }
+}, !spliceWorksWithEmptyObject);
+
+// ES5 15.4.4.12
+// http://es5.github.com/#x15.4.4.13
+// Return len+argCount.
+// [bugfix, ielt8]
+// IE < 8 bug: [].unshift(0) === undefined but should be "1"
+var hasUnshiftReturnValueBug = [].unshift(0) !== 1;
+defineProperties(ArrayPrototype, {
+    unshift: function () {
+        array_unshift.apply(this, arguments);
+        return this.length;
+    }
+}, hasUnshiftReturnValueBug);
+
+// ES5 15.4.3.2
+// http://es5.github.com/#x15.4.3.2
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
+defineProperties(Array, { isArray: isArray });
+
+// The IsCallable() check in the Array functions
+// has been replaced with a strict check on the
+// internal class of the object to trap cases where
+// the provided function was actually a regular
+// expression literal, which in V8 and
+// JavaScriptCore is a typeof "function".  Only in
+// V8 are regular expression literals permitted as
+// reduce parameters, so it is desirable in the
+// general case for the shim to match the more
+// strict and common behavior of rejecting regular
+// expressions.
+
+// ES5 15.4.4.18
+// http://es5.github.com/#x15.4.4.18
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/forEach
+
+// Check failure of by-index access of string characters (IE < 9)
+// and failure of `0 in boxedString` (Rhino)
+var boxedString = Object('a');
+var splitString = boxedString[0] !== 'a' || !(0 in boxedString);
+
+var properlyBoxesContext = function properlyBoxed(method) {
+    // Check node 0.6.21 bug where third parameter is not boxed
+    var properlyBoxesNonStrict = true;
+    var properlyBoxesStrict = true;
+    if (method) {
+        method.call('foo', function (_, __, context) {
+            if (typeof context !== 'object') { properlyBoxesNonStrict = false; }
+        });
+
+        method.call([1], function () {
+            'use strict';
+            properlyBoxesStrict = typeof this === 'string';
+        }, 'x');
+    }
+    return !!method && properlyBoxesNonStrict && properlyBoxesStrict;
+};
+
+defineProperties(ArrayPrototype, {
+    forEach: function forEach(fun /*, thisp*/) {
+        var object = ES.ToObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            thisp = arguments[1],
+            i = -1,
+            length = self.length >>> 0;
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(); // TODO message
+        }
+
+        while (++i < length) {
+            if (i in self) {
+                // Invoke the callback function with call, passing arguments:
+                // context, property value, property key, thisArg object
+                // context
+                fun.call(thisp, self[i], i, object);
+            }
+        }
+    }
+}, !properlyBoxesContext(ArrayPrototype.forEach));
+
+// ES5 15.4.4.19
+// http://es5.github.com/#x15.4.4.19
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/map
+defineProperties(ArrayPrototype, {
+    map: function map(fun /*, thisp*/) {
+        var object = ES.ToObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            result = Array(length),
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + ' is not a function');
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self) {
+                result[i] = fun.call(thisp, self[i], i, object);
+            }
+        }
+        return result;
+    }
+}, !properlyBoxesContext(ArrayPrototype.map));
+
+// ES5 15.4.4.20
+// http://es5.github.com/#x15.4.4.20
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/filter
+defineProperties(ArrayPrototype, {
+    filter: function filter(fun /*, thisp */) {
+        var object = ES.ToObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            result = [],
+            value,
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + ' is not a function');
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self) {
+                value = self[i];
+                if (fun.call(thisp, value, i, object)) {
+                    result.push(value);
+                }
+            }
+        }
+        return result;
+    }
+}, !properlyBoxesContext(ArrayPrototype.filter));
+
+// ES5 15.4.4.16
+// http://es5.github.com/#x15.4.4.16
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/every
+defineProperties(ArrayPrototype, {
+    every: function every(fun /*, thisp */) {
+        var object = ES.ToObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + ' is not a function');
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self && !fun.call(thisp, self[i], i, object)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}, !properlyBoxesContext(ArrayPrototype.every));
+
+// ES5 15.4.4.17
+// http://es5.github.com/#x15.4.4.17
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/some
+defineProperties(ArrayPrototype, {
+    some: function some(fun /*, thisp */) {
+        var object = ES.ToObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + ' is not a function');
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self && fun.call(thisp, self[i], i, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}, !properlyBoxesContext(ArrayPrototype.some));
+
+// ES5 15.4.4.21
+// http://es5.github.com/#x15.4.4.21
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduce
+var reduceCoercesToObject = false;
+if (ArrayPrototype.reduce) {
+    reduceCoercesToObject = typeof ArrayPrototype.reduce.call('es5', function (_, __, ___, list) { return list; }) === 'object';
+}
+defineProperties(ArrayPrototype, {
+    reduce: function reduce(fun /*, initial*/) {
+        var object = ES.ToObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0;
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + ' is not a function');
+        }
+
+        // no value to return if no initial value and an empty array
+        if (!length && arguments.length === 1) {
+            throw new TypeError('reduce of empty array with no initial value');
+        }
+
+        var i = 0;
+        var result;
+        if (arguments.length >= 2) {
+            result = arguments[1];
+        } else {
+            do {
+                if (i in self) {
+                    result = self[i++];
+                    break;
+                }
+
+                // if array contains no values, no initial value to return
+                if (++i >= length) {
+                    throw new TypeError('reduce of empty array with no initial value');
+                }
+            } while (true);
+        }
+
+        for (; i < length; i++) {
+            if (i in self) {
+                result = fun.call(void 0, result, self[i], i, object);
+            }
+        }
+
+        return result;
+    }
+}, !reduceCoercesToObject);
+
+// ES5 15.4.4.22
+// http://es5.github.com/#x15.4.4.22
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduceRight
+var reduceRightCoercesToObject = false;
+if (ArrayPrototype.reduceRight) {
+    reduceRightCoercesToObject = typeof ArrayPrototype.reduceRight.call('es5', function (_, __, ___, list) { return list; }) === 'object';
+}
+defineProperties(ArrayPrototype, {
+    reduceRight: function reduceRight(fun /*, initial*/) {
+        var object = ES.ToObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0;
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + ' is not a function');
+        }
+
+        // no value to return if no initial value, empty array
+        if (!length && arguments.length === 1) {
+            throw new TypeError('reduceRight of empty array with no initial value');
+        }
+
+        var result, i = length - 1;
+        if (arguments.length >= 2) {
+            result = arguments[1];
+        } else {
+            do {
+                if (i in self) {
+                    result = self[i--];
+                    break;
+                }
+
+                // if array contains no values, no initial value to return
+                if (--i < 0) {
+                    throw new TypeError('reduceRight of empty array with no initial value');
+                }
+            } while (true);
+        }
+
+        if (i < 0) {
+            return result;
+        }
+
+        do {
+            if (i in self) {
+                result = fun.call(void 0, result, self[i], i, object);
+            }
+        } while (i--);
+
+        return result;
+    }
+}, !reduceRightCoercesToObject);
+
+// ES5 15.4.4.14
+// http://es5.github.com/#x15.4.4.14
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
+var hasFirefox2IndexOfBug = Array.prototype.indexOf && [0, 1].indexOf(1, 2) !== -1;
+defineProperties(ArrayPrototype, {
+    indexOf: function indexOf(sought /*, fromIndex */) {
+        var self = splitString && isString(this) ? this.split('') : ES.ToObject(this),
+            length = self.length >>> 0;
+
+        if (!length) {
+            return -1;
+        }
+
+        var i = 0;
+        if (arguments.length > 1) {
+            i = toInteger(arguments[1]);
+        }
+
+        // handle negative indices
+        i = i >= 0 ? i : Math.max(0, length + i);
+        for (; i < length; i++) {
+            if (i in self && self[i] === sought) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}, hasFirefox2IndexOfBug);
+
+// ES5 15.4.4.15
+// http://es5.github.com/#x15.4.4.15
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/lastIndexOf
+var hasFirefox2LastIndexOfBug = Array.prototype.lastIndexOf && [0, 1].lastIndexOf(0, -3) !== -1;
+defineProperties(ArrayPrototype, {
+    lastIndexOf: function lastIndexOf(sought /*, fromIndex */) {
+        var self = splitString && isString(this) ? this.split('') : ES.ToObject(this),
+            length = self.length >>> 0;
+
+        if (!length) {
+            return -1;
+        }
+        var i = length - 1;
+        if (arguments.length > 1) {
+            i = Math.min(i, toInteger(arguments[1]));
+        }
+        // handle negative indices
+        i = i >= 0 ? i : length - Math.abs(i);
+        for (; i >= 0; i--) {
+            if (i in self && sought === self[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}, hasFirefox2LastIndexOfBug);
+
+//
+// Object
+// ======
+//
+
+// ES5 15.2.3.14
+// http://es5.github.com/#x15.2.3.14
+
+// http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+var hasDontEnumBug = !({'toString': null}).propertyIsEnumerable('toString'),
+    hasProtoEnumBug = function () {}.propertyIsEnumerable('prototype'),
+    dontEnums = [
+        'toString',
+        'toLocaleString',
+        'valueOf',
+        'hasOwnProperty',
+        'isPrototypeOf',
+        'propertyIsEnumerable',
+        'constructor'
+    ],
+    dontEnumsLength = dontEnums.length;
+
+defineProperties(Object, {
+    keys: function keys(object) {
+        var isFn = isFunction(object),
+            isArgs = isArguments(object),
+            isObject = object !== null && typeof object === 'object',
+            isStr = isObject && isString(object);
+
+        if (!isObject && !isFn && !isArgs) {
+            throw new TypeError('Object.keys called on a non-object');
+        }
+
+        var theKeys = [];
+        var skipProto = hasProtoEnumBug && isFn;
+        if (isStr || isArgs) {
+            for (var i = 0; i < object.length; ++i) {
+                theKeys.push(String(i));
+            }
+        } else {
+            for (var name in object) {
+                if (!(skipProto && name === 'prototype') && owns(object, name)) {
+                    theKeys.push(String(name));
+                }
+            }
+        }
+
+        if (hasDontEnumBug) {
+            var ctor = object.constructor,
+                skipConstructor = ctor && ctor.prototype === object;
+            for (var j = 0; j < dontEnumsLength; j++) {
+                var dontEnum = dontEnums[j];
+                if (!(skipConstructor && dontEnum === 'constructor') && owns(object, dontEnum)) {
+                    theKeys.push(dontEnum);
+                }
+            }
+        }
+        return theKeys;
+    }
+});
+
+var keysWorksWithArguments = Object.keys && (function () {
+    // Safari 5.0 bug
+    return Object.keys(arguments).length === 2;
+}(1, 2));
+var originalKeys = Object.keys;
+defineProperties(Object, {
+    keys: function keys(object) {
+        if (isArguments(object)) {
+            return originalKeys(ArrayPrototype.slice.call(object));
+        } else {
+            return originalKeys(object);
+        }
+    }
+}, !keysWorksWithArguments);
+
+//
+// Date
+// ====
+//
+
+// ES5 15.9.5.43
+// http://es5.github.com/#x15.9.5.43
+// This function returns a String value represent the instance in time
+// represented by this Date object. The format of the String is the Date Time
+// string format defined in 15.9.1.15. All fields are present in the String.
+// The time zone is always UTC, denoted by the suffix Z. If the time value of
+// this object is not a finite Number a RangeError exception is thrown.
+var negativeDate = -62198755200000;
+var negativeYearString = '-000001';
+var hasNegativeDateBug = Date.prototype.toISOString && new Date(negativeDate).toISOString().indexOf(negativeYearString) === -1;
+
+defineProperties(Date.prototype, {
+    toISOString: function toISOString() {
+        var result, length, value, year, month;
+        if (!isFinite(this)) {
+            throw new RangeError('Date.prototype.toISOString called on non-finite value.');
+        }
+
+        year = this.getUTCFullYear();
+
+        month = this.getUTCMonth();
+        // see https://github.com/es-shims/es5-shim/issues/111
+        year += Math.floor(month / 12);
+        month = (month % 12 + 12) % 12;
+
+        // the date time string format is specified in 15.9.1.15.
+        result = [month + 1, this.getUTCDate(), this.getUTCHours(), this.getUTCMinutes(), this.getUTCSeconds()];
+        year = (
+            (year < 0 ? '-' : (year > 9999 ? '+' : '')) +
+            ('00000' + Math.abs(year)).slice(0 <= year && year <= 9999 ? -4 : -6)
+        );
+
+        length = result.length;
+        while (length--) {
+            value = result[length];
+            // pad months, days, hours, minutes, and seconds to have two
+            // digits.
+            if (value < 10) {
+                result[length] = '0' + value;
+            }
+        }
+        // pad milliseconds to have three digits.
+        return (
+            year + '-' + result.slice(0, 2).join('-') +
+            'T' + result.slice(2).join(':') + '.' +
+            ('000' + this.getUTCMilliseconds()).slice(-3) + 'Z'
+        );
+    }
+}, hasNegativeDateBug);
+
+
+// ES5 15.9.5.44
+// http://es5.github.com/#x15.9.5.44
+// This function provides a String representation of a Date object for use by
+// JSON.stringify (15.12.3).
+var dateToJSONIsSupported = false;
+try {
+    dateToJSONIsSupported = (
+        Date.prototype.toJSON &&
+        new Date(NaN).toJSON() === null &&
+        new Date(negativeDate).toJSON().indexOf(negativeYearString) !== -1 &&
+        Date.prototype.toJSON.call({ // generic
+            toISOString: function () {
+                return true;
+            }
+        })
+    );
+} catch (e) {
+}
+if (!dateToJSONIsSupported) {
+    Date.prototype.toJSON = function toJSON(key) {
+        // When the toJSON method is called with argument key, the following
+        // steps are taken:
+
+        // 1.  Let O be the result of calling ToObject, giving it the this
+        // value as its argument.
+        // 2. Let tv be toPrimitive(O, hint Number).
+        var o = Object(this),
+            tv = toPrimitive(o),
+            toISO;
+        // 3. If tv is a Number and is not finite, return null.
+        if (typeof tv === 'number' && !isFinite(tv)) {
+            return null;
+        }
+        // 4. Let toISO be the result of calling the [[Get]] internal method of
+        // O with argument "toISOString".
+        toISO = o.toISOString;
+        // 5. If IsCallable(toISO) is false, throw a TypeError exception.
+        if (typeof toISO !== 'function') {
+            throw new TypeError('toISOString property is not callable');
+        }
+        // 6. Return the result of calling the [[Call]] internal method of
+        //  toISO with O as the this value and an empty argument list.
+        return toISO.call(o);
+
+        // NOTE 1 The argument is ignored.
+
+        // NOTE 2 The toJSON function is intentionally generic; it does not
+        // require that its this value be a Date object. Therefore, it can be
+        // transferred to other kinds of objects for use as a method. However,
+        // it does require that any such object have a toISOString method. An
+        // object is free to use the argument key to filter its
+        // stringification.
+    };
+}
+
+// ES5 15.9.4.2
+// http://es5.github.com/#x15.9.4.2
+// based on work shared by Daniel Friesen (dantman)
+// http://gist.github.com/303249
+var supportsExtendedYears = Date.parse('+033658-09-27T01:46:40.000Z') === 1e15;
+var acceptsInvalidDates = !isNaN(Date.parse('2012-04-04T24:00:00.500Z')) || !isNaN(Date.parse('2012-11-31T23:59:59.000Z'));
+var doesNotParseY2KNewYear = isNaN(Date.parse('2000-01-01T00:00:00.000Z'));
+if (!Date.parse || doesNotParseY2KNewYear || acceptsInvalidDates || !supportsExtendedYears) {
+    // XXX global assignment won't work in embeddings that use
+    // an alternate object for the context.
+    /*global Date: true */
+    Date = (function (NativeDate) {
+
+        // Date.length === 7
+        function Date(Y, M, D, h, m, s, ms) {
+            var length = arguments.length;
+            if (this instanceof NativeDate) {
+                var date = length === 1 && String(Y) === Y ? // isString(Y)
+                    // We explicitly pass it through parse:
+                    new NativeDate(Date.parse(Y)) :
+                    // We have to manually make calls depending on argument
+                    // length here
+                    length >= 7 ? new NativeDate(Y, M, D, h, m, s, ms) :
+                    length >= 6 ? new NativeDate(Y, M, D, h, m, s) :
+                    length >= 5 ? new NativeDate(Y, M, D, h, m) :
+                    length >= 4 ? new NativeDate(Y, M, D, h) :
+                    length >= 3 ? new NativeDate(Y, M, D) :
+                    length >= 2 ? new NativeDate(Y, M) :
+                    length >= 1 ? new NativeDate(Y) :
+                                  new NativeDate();
+                // Prevent mixups with unfixed Date object
+                date.constructor = Date;
+                return date;
+            }
+            return NativeDate.apply(this, arguments);
+        }
+
+        // 15.9.1.15 Date Time String Format.
+        var isoDateExpression = new RegExp('^' +
+            '(\\d{4}|[+-]\\d{6})' + // four-digit year capture or sign +
+                                      // 6-digit extended year
+            '(?:-(\\d{2})' + // optional month capture
+            '(?:-(\\d{2})' + // optional day capture
+            '(?:' + // capture hours:minutes:seconds.milliseconds
+                'T(\\d{2})' + // hours capture
+                ':(\\d{2})' + // minutes capture
+                '(?:' + // optional :seconds.milliseconds
+                    ':(\\d{2})' + // seconds capture
+                    '(?:(\\.\\d{1,}))?' + // milliseconds capture
+                ')?' +
+            '(' + // capture UTC offset component
+                'Z|' + // UTC capture
+                '(?:' + // offset specifier +/-hours:minutes
+                    '([-+])' + // sign capture
+                    '(\\d{2})' + // hours offset capture
+                    ':(\\d{2})' + // minutes offset capture
+                ')' +
+            ')?)?)?)?' +
+        '$');
+
+        var months = [
+            0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+        ];
+
+        function dayFromMonth(year, month) {
+            var t = month > 1 ? 1 : 0;
+            return (
+                months[month] +
+                Math.floor((year - 1969 + t) / 4) -
+                Math.floor((year - 1901 + t) / 100) +
+                Math.floor((year - 1601 + t) / 400) +
+                365 * (year - 1970)
+            );
+        }
+
+        function toUTC(t) {
+            return Number(new NativeDate(1970, 0, 1, 0, 0, 0, t));
+        }
+
+        // Copy any custom methods a 3rd party library may have added
+        for (var key in NativeDate) {
+            Date[key] = NativeDate[key];
+        }
+
+        // Copy "native" methods explicitly; they may be non-enumerable
+        Date.now = NativeDate.now;
+        Date.UTC = NativeDate.UTC;
+        Date.prototype = NativeDate.prototype;
+        Date.prototype.constructor = Date;
+
+        // Upgrade Date.parse to handle simplified ISO 8601 strings
+        Date.parse = function parse(string) {
+            var match = isoDateExpression.exec(string);
+            if (match) {
+                // parse months, days, hours, minutes, seconds, and milliseconds
+                // provide default values if necessary
+                // parse the UTC offset component
+                var year = Number(match[1]),
+                    month = Number(match[2] || 1) - 1,
+                    day = Number(match[3] || 1) - 1,
+                    hour = Number(match[4] || 0),
+                    minute = Number(match[5] || 0),
+                    second = Number(match[6] || 0),
+                    millisecond = Math.floor(Number(match[7] || 0) * 1000),
+                    // When time zone is missed, local offset should be used
+                    // (ES 5.1 bug)
+                    // see https://bugs.ecmascript.org/show_bug.cgi?id=112
+                    isLocalTime = Boolean(match[4] && !match[8]),
+                    signOffset = match[9] === '-' ? 1 : -1,
+                    hourOffset = Number(match[10] || 0),
+                    minuteOffset = Number(match[11] || 0),
+                    result;
+                if (
+                    hour < (
+                        minute > 0 || second > 0 || millisecond > 0 ?
+                        24 : 25
+                    ) &&
+                    minute < 60 && second < 60 && millisecond < 1000 &&
+                    month > -1 && month < 12 && hourOffset < 24 &&
+                    minuteOffset < 60 && // detect invalid offsets
+                    day > -1 &&
+                    day < (
+                        dayFromMonth(year, month + 1) -
+                        dayFromMonth(year, month)
+                    )
+                ) {
+                    result = (
+                        (dayFromMonth(year, month) + day) * 24 +
+                        hour +
+                        hourOffset * signOffset
+                    ) * 60;
+                    result = (
+                        (result + minute + minuteOffset * signOffset) * 60 +
+                        second
+                    ) * 1000 + millisecond;
+                    if (isLocalTime) {
+                        result = toUTC(result);
+                    }
+                    if (-8.64e15 <= result && result <= 8.64e15) {
+                        return result;
+                    }
+                }
+                return NaN;
+            }
+            return NativeDate.parse.apply(this, arguments);
+        };
+
+        return Date;
+    }(Date));
+    /*global Date: false */
+}
+
+// ES5 15.9.4.4
+// http://es5.github.com/#x15.9.4.4
+if (!Date.now) {
+    Date.now = function now() {
+        return new Date().getTime();
+    };
+}
+
+
+//
+// Number
+// ======
+//
+
+// ES5.1 15.7.4.5
+// http://es5.github.com/#x15.7.4.5
+var hasToFixedBugs = NumberPrototype.toFixed && (
+  (0.00008).toFixed(3) !== '0.000' ||
+  (0.9).toFixed(0) !== '1' ||
+  (1.255).toFixed(2) !== '1.25' ||
+  (1000000000000000128).toFixed(0) !== '1000000000000000128'
+);
+
+var toFixedHelpers = {
+  base: 1e7,
+  size: 6,
+  data: [0, 0, 0, 0, 0, 0],
+  multiply: function multiply(n, c) {
+      var i = -1;
+      while (++i < toFixedHelpers.size) {
+          c += n * toFixedHelpers.data[i];
+          toFixedHelpers.data[i] = c % toFixedHelpers.base;
+          c = Math.floor(c / toFixedHelpers.base);
+      }
+  },
+  divide: function divide(n) {
+      var i = toFixedHelpers.size, c = 0;
+      while (--i >= 0) {
+          c += toFixedHelpers.data[i];
+          toFixedHelpers.data[i] = Math.floor(c / n);
+          c = (c % n) * toFixedHelpers.base;
+      }
+  },
+  numToString: function numToString() {
+      var i = toFixedHelpers.size;
+      var s = '';
+      while (--i >= 0) {
+          if (s !== '' || i === 0 || toFixedHelpers.data[i] !== 0) {
+              var t = String(toFixedHelpers.data[i]);
+              if (s === '') {
+                  s = t;
+              } else {
+                  s += '0000000'.slice(0, 7 - t.length) + t;
+              }
+          }
+      }
+      return s;
+  },
+  pow: function pow(x, n, acc) {
+      return (n === 0 ? acc : (n % 2 === 1 ? pow(x, n - 1, acc * x) : pow(x * x, n / 2, acc)));
+  },
+  log: function log(x) {
+      var n = 0;
+      while (x >= 4096) {
+          n += 12;
+          x /= 4096;
+      }
+      while (x >= 2) {
+          n += 1;
+          x /= 2;
+      }
+      return n;
+  }
+};
+
+defineProperties(NumberPrototype, {
+    toFixed: function toFixed(fractionDigits) {
+        var f, x, s, m, e, z, j, k;
+
+        // Test for NaN and round fractionDigits down
+        f = Number(fractionDigits);
+        f = f !== f ? 0 : Math.floor(f);
+
+        if (f < 0 || f > 20) {
+            throw new RangeError('Number.toFixed called with invalid number of decimals');
+        }
+
+        x = Number(this);
+
+        // Test for NaN
+        if (x !== x) {
+            return 'NaN';
+        }
+
+        // If it is too big or small, return the string value of the number
+        if (x <= -1e21 || x >= 1e21) {
+            return String(x);
+        }
+
+        s = '';
+
+        if (x < 0) {
+            s = '-';
+            x = -x;
+        }
+
+        m = '0';
+
+        if (x > 1e-21) {
+            // 1e-21 < x < 1e21
+            // -70 < log2(x) < 70
+            e = toFixedHelpers.log(x * toFixedHelpers.pow(2, 69, 1)) - 69;
+            z = (e < 0 ? x * toFixedHelpers.pow(2, -e, 1) : x / toFixedHelpers.pow(2, e, 1));
+            z *= 0x10000000000000; // Math.pow(2, 52);
+            e = 52 - e;
+
+            // -18 < e < 122
+            // x = z / 2 ^ e
+            if (e > 0) {
+                toFixedHelpers.multiply(0, z);
+                j = f;
+
+                while (j >= 7) {
+                    toFixedHelpers.multiply(1e7, 0);
+                    j -= 7;
+                }
+
+                toFixedHelpers.multiply(toFixedHelpers.pow(10, j, 1), 0);
+                j = e - 1;
+
+                while (j >= 23) {
+                    toFixedHelpers.divide(1 << 23);
+                    j -= 23;
+                }
+
+                toFixedHelpers.divide(1 << j);
+                toFixedHelpers.multiply(1, 1);
+                toFixedHelpers.divide(2);
+                m = toFixedHelpers.numToString();
+            } else {
+                toFixedHelpers.multiply(0, z);
+                toFixedHelpers.multiply(1 << (-e), 0);
+                m = toFixedHelpers.numToString() + '0.00000000000000000000'.slice(2, 2 + f);
+            }
+        }
+
+        if (f > 0) {
+            k = m.length;
+
+            if (k <= f) {
+                m = s + '0.0000000000000000000'.slice(0, f - k + 2) + m;
+            } else {
+                m = s + m.slice(0, k - f) + '.' + m.slice(k - f);
+            }
+        } else {
+            m = s + m;
+        }
+
+        return m;
+    }
+}, hasToFixedBugs);
+
+
+//
+// String
+// ======
+//
+
+// ES5 15.5.4.14
+// http://es5.github.com/#x15.5.4.14
+
+// [bugfix, IE lt 9, firefox 4, Konqueror, Opera, obscure browsers]
+// Many browsers do not split properly with regular expressions or they
+// do not perform the split correctly under obscure conditions.
+// See http://blog.stevenlevithan.com/archives/cross-browser-split
+// I've tested in many browsers and this seems to cover the deviant ones:
+//    'ab'.split(/(?:ab)*/) should be ["", ""], not [""]
+//    '.'.split(/(.?)(.?)/) should be ["", ".", "", ""], not ["", ""]
+//    'tesst'.split(/(s)*/) should be ["t", undefined, "e", "s", "t"], not
+//       [undefined, "t", undefined, "e", ...]
+//    ''.split(/.?/) should be [], not [""]
+//    '.'.split(/()()/) should be ["."], not ["", "", "."]
+
+var string_split = StringPrototype.split;
+if (
+    'ab'.split(/(?:ab)*/).length !== 2 ||
+    '.'.split(/(.?)(.?)/).length !== 4 ||
+    'tesst'.split(/(s)*/)[1] === 't' ||
+    'test'.split(/(?:)/, -1).length !== 4 ||
+    ''.split(/.?/).length ||
+    '.'.split(/()()/).length > 1
+) {
+    (function () {
+        var compliantExecNpcg = typeof (/()??/).exec('')[1] === 'undefined'; // NPCG: nonparticipating capturing group
+
+        StringPrototype.split = function (separator, limit) {
+            var string = this;
+            if (typeof separator === 'undefined' && limit === 0) {
+                return [];
+            }
+
+            // If `separator` is not a regex, use native split
+            if (to_string.call(separator) !== '[object RegExp]') {
+                return string_split.call(this, separator, limit);
+            }
+
+            var output = [],
+                flags = (separator.ignoreCase ? 'i' : '') +
+                        (separator.multiline ? 'm' : '') +
+                        (separator.extended ? 'x' : '') + // Proposed for ES6
+                        (separator.sticky ? 'y' : ''), // Firefox 3+
+                lastLastIndex = 0,
+                // Make `global` and avoid `lastIndex` issues by working with a copy
+                separator2, match, lastIndex, lastLength;
+            separator = new RegExp(separator.source, flags + 'g');
+            string += ''; // Type-convert
+            if (!compliantExecNpcg) {
+                // Doesn't need flags gy, but they don't hurt
+                separator2 = new RegExp('^' + separator.source + '$(?!\\s)', flags);
+            }
+            /* Values for `limit`, per the spec:
+             * If undefined: 4294967295 // Math.pow(2, 32) - 1
+             * If 0, Infinity, or NaN: 0
+             * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
+             * If negative number: 4294967296 - Math.floor(Math.abs(limit))
+             * If other: Type-convert, then use the above rules
+             */
+            limit = typeof limit === 'undefined' ?
+                -1 >>> 0 : // Math.pow(2, 32) - 1
+                ES.ToUint32(limit);
+            while (match = separator.exec(string)) {
+                // `separator.lastIndex` is not reliable cross-browser
+                lastIndex = match.index + match[0].length;
+                if (lastIndex > lastLastIndex) {
+                    output.push(string.slice(lastLastIndex, match.index));
+                    // Fix browsers whose `exec` methods don't consistently return `undefined` for
+                    // nonparticipating capturing groups
+                    if (!compliantExecNpcg && match.length > 1) {
+                        match[0].replace(separator2, function () {
+                            for (var i = 1; i < arguments.length - 2; i++) {
+                                if (typeof arguments[i] === 'undefined') {
+                                    match[i] = void 0;
+                                }
+                            }
+                        });
+                    }
+                    if (match.length > 1 && match.index < string.length) {
+                        array_push.apply(output, match.slice(1));
+                    }
+                    lastLength = match[0].length;
+                    lastLastIndex = lastIndex;
+                    if (output.length >= limit) {
+                        break;
+                    }
+                }
+                if (separator.lastIndex === match.index) {
+                    separator.lastIndex++; // Avoid an infinite loop
+                }
+            }
+            if (lastLastIndex === string.length) {
+                if (lastLength || !separator.test('')) {
+                    output.push('');
+                }
+            } else {
+                output.push(string.slice(lastLastIndex));
+            }
+            return output.length > limit ? output.slice(0, limit) : output;
+        };
+    }());
+
+// [bugfix, chrome]
+// If separator is undefined, then the result array contains just one String,
+// which is the this value (converted to a String). If limit is not undefined,
+// then the output array is truncated so that it contains no more than limit
+// elements.
+// "0".split(undefined, 0) -> []
+} else if ('0'.split(void 0, 0).length) {
+    StringPrototype.split = function split(separator, limit) {
+        if (typeof separator === 'undefined' && limit === 0) { return []; }
+        return string_split.call(this, separator, limit);
+    };
+}
+
+var str_replace = StringPrototype.replace;
+var replaceReportsGroupsCorrectly = (function () {
+    var groups = [];
+    'x'.replace(/x(.)?/g, function (match, group) {
+        groups.push(group);
+    });
+    return groups.length === 1 && typeof groups[0] === 'undefined';
+}());
+
+if (!replaceReportsGroupsCorrectly) {
+    StringPrototype.replace = function replace(searchValue, replaceValue) {
+        var isFn = isFunction(replaceValue);
+        var hasCapturingGroups = isRegex(searchValue) && (/\)[*?]/).test(searchValue.source);
+        if (!isFn || !hasCapturingGroups) {
+            return str_replace.call(this, searchValue, replaceValue);
+        } else {
+            var wrappedReplaceValue = function (match) {
+                var length = arguments.length;
+                var originalLastIndex = searchValue.lastIndex;
+                searchValue.lastIndex = 0;
+                var args = searchValue.exec(match) || [];
+                searchValue.lastIndex = originalLastIndex;
+                args.push(arguments[length - 2], arguments[length - 1]);
+                return replaceValue.apply(this, args);
+            };
+            return str_replace.call(this, searchValue, wrappedReplaceValue);
+        }
+    };
+}
+
+// ECMA-262, 3rd B.2.3
+// Not an ECMAScript standard, although ECMAScript 3rd Edition has a
+// non-normative section suggesting uniform semantics and it should be
+// normalized across all browsers
+// [bugfix, IE lt 9] IE < 9 substr() with negative value not working in IE
+var string_substr = StringPrototype.substr;
+var hasNegativeSubstrBug = ''.substr && '0b'.substr(-1) !== 'b';
+defineProperties(StringPrototype, {
+    substr: function substr(start, length) {
+        return string_substr.call(
+            this,
+            start < 0 ? ((start = this.length + start) < 0 ? 0 : start) : start,
+            length
+        );
+    }
+}, hasNegativeSubstrBug);
+
+// ES5 15.5.4.20
+// whitespace from: http://es5.github.io/#x15.5.4.20
+var ws = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
+    '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028' +
+    '\u2029\uFEFF';
+var zeroWidth = '\u200b';
+var wsRegexChars = '[' + ws + ']';
+var trimBeginRegexp = new RegExp('^' + wsRegexChars + wsRegexChars + '*');
+var trimEndRegexp = new RegExp(wsRegexChars + wsRegexChars + '*$');
+var hasTrimWhitespaceBug = StringPrototype.trim && (ws.trim() || !zeroWidth.trim());
+defineProperties(StringPrototype, {
+    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
+    // http://perfectionkills.com/whitespace-deviations/
+    trim: function trim() {
+        if (typeof this === 'undefined' || this === null) {
+            throw new TypeError("can't convert " + this + ' to object');
+        }
+        return String(this).replace(trimBeginRegexp, '').replace(trimEndRegexp, '');
+    }
+}, hasTrimWhitespaceBug);
+
+// ES-5 15.1.2.2
+if (parseInt(ws + '08') !== 8 || parseInt(ws + '0x16') !== 22) {
+    /*global parseInt: true */
+    parseInt = (function (origParseInt) {
+        var hexRegex = /^0[xX]/;
+        return function parseIntES5(str, radix) {
+            str = String(str).trim();
+            if (!Number(radix)) {
+                radix = hexRegex.test(str) ? 16 : 10;
+            }
+            return origParseInt(str, radix);
+        };
+    }(parseInt));
+}
+
+}));
 /**
  * React (with addons) v0.11.2
  */
@@ -20275,5709 +22204,3053 @@ module.exports = warning;
 },{"./emptyFunction":116}]},{},[88])
 (88)
 });
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.ReactRouter=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-/**
- * Actions that modify the URL.
- */
-var LocationActions = {
+var ReactRouter =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports.DefaultRoute = __webpack_require__(1);
+	exports.Link = __webpack_require__(2);
+	exports.NotFoundRoute = __webpack_require__(3);
+	exports.Redirect = __webpack_require__(4);
+	exports.Route = __webpack_require__(5);
+	exports.RouteHandler = __webpack_require__(6);
+
+	exports.HashLocation = __webpack_require__(7);
+	exports.HistoryLocation = __webpack_require__(8);
+	exports.RefreshLocation = __webpack_require__(9);
+
+	exports.ImitateBrowserBehavior = __webpack_require__(10);
+	exports.ScrollToTopBehavior = __webpack_require__(11);
+
+	exports.Navigation = __webpack_require__(12);
+	exports.State = __webpack_require__(13);
+
+	exports.create = __webpack_require__(14);
+	exports.run = __webpack_require__(15);
+
+	exports.History = __webpack_require__(16);
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+	var FakeNode = __webpack_require__(18);
+	var PropTypes = __webpack_require__(19);
+
+	/**
+	 * A <DefaultRoute> component is a special kind of <Route> that
+	 * renders when its parent matches but none of its siblings do.
+	 * Only one such route may be used at any given level in the
+	 * route hierarchy.
+	 */
+	var DefaultRoute = React.createClass({
+
+	  displayName: 'DefaultRoute',
+
+	  mixins: [ FakeNode ],
+
+	  propTypes: {
+	    name: React.PropTypes.string,
+	    path: PropTypes.falsy,
+	    handler: React.PropTypes.func.isRequired
+	  }
 
-  /**
-   * Indicates a new location is being pushed to the history stack.
-   */
-  PUSH: 'push',
-
-  /**
-   * Indicates the current location should be replaced.
-   */
-  REPLACE: 'replace',
-
-  /**
-   * Indicates the most recent entry should be removed from the history stack.
-   */
-  POP: 'pop'
-
-};
-
-module.exports = LocationActions;
-
-},{}],2:[function(_dereq_,module,exports){
-var LocationActions = _dereq_('../actions/LocationActions');
-
-/**
- * A scroll behavior that attempts to imitate the default behavior
- * of modern browsers.
- */
-var ImitateBrowserBehavior = {
-
-  updateScrollPosition: function (position, actionType) {
-    switch (actionType) {
-      case LocationActions.PUSH:
-      case LocationActions.REPLACE:
-        window.scrollTo(0, 0);
-        break;
-      case LocationActions.POP:
-        if (position) {
-          window.scrollTo(position.x, position.y);
-        } else {
-          window.scrollTo(0, 0);
-        }
-        break;
-    }
-  }
-
-};
-
-module.exports = ImitateBrowserBehavior;
-
-},{"../actions/LocationActions":1}],3:[function(_dereq_,module,exports){
-/**
- * A scroll behavior that always scrolls to the top of the page
- * after a transition.
- */
-var ScrollToTopBehavior = {
-
-  updateScrollPosition: function () {
-    window.scrollTo(0, 0);
-  }
-
-};
-
-module.exports = ScrollToTopBehavior;
-
-},{}],4:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var FakeNode = _dereq_('../mixins/FakeNode');
-var PropTypes = _dereq_('../utils/PropTypes');
-
-/**
- * A <DefaultRoute> component is a special kind of <Route> that
- * renders when its parent matches but none of its siblings do.
- * Only one such route may be used at any given level in the
- * route hierarchy.
- */
-var DefaultRoute = React.createClass({
-
-  displayName: 'DefaultRoute',
-
-  mixins: [ FakeNode ],
-
-  propTypes: {
-    name: React.PropTypes.string,
-    path: PropTypes.falsy,
-    handler: React.PropTypes.func.isRequired
-  }
-
-});
-
-module.exports = DefaultRoute;
-
-},{"../mixins/FakeNode":14,"../utils/PropTypes":23}],5:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var classSet = _dereq_('react/lib/cx');
-var assign = _dereq_('react/lib/Object.assign');
-var Navigation = _dereq_('../mixins/Navigation');
-var State = _dereq_('../mixins/State');
-
-function isLeftClickEvent(event) {
-  return event.button === 0;
-}
-
-function isModifiedEvent(event) {
-  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-}
-
-/**
- * <Link> components are used to create an <a> element that links to a route.
- * When that route is active, the link gets an "active" class name (or the
- * value of its `activeClassName` prop).
- *
- * For example, assuming you have the following route:
- *
- *   <Route name="showPost" path="/posts/:postID" handler={Post}/>
- *
- * You could use the following component to link to that route:
- *
- *   <Link to="showPost" params={{ postID: "123" }} />
- *
- * In addition to params, links may pass along query string parameters
- * using the `query` prop.
- *
- *   <Link to="showPost" params={{ postID: "123" }} query={{ show:true }}/>
- */
-var Link = React.createClass({
-
-  displayName: 'Link',
-
-  mixins: [ Navigation, State ],
-
-  propTypes: {
-    activeClassName: React.PropTypes.string.isRequired,
-    to: React.PropTypes.string.isRequired,
-    params: React.PropTypes.object,
-    query: React.PropTypes.object,
-    onClick: React.PropTypes.func
-  },
-
-  getDefaultProps: function () {
-    return {
-      activeClassName: 'active'
-    };
-  },
-
-  handleClick: function (event) {
-    var allowTransition = true;
-    var clickResult;
-
-    if (this.props.onClick)
-      clickResult = this.props.onClick(event);
-
-    if (isModifiedEvent(event) || !isLeftClickEvent(event))
-      return;
-
-    if (clickResult === false || event.defaultPrevented === true)
-      allowTransition = false;
-
-    event.preventDefault();
-
-    if (allowTransition)
-      this.transitionTo(this.props.to, this.props.params, this.props.query);
-  },
-
-  /**
-   * Returns the value of the "href" attribute to use on the DOM element.
-   */
-  getHref: function () {
-    return this.makeHref(this.props.to, this.props.params, this.props.query);
-  },
-
-  /**
-   * Returns the value of the "class" attribute to use on the DOM element, which contains
-   * the value of the activeClassName property when this <Link> is active.
-   */
-  getClassName: function () {
-    var classNames = {};
-
-    if (this.props.className)
-      classNames[this.props.className] = true;
-
-    if (this.isActive(this.props.to, this.props.params, this.props.query))
-      classNames[this.props.activeClassName] = true;
-
-    return classSet(classNames);
-  },
-
-  render: function () {
-    var props = assign({}, this.props, {
-      href: this.getHref(),
-      className: this.getClassName(),
-      onClick: this.handleClick
-    });
-
-    return React.DOM.a(props, this.props.children);
-  }
-
-});
-
-module.exports = Link;
-
-},{"../mixins/Navigation":15,"../mixins/State":18,"react/lib/Object.assign":38,"react/lib/cx":39}],6:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var FakeNode = _dereq_('../mixins/FakeNode');
-var PropTypes = _dereq_('../utils/PropTypes');
-
-/**
- * A <NotFoundRoute> is a special kind of <Route> that
- * renders when the beginning of its parent's path matches
- * but none of its siblings do, including any <DefaultRoute>.
- * Only one such route may be used at any given level in the
- * route hierarchy.
- */
-var NotFoundRoute = React.createClass({
-
-  displayName: 'NotFoundRoute',
-
-  mixins: [ FakeNode ],
-
-  propTypes: {
-    name: React.PropTypes.string,
-    path: PropTypes.falsy,
-    handler: React.PropTypes.func.isRequired
-  }
-
-});
-
-module.exports = NotFoundRoute;
-
-},{"../mixins/FakeNode":14,"../utils/PropTypes":23}],7:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var FakeNode = _dereq_('../mixins/FakeNode');
-var PropTypes = _dereq_('../utils/PropTypes');
-
-/**
- * A <Redirect> component is a special kind of <Route> that always
- * redirects to another route when it matches.
- */
-var Redirect = React.createClass({
-
-  displayName: 'Redirect',
-
-  mixins: [ FakeNode ],
-
-  propTypes: {
-    path: React.PropTypes.string,
-    from: React.PropTypes.string, // Alias for path.
-    to: React.PropTypes.string,
-    handler: PropTypes.falsy
-  }
-
-});
-
-module.exports = Redirect;
-
-},{"../mixins/FakeNode":14,"../utils/PropTypes":23}],8:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var FakeNode = _dereq_('../mixins/FakeNode');
-
-/**
- * <Route> components specify components that are rendered to the page when the
- * URL matches a given pattern.
- *
- * Routes are arranged in a nested tree structure. When a new URL is requested,
- * the tree is searched depth-first to find a route whose path matches the URL.
- * When one is found, all routes in the tree that lead to it are considered
- * "active" and their components are rendered into the DOM, nested in the same
- * order as they are in the tree.
- *
- * The preferred way to configure a router is using JSX. The XML-like syntax is
- * a great way to visualize how routes are laid out in an application.
- *
- *   var routes = [
- *     <Route handler={App}>
- *       <Route name="login" handler={Login}/>
- *       <Route name="logout" handler={Logout}/>
- *       <Route name="about" handler={About}/>
- *     </Route>
- *   ];
- *   
- *   Router.run(routes, function (Handler) {
- *     React.render(<Handler/>, document.body);
- *   });
- *
- * Handlers for Route components that contain children can render their active
- * child route using a <RouteHandler> element.
- *
- *   var App = React.createClass({
- *     render: function () {
- *       return (
- *         <div class="application">
- *           <RouteHandler/>
- *         </div>
- *       );
- *     }
- *   });
- */
-var Route = React.createClass({
-
-  displayName: 'Route',
-
-  mixins: [ FakeNode ],
-
-  propTypes: {
-    name: React.PropTypes.string,
-    path: React.PropTypes.string,
-    handler: React.PropTypes.func.isRequired,
-    ignoreScrollBehavior: React.PropTypes.bool
-  }
-
-});
-
-module.exports = Route;
-
-},{"../mixins/FakeNode":14}],9:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-
-/**
- * A <RouteHandler> component renders the active child route handler
- * when routes are nested.
- */
-var RouteHandler = React.createClass({
-
-  displayName: 'RouteHandler',
-
-  getDefaultProps: function () {
-    return {
-      ref: '__routeHandler__'
-    };
-  },
-
-  contextTypes: {
-    getRouteAtDepth: React.PropTypes.func.isRequired,
-    getRouteComponents: React.PropTypes.func.isRequired,
-    routeHandlers: React.PropTypes.array.isRequired
-  },
-
-  childContextTypes: {
-    routeHandlers: React.PropTypes.array.isRequired
-  },
-
-  getChildContext: function () {
-    return {
-      routeHandlers: this.context.routeHandlers.concat([ this ])
-    };
-  },
-
-  getRouteDepth: function () {
-    return this.context.routeHandlers.length - 1;
-  },
-
-  componentDidMount: function () {
-    this._updateRouteComponent();
-  },
-
-  componentDidUpdate: function () {
-    this._updateRouteComponent();
-  },
-
-  _updateRouteComponent: function () {
-    var depth = this.getRouteDepth();
-    var components = this.context.getRouteComponents();
-    components[depth] = this.refs[this.props.ref];
-  },
-
-  render: function () {
-    var route = this.context.getRouteAtDepth(this.getRouteDepth());
-    return route ? React.createElement(route.handler, this.props) : null;
-  }
-
-});
-
-module.exports = RouteHandler;
-
-},{}],10:[function(_dereq_,module,exports){
-exports.DefaultRoute = _dereq_('./components/DefaultRoute');
-exports.Link = _dereq_('./components/Link');
-exports.NotFoundRoute = _dereq_('./components/NotFoundRoute');
-exports.Redirect = _dereq_('./components/Redirect');
-exports.Route = _dereq_('./components/Route');
-exports.RouteHandler = _dereq_('./components/RouteHandler');
-
-exports.HashLocation = _dereq_('./locations/HashLocation');
-exports.HistoryLocation = _dereq_('./locations/HistoryLocation');
-exports.RefreshLocation = _dereq_('./locations/RefreshLocation');
-
-exports.ImitateBrowserBehavior = _dereq_('./behaviors/ImitateBrowserBehavior');
-exports.ScrollToTopBehavior = _dereq_('./behaviors/ScrollToTopBehavior');
-
-exports.Navigation = _dereq_('./mixins/Navigation');
-exports.State = _dereq_('./mixins/State');
-
-exports.create = _dereq_('./utils/createRouter');
-exports.run = _dereq_('./utils/runRouter');
-
-},{"./behaviors/ImitateBrowserBehavior":2,"./behaviors/ScrollToTopBehavior":3,"./components/DefaultRoute":4,"./components/Link":5,"./components/NotFoundRoute":6,"./components/Redirect":7,"./components/Route":8,"./components/RouteHandler":9,"./locations/HashLocation":11,"./locations/HistoryLocation":12,"./locations/RefreshLocation":13,"./mixins/Navigation":15,"./mixins/State":18,"./utils/createRouter":26,"./utils/runRouter":30}],11:[function(_dereq_,module,exports){
-var invariant = _dereq_('react/lib/invariant');
-var canUseDOM = _dereq_('react/lib/ExecutionEnvironment').canUseDOM;
-var LocationActions = _dereq_('../actions/LocationActions');
-var Path = _dereq_('../utils/Path');
-
-/**
- * Returns the current URL path from `window.location.hash`, including query string
- */
-function getHashPath() {
-  invariant(
-    canUseDOM,
-    'getHashPath needs a DOM'
-  );
-
-  return Path.decode(
-    window.location.hash.substr(1)
-  );
-}
-
-var _actionType;
-
-function ensureSlash() {
-  var path = getHashPath();
-
-  if (path.charAt(0) === '/')
-    return true;
-
-  HashLocation.replace('/' + path);
-
-  return false;
-}
-
-var _changeListeners = [];
-
-function notifyChange(type) {
-  var change = {
-    path: getHashPath(),
-    type: type
-  };
-
-  _changeListeners.forEach(function (listener) {
-    listener(change);
-  });
-}
-
-var _isListening = false;
-
-function onHashChange() {
-  if (ensureSlash()) {
-    // If we don't have an _actionType then all we know is the hash
-    // changed. It was probably caused by the user clicking the Back
-    // button, but may have also been the Forward button or manual
-    // manipulation. So just guess 'pop'.
-    notifyChange(_actionType || LocationActions.POP);
-    _actionType = null;
-  }
-}
-
-/**
- * A Location that uses `window.location.hash`.
- */
-var HashLocation = {
-
-  addChangeListener: function (listener) {
-    _changeListeners.push(listener);
-
-    // Do this BEFORE listening for hashchange.
-    ensureSlash();
-
-    if (_isListening)
-      return;
-
-    if (window.addEventListener) {
-      window.addEventListener('hashchange', onHashChange, false);
-    } else {
-      window.attachEvent('onhashchange', onHashChange);
-    }
-
-    _isListening = true;
-  },
-
-  push: function (path) {
-    _actionType = LocationActions.PUSH;
-    window.location.hash = Path.encode(path);
-  },
-
-  replace: function (path) {
-    _actionType = LocationActions.REPLACE;
-    window.location.replace(window.location.pathname + '#' + Path.encode(path));
-  },
-
-  pop: function () {
-    _actionType = LocationActions.POP;
-    window.history.back();
-  },
-
-  getCurrentPath: getHashPath,
-
-  toString: function () {
-    return '<HashLocation>';
-  }
-
-};
-
-module.exports = HashLocation;
-
-},{"../actions/LocationActions":1,"../utils/Path":21,"react/lib/ExecutionEnvironment":37,"react/lib/invariant":41}],12:[function(_dereq_,module,exports){
-var invariant = _dereq_('react/lib/invariant');
-var canUseDOM = _dereq_('react/lib/ExecutionEnvironment').canUseDOM;
-var LocationActions = _dereq_('../actions/LocationActions');
-var Path = _dereq_('../utils/Path');
-
-/**
- * Returns the current URL path from `window.location`, including query string
- */
-function getWindowPath() {
-  invariant(
-    canUseDOM,
-    'getWindowPath needs a DOM'
-  );
-
-  return Path.decode(
-    window.location.pathname + window.location.search
-  );
-}
-
-var _changeListeners = [];
-
-function notifyChange(type) {
-  var change = {
-    path: getWindowPath(),
-    type: type
-  };
-
-  _changeListeners.forEach(function (listener) {
-    listener(change);
-  });
-}
-
-var _isListening = false;
-
-function onPopState() {
-  notifyChange(LocationActions.POP);
-}
-
-/**
- * A Location that uses HTML5 history.
- */
-var HistoryLocation = {
-
-  addChangeListener: function (listener) {
-    _changeListeners.push(listener);
-
-    if (_isListening)
-      return;
-
-    if (window.addEventListener) {
-      window.addEventListener('popstate', onPopState, false);
-    } else {
-      window.attachEvent('popstate', onPopState);
-    }
-
-    _isListening = true;
-  },
-
-  push: function (path) {
-    window.history.pushState({ path: path }, '', Path.encode(path));
-    notifyChange(LocationActions.PUSH);
-  },
-
-  replace: function (path) {
-    window.history.replaceState({ path: path }, '', Path.encode(path));
-    notifyChange(LocationActions.REPLACE);
-  },
-
-  pop: function () {
-    window.history.back();
-  },
-
-  getCurrentPath: getWindowPath,
-
-  toString: function () {
-    return '<HistoryLocation>';
-  }
-
-};
-
-module.exports = HistoryLocation;
-
-},{"../actions/LocationActions":1,"../utils/Path":21,"react/lib/ExecutionEnvironment":37,"react/lib/invariant":41}],13:[function(_dereq_,module,exports){
-var HistoryLocation = _dereq_('./HistoryLocation');
-var Path = _dereq_('../utils/Path');
-
-/**
- * A Location that uses full page refreshes. This is used as
- * the fallback for HistoryLocation in browsers that do not
- * support the HTML5 history API.
- */
-var RefreshLocation = {
-
-  push: function (path) {
-    window.location = Path.encode(path);
-  },
-
-  replace: function (path) {
-    window.location.replace(Path.encode(path));
-  },
-
-  pop: function () {
-    window.history.back();
-  },
-
-  getCurrentPath: HistoryLocation.getCurrentPath,
-
-  toString: function () {
-    return '<RefreshLocation>';
-  }
-
-};
-
-module.exports = RefreshLocation;
-
-},{"../utils/Path":21,"./HistoryLocation":12}],14:[function(_dereq_,module,exports){
-var invariant = _dereq_('react/lib/invariant');
-
-var FakeNode = {
-
-  render: function () {
-    invariant(
-      false,
-      '%s elements should not be rendered',
-      this.constructor.displayName
-    );
-  }
-
-};
-
-module.exports = FakeNode;
-
-},{"react/lib/invariant":41}],15:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-
-/**
- * A mixin for components that modify the URL.
- *
- * Example:
- *
- *   var MyLink = React.createClass({
- *     mixins: [ Router.Navigation ],
- *     handleClick: function (event) {
- *       event.preventDefault();
- *       this.transitionTo('aRoute', { the: 'params' }, { the: 'query' });
- *     },
- *     render: function () {
- *       return (
- *         <a onClick={this.handleClick}>Click me!</a>
- *       );
- *     }
- *   });
- */
-var Navigation = {
-
-  contextTypes: {
-    makePath: React.PropTypes.func.isRequired,
-    makeHref: React.PropTypes.func.isRequired,
-    transitionTo: React.PropTypes.func.isRequired,
-    replaceWith: React.PropTypes.func.isRequired,
-    goBack: React.PropTypes.func.isRequired
-  },
-
-  /**
-   * Returns an absolute URL path created from the given route
-   * name, URL parameters, and query values.
-   */
-  makePath: function (to, params, query) {
-    return this.context.makePath(to, params, query);
-  },
-
-  /**
-   * Returns a string that may safely be used as the href of a
-   * link to the route with the given name.
-   */
-  makeHref: function (to, params, query) {
-    return this.context.makeHref(to, params, query);
-  },
-
-  /**
-   * Transitions to the URL specified in the arguments by pushing
-   * a new URL onto the history stack.
-   */
-  transitionTo: function (to, params, query) {
-    this.context.transitionTo(to, params, query);
-  },
-
-  /**
-   * Transitions to the URL specified in the arguments by replacing
-   * the current URL in the history stack.
-   */
-  replaceWith: function (to, params, query) {
-    this.context.replaceWith(to, params, query);
-  },
-
-  /**
-   * Transitions to the previous URL.
-   */
-  goBack: function () {
-    this.context.goBack();
-  }
-
-};
-
-module.exports = Navigation;
-
-},{}],16:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-
-/**
- * Provides the router with context for Router.Navigation.
- */
-var NavigationContext = {
-
-  childContextTypes: {
-    makePath: React.PropTypes.func.isRequired,
-    makeHref: React.PropTypes.func.isRequired,
-    transitionTo: React.PropTypes.func.isRequired,
-    replaceWith: React.PropTypes.func.isRequired,
-    goBack: React.PropTypes.func.isRequired
-  },
-
-  getChildContext: function () {
-    return {
-      makePath: this.constructor.makePath,
-      makeHref: this.constructor.makeHref,
-      transitionTo: this.constructor.transitionTo,
-      replaceWith: this.constructor.replaceWith,
-      goBack: this.constructor.goBack
-    };
-  }
-
-};
-
-module.exports = NavigationContext;
-
-},{}],17:[function(_dereq_,module,exports){
-var invariant = _dereq_('react/lib/invariant');
-var canUseDOM = _dereq_('react/lib/ExecutionEnvironment').canUseDOM;
-var getWindowScrollPosition = _dereq_('../utils/getWindowScrollPosition');
-
-function shouldUpdateScroll(state, prevState) {
-  if (!prevState)
-    return true;
-
-  // Don't update scroll position when only the query has changed.
-  if (state.pathname === prevState.pathname)
-    return false;
-
-  var routes = state.routes;
-  var prevRoutes = prevState.routes;
-
-  var sharedAncestorRoutes = routes.filter(function (route) {
-    return prevRoutes.indexOf(route) !== -1;
-  });
-
-  return !sharedAncestorRoutes.some(function (route) {
-    return route.ignoreScrollBehavior;
-  });
-}
-
-/**
- * Provides the router with the ability to manage window scroll position
- * according to its scroll behavior.
- */
-var Scrolling = {
-
-  statics: {
-    /**
-     * Records curent scroll position as the last known position for the given URL path.
-     */
-    recordScrollPosition: function (path) {
-      if (!this.scrollHistory)
-        this.scrollHistory = {};
-
-      this.scrollHistory[path] = getWindowScrollPosition();
-    },
-
-    /**
-     * Returns the last known scroll position for the given URL path.
-     */
-    getScrollPosition: function (path) {
-      if (!this.scrollHistory)
-        this.scrollHistory = {};
-
-      return this.scrollHistory[path] || null;
-    }
-  },
-
-  componentWillMount: function () {
-    invariant(
-      this.getScrollBehavior() == null || canUseDOM,
-      'Cannot use scroll behavior without a DOM'
-    );
-  },
-
-  componentDidMount: function () {
-    this._updateScroll();
-  },
-
-  componentDidUpdate: function (prevProps, prevState) {
-    this._updateScroll(prevState);
-  },
-
-  _updateScroll: function (prevState) {
-    if (!shouldUpdateScroll(this.state, prevState))
-      return;
-
-    var scrollBehavior = this.getScrollBehavior();
-
-    if (scrollBehavior)
-      scrollBehavior.updateScrollPosition(
-        this.constructor.getScrollPosition(this.state.path),
-        this.state.action
-      );
-  }
-
-};
-
-module.exports = Scrolling;
-
-},{"../utils/getWindowScrollPosition":28,"react/lib/ExecutionEnvironment":37,"react/lib/invariant":41}],18:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-
-/**
- * A mixin for components that need to know the path, routes, URL
- * params and query that are currently active.
- *
- * Example:
- *
- *   var AboutLink = React.createClass({
- *     mixins: [ Router.State ],
- *     render: function () {
- *       var className = this.props.className;
- *   
- *       if (this.isActive('about'))
- *         className += ' is-active';
- *   
- *       return React.DOM.a({ className: className }, this.props.children);
- *     }
- *   });
- */
-var State = {
-
-  contextTypes: {
-    getCurrentPath: React.PropTypes.func.isRequired,
-    getCurrentRoutes: React.PropTypes.func.isRequired,
-    getCurrentPathname: React.PropTypes.func.isRequired,
-    getCurrentParams: React.PropTypes.func.isRequired,
-    getCurrentQuery: React.PropTypes.func.isRequired,
-    isActive: React.PropTypes.func.isRequired
-  },
-
-  /**
-   * Returns the current URL path.
-   */
-  getPath: function () {
-    return this.context.getCurrentPath();
-  },
-
-  /**
-   * Returns an array of the routes that are currently active.
-   */
-  getRoutes: function () {
-    return this.context.getCurrentRoutes();
-  },
-
-  /**
-   * Returns the current URL path without the query string.
-   */
-  getPathname: function () {
-    return this.context.getCurrentPathname();
-  },
-
-  /**
-   * Returns an object of the URL params that are currently active.
-   */
-  getParams: function () {
-    return this.context.getCurrentParams();
-  },
-
-  /**
-   * Returns an object of the query params that are currently active.
-   */
-  getQuery: function () {
-    return this.context.getCurrentQuery();
-  },
-
-  /**
-   * A helper method to determine if a given route, params, and query
-   * are active.
-   */
-  isActive: function (to, params, query) {
-    return this.context.isActive(to, params, query);
-  }
-
-};
-
-module.exports = State;
-
-},{}],19:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var assign = _dereq_('react/lib/Object.assign');
-var Path = _dereq_('../utils/Path');
-
-function routeIsActive(activeRoutes, routeName) {
-  return activeRoutes.some(function (route) {
-    return route.name === routeName;
-  });
-}
-
-function paramsAreActive(activeParams, params) {
-  for (var property in params)
-    if (String(activeParams[property]) !== String(params[property]))
-      return false;
-
-  return true;
-}
-
-function queryIsActive(activeQuery, query) {
-  for (var property in query)
-    if (String(activeQuery[property]) !== String(query[property]))
-      return false;
-
-  return true;
-}
-
-/**
- * Provides the router with context for Router.State.
- */
-var StateContext = {
-
-  /**
-   * Returns the current URL path + query string.
-   */
-  getCurrentPath: function () {
-    return this.state.path;
-  },
-
-  /**
-   * Returns a read-only array of the currently active routes.
-   */
-  getCurrentRoutes: function () {
-    return this.state.routes.slice(0);
-  },
-
-  /**
-   * Returns the current URL path without the query string.
-   */
-  getCurrentPathname: function () {
-    return this.state.pathname;
-  },
-
-  /**
-   * Returns a read-only object of the currently active URL parameters.
-   */
-  getCurrentParams: function () {
-    return assign({}, this.state.params);
-  },
-
-  /**
-   * Returns a read-only object of the currently active query parameters.
-   */
-  getCurrentQuery: function () {
-    return assign({}, this.state.query);
-  },
-
-  /**
-   * Returns true if the given route, params, and query are active.
-   */
-  isActive: function (to, params, query) {
-    if (Path.isAbsolute(to))
-      return to === this.state.path;
-
-    return routeIsActive(this.state.routes, to) &&
-      paramsAreActive(this.state.params, params) &&
-      (query == null || queryIsActive(this.state.query, query));
-  },
-
-  childContextTypes: {
-    getCurrentPath: React.PropTypes.func.isRequired,
-    getCurrentRoutes: React.PropTypes.func.isRequired,
-    getCurrentPathname: React.PropTypes.func.isRequired,
-    getCurrentParams: React.PropTypes.func.isRequired,
-    getCurrentQuery: React.PropTypes.func.isRequired,
-    isActive: React.PropTypes.func.isRequired
-  },
-
-  getChildContext: function () {
-    return {
-      getCurrentPath: this.getCurrentPath,
-      getCurrentRoutes: this.getCurrentRoutes,
-      getCurrentPathname: this.getCurrentPathname,
-      getCurrentParams: this.getCurrentParams,
-      getCurrentQuery: this.getCurrentQuery,
-      isActive: this.isActive
-    };
-  }
-
-};
-
-module.exports = StateContext;
-
-},{"../utils/Path":21,"react/lib/Object.assign":38}],20:[function(_dereq_,module,exports){
-/**
- * Represents a cancellation caused by navigating away
- * before the previous transition has fully resolved.
- */
-function Cancellation() { }
-
-module.exports = Cancellation;
-
-},{}],21:[function(_dereq_,module,exports){
-var invariant = _dereq_('react/lib/invariant');
-var merge = _dereq_('qs/lib/utils').merge;
-var qs = _dereq_('qs');
-
-var paramCompileMatcher = /:([a-zA-Z_$][a-zA-Z0-9_$]*)|[*.()\[\]\\+|{}^$]/g;
-var paramInjectMatcher = /:([a-zA-Z_$][a-zA-Z0-9_$?]*[?]?)|[*]/g;
-var paramInjectTrailingSlashMatcher = /\/\/\?|\/\?/g;
-var queryMatcher = /\?(.+)/;
-
-var _compiledPatterns = {};
-
-function compilePattern(pattern) {
-  if (!(pattern in _compiledPatterns)) {
-    var paramNames = [];
-    var source = pattern.replace(paramCompileMatcher, function (match, paramName) {
-      if (paramName) {
-        paramNames.push(paramName);
-        return '([^/?#]+)';
-      } else if (match === '*') {
-        paramNames.push('splat');
-        return '(.*?)';
-      } else {
-        return '\\' + match;
-      }
-    });
-
-    _compiledPatterns[pattern] = {
-      matcher: new RegExp('^' + source + '$', 'i'),
-      paramNames: paramNames
-    };
-  }
-
-  return _compiledPatterns[pattern];
-}
-
-var Path = {
-
-  /**
-   * Safely decodes special characters in the given URL path.
-   */
-  decode: function (path) {
-    return decodeURI(path.replace(/\+/g, ' '));
-  },
-
-  /**
-   * Safely encodes special characters in the given URL path.
-   */
-  encode: function (path) {
-    return encodeURI(path).replace(/%20/g, '+');
-  },
-
-  /**
-   * Returns an array of the names of all parameters in the given pattern.
-   */
-  extractParamNames: function (pattern) {
-    return compilePattern(pattern).paramNames;
-  },
-
-  /**
-   * Extracts the portions of the given URL path that match the given pattern
-   * and returns an object of param name => value pairs. Returns null if the
-   * pattern does not match the given path.
-   */
-  extractParams: function (pattern, path) {
-    var object = compilePattern(pattern);
-    var match = path.match(object.matcher);
-
-    if (!match)
-      return null;
-
-    var params = {};
-
-    object.paramNames.forEach(function (paramName, index) {
-      params[paramName] = match[index + 1];
-    });
-
-    return params;
-  },
-
-  /**
-   * Returns a version of the given route path with params interpolated. Throws
-   * if there is a dynamic segment of the route path for which there is no param.
-   */
-  injectParams: function (pattern, params) {
-    params = params || {};
-
-    var splatIndex = 0;
-
-    return pattern.replace(paramInjectMatcher, function (match, paramName) {
-      paramName = paramName || 'splat';
-
-      // If param is optional don't check for existence
-      if (paramName.slice(-1) !== '?') {
-        invariant(
-          params[paramName] != null,
-          'Missing "' + paramName + '" parameter for path "' + pattern + '"'
-        );
-      } else {
-        paramName = paramName.slice(0, -1);
-
-        if (params[paramName] == null)
-          return '';
-      }
-
-      var segment;
-      if (paramName === 'splat' && Array.isArray(params[paramName])) {
-        segment = params[paramName][splatIndex++];
-
-        invariant(
-          segment != null,
-          'Missing splat # ' + splatIndex + ' for path "' + pattern + '"'
-        );
-      } else {
-        segment = params[paramName];
-      }
-
-      return segment;
-    }).replace(paramInjectTrailingSlashMatcher, '/');
-  },
-
-  /**
-   * Returns an object that is the result of parsing any query string contained
-   * in the given path, null if the path contains no query string.
-   */
-  extractQuery: function (path) {
-    var match = path.match(queryMatcher);
-    return match && qs.parse(match[1]);
-  },
-
-  /**
-   * Returns a version of the given path without the query string.
-   */
-  withoutQuery: function (path) {
-    return path.replace(queryMatcher, '');
-  },
-
-  /**
-   * Returns a version of the given path with the parameters in the given
-   * query merged into the query string.
-   */
-  withQuery: function (path, query) {
-    var existingQuery = Path.extractQuery(path);
-
-    if (existingQuery)
-      query = query ? merge(existingQuery, query) : existingQuery;
-
-    var queryString = query && qs.stringify(query);
-
-    if (queryString)
-      return Path.withoutQuery(path) + '?' + queryString;
-
-    return path;
-  },
-
-  /**
-   * Returns true if the given path is absolute.
-   */
-  isAbsolute: function (path) {
-    return path.charAt(0) === '/';
-  },
-
-  /**
-   * Returns a normalized version of the given path.
-   */
-  normalize: function (path, parentRoute) {
-    return path.replace(/^\/*/, '/');
-  },
-
-  /**
-   * Joins two URL paths together.
-   */
-  join: function (a, b) {
-    return a.replace(/\/*$/, '/') + b;
-  }
-
-};
-
-module.exports = Path;
-
-},{"qs":32,"qs/lib/utils":36,"react/lib/invariant":41}],22:[function(_dereq_,module,exports){
-var Promise = _dereq_('when/lib/Promise');
-
-// TODO: Use process.env.NODE_ENV check + envify to enable
-// when's promise monitor here when in dev.
-
-module.exports = Promise;
-
-},{"when/lib/Promise":43}],23:[function(_dereq_,module,exports){
-var PropTypes = {
-
-  /**
-   * Requires that the value of a prop be falsy.
-   */
-  falsy: function (props, propName, elementName) {
-    if (props[propName])
-      return new Error('<' + elementName + '> may not have a "' + propName + '" prop');
-  }
-
-};
-
-module.exports = PropTypes;
-
-},{}],24:[function(_dereq_,module,exports){
-/**
- * Encapsulates a redirect to the given route.
- */
-function Redirect(to, params, query) {
-  this.to = to;
-  this.params = params;
-  this.query = query;
-}
-
-module.exports = Redirect;
-
-},{}],25:[function(_dereq_,module,exports){
-var assign = _dereq_('react/lib/Object.assign');
-var reversedArray = _dereq_('./reversedArray');
-var Redirect = _dereq_('./Redirect');
-var Promise = _dereq_('./Promise');
-
-/**
- * Runs all hook functions serially and calls callback(error) when finished.
- * A hook may return a promise if it needs to execute asynchronously.
- */
-function runHooks(hooks, callback) {
-  try {
-    var promise = hooks.reduce(function (promise, hook) {
-      // The first hook to use transition.wait makes the rest
-      // of the transition async from that point forward.
-      return promise ? promise.then(hook) : hook();
-    }, null);
-  } catch (error) {
-    return callback(error); // Sync error.
-  }
-
-  if (promise) {
-    // Use setTimeout to break the promise chain.
-    promise.then(function () {
-      setTimeout(callback);
-    }, function (error) {
-      setTimeout(function () {
-        callback(error);
-      });
-    });
-  } else {
-    callback();
-  }
-}
-
-/**
- * Calls the willTransitionFrom hook of all handlers in the given matches
- * serially in reverse with the transition object and the current instance of
- * the route's handler, so that the deepest nested handlers are called first.
- * Calls callback(error) when finished.
- */
-function runTransitionFromHooks(transition, routes, components, callback) {
-  components = reversedArray(components);
-
-  var hooks = reversedArray(routes).map(function (route, index) {
-    return function () {
-      var handler = route.handler;
-
-      if (!transition.isAborted && handler.willTransitionFrom)
-        return handler.willTransitionFrom(transition, components[index]);
-
-      var promise = transition._promise;
-      transition._promise = null;
-
-      return promise;
-    };
-  });
-
-  runHooks(hooks, callback);
-}
-
-/**
- * Calls the willTransitionTo hook of all handlers in the given matches
- * serially with the transition object and any params that apply to that
- * handler. Calls callback(error) when finished.
- */
-function runTransitionToHooks(transition, routes, params, query, callback) {
-  var hooks = routes.map(function (route) {
-    return function () {
-      var handler = route.handler;
-
-      if (!transition.isAborted && handler.willTransitionTo)
-        handler.willTransitionTo(transition, params, query);
-
-      var promise = transition._promise;
-      transition._promise = null;
-
-      return promise;
-    };
-  });
-
-  runHooks(hooks, callback);
-}
-
-/**
- * Encapsulates a transition to a given path.
- *
- * The willTransitionTo and willTransitionFrom handlers receive
- * an instance of this class as their first argument.
- */
-function Transition(path, retry) {
-  this.path = path;
-  this.abortReason = null;
-  this.isAborted = false;
-  this.retry = retry.bind(this);
-  this._promise = null;
-}
-
-assign(Transition.prototype, {
-
-  abort: function (reason) {
-    if (this.isAborted) {
-      // First abort wins.
-      return;
-    }
-
-    this.abortReason = reason;
-    this.isAborted = true;
-  },
-
-  redirect: function (to, params, query) {
-    this.abort(new Redirect(to, params, query));
-  },
-
-  wait: function (value) {
-    this._promise = Promise.resolve(value);
-  },
-
-  from: function (routes, components, callback) {
-    return runTransitionFromHooks(this, routes, components, callback);
-  },
-
-  to: function (routes, params, query, callback) {
-    return runTransitionToHooks(this, routes, params, query, callback);
-  }
-
-});
-
-module.exports = Transition;
-
-},{"./Promise":22,"./Redirect":24,"./reversedArray":29,"react/lib/Object.assign":38}],26:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var warning = _dereq_('react/lib/warning');
-var invariant = _dereq_('react/lib/invariant');
-var canUseDOM = _dereq_('react/lib/ExecutionEnvironment').canUseDOM;
-var ImitateBrowserBehavior = _dereq_('../behaviors/ImitateBrowserBehavior');
-var RouteHandler = _dereq_('../components/RouteHandler');
-var LocationActions = _dereq_('../actions/LocationActions');
-var HashLocation = _dereq_('../locations/HashLocation');
-var HistoryLocation = _dereq_('../locations/HistoryLocation');
-var RefreshLocation = _dereq_('../locations/RefreshLocation');
-var NavigationContext = _dereq_('../mixins/NavigationContext');
-var StateContext = _dereq_('../mixins/StateContext');
-var Scrolling = _dereq_('../mixins/Scrolling');
-var createRoutesFromChildren = _dereq_('./createRoutesFromChildren');
-var supportsHistory = _dereq_('./supportsHistory');
-var Transition = _dereq_('./Transition');
-var PropTypes = _dereq_('./PropTypes');
-var Redirect = _dereq_('./Redirect');
-var Cancellation = _dereq_('./Cancellation');
-var Path = _dereq_('./Path');
-
-/**
- * The default location for new routers.
- */
-var DEFAULT_LOCATION = canUseDOM ? HashLocation : '/';
-
-/**
- * The default scroll behavior for new routers.
- */
-var DEFAULT_SCROLL_BEHAVIOR = canUseDOM ? ImitateBrowserBehavior : null;
-
-/**
- * The default error handler for new routers.
- */
-function defaultErrorHandler(error) {
-  // Throw so we don't silently swallow async errors.
-  throw error; // This error probably originated in a transition hook.
-}
-
-/**
- * The default aborted transition handler for new routers.
- */
-function defaultAbortHandler(abortReason, location) {
-  if (typeof location === 'string')
-    throw new Error('Unhandled aborted transition! Reason: ' + abortReason);
-
-  if (abortReason instanceof Cancellation) {
-    return;
-  } else if (abortReason instanceof Redirect) {
-    location.replace(this.makePath(abortReason.to, abortReason.params, abortReason.query));
-  } else {
-    location.pop();
-  }
-}
-
-function findMatch(pathname, routes, defaultRoute, notFoundRoute) {
-  var match, route, params;
-
-  for (var i = 0, len = routes.length; i < len; ++i) {
-    route = routes[i];
-
-    // Check the subtree first to find the most deeply-nested match.
-    match = findMatch(pathname, route.childRoutes, route.defaultRoute, route.notFoundRoute);
-
-    if (match != null) {
-      match.routes.unshift(route);
-      return match;
-    }
-
-    // No routes in the subtree matched, so check this route.
-    params = Path.extractParams(route.path, pathname);
-
-    if (params)
-      return createMatch(route, params);
-  }
-
-  // No routes matched, so try the default route if there is one.
-  if (defaultRoute && (params = Path.extractParams(defaultRoute.path, pathname)))
-    return createMatch(defaultRoute, params);
-
-  // Last attempt: does the "not found" route match?
-  if (notFoundRoute && (params = Path.extractParams(notFoundRoute.path, pathname)))
-    return createMatch(notFoundRoute, params);
-
-  return match;
-}
-
-function createMatch(route, params) {
-  return { routes: [ route ], params: params };
-}
-
-function hasMatch(routes, route, prevParams, nextParams) {
-  return routes.some(function (r) {
-    if (r !== route)
-      return false;
-
-    var paramNames = route.paramNames;
-    var paramName;
-
-    for (var i = 0, len = paramNames.length; i < len; ++i) {
-      paramName = paramNames[i];
-
-      if (nextParams[paramName] !== prevParams[paramName])
-        return false;
-    }
-
-    return true;
-  });
-}
-
-/**
- * Creates and returns a new router using the given options. A router
- * is a ReactComponent class that knows how to react to changes in the
- * URL and keep the contents of the page in sync.
- *
- * Options may be any of the following:
- *
- * - routes           (required) The route config
- * - location         The location to use. Defaults to HashLocation when
- *                    the DOM is available, "/" otherwise
- * - scrollBehavior   The scroll behavior to use. Defaults to ImitateBrowserBehavior
- *                    when the DOM is available, null otherwise
- * - onError          A function that is used to handle errors
- * - onAbort          A function that is used to handle aborted transitions
- *
- * When rendering in a server-side environment, the location should simply
- * be the URL path that was used in the request, including the query string.
- */
-function createRouter(options) {
-  options = options || {};
-
-  if (typeof options === 'function') {
-    options = { routes: options }; // Router.create(<Route>)
-  } else if (Array.isArray(options)) {
-    options = { routes: options }; // Router.create([ <Route>, <Route> ])
-  }
-
-  var routes = [];
-  var namedRoutes = {};
-  var components = [];
-  var location = options.location || DEFAULT_LOCATION;
-  var scrollBehavior = options.scrollBehavior || DEFAULT_SCROLL_BEHAVIOR;
-  var onError = options.onError || defaultErrorHandler;
-  var onAbort = options.onAbort || defaultAbortHandler;
-  var state = {};
-  var nextState = {};
-  var pendingTransition = null;
-
-  function updateState() {
-    state = nextState;
-    nextState = {};
-  }
-
-  // Automatically fall back to full page refreshes in
-  // browsers that don't support the HTML history API.
-  if (location === HistoryLocation && !supportsHistory())
-    location = RefreshLocation;
-
-  var router = React.createClass({
-
-    displayName: 'Router',
-
-    mixins: [ NavigationContext, StateContext, Scrolling ],
-
-    statics: {
-
-      defaultRoute: null,
-      notFoundRoute: null,
-
-      /**
-       * Adds routes to this router from the given children object (see ReactChildren).
-       */
-      addRoutes: function (children) {
-        routes.push.apply(routes, createRoutesFromChildren(children, this, namedRoutes));
-      },
-
-      /**
-       * Returns an absolute URL path created from the given route
-       * name, URL parameters, and query.
-       */
-      makePath: function (to, params, query) {
-        var path;
-        if (Path.isAbsolute(to)) {
-          path = Path.normalize(to);
-        } else {
-          var route = namedRoutes[to];
-
-          invariant(
-            route,
-            'Unable to find <Route name="%s">',
-            to
-          );
-
-          path = route.path;
-        }
-
-        return Path.withQuery(Path.injectParams(path, params), query);
-      },
-
-      /**
-       * Returns a string that may safely be used as the href of a link
-       * to the route with the given name, URL parameters, and query.
-       */
-      makeHref: function (to, params, query) {
-        var path = this.makePath(to, params, query);
-        return (location === HashLocation) ? '#' + path : path;
-      },
-
-      /**
-       * Transitions to the URL specified in the arguments by pushing
-       * a new URL onto the history stack.
-       */
-      transitionTo: function (to, params, query) {
-        invariant(
-          typeof location !== 'string',
-          'You cannot use transitionTo with a static location'
-        );
-
-        var path = this.makePath(to, params, query);
-
-        if (pendingTransition) {
-          // Replace so pending location does not stay in history.
-          location.replace(path);
-        } else {
-          location.push(path);
-        }
-      },
-
-      /**
-       * Transitions to the URL specified in the arguments by replacing
-       * the current URL in the history stack.
-       */
-      replaceWith: function (to, params, query) {
-        invariant(
-          typeof location !== 'string',
-          'You cannot use replaceWith with a static location'
-        );
-
-        location.replace(this.makePath(to, params, query));
-      },
-
-      /**
-       * Transitions to the previous URL.
-       */
-      goBack: function () {
-        invariant(
-          typeof location !== 'string',
-          'You cannot use goBack with a static location'
-        );
-
-        location.pop();
-      },
-
-      /**
-       * Performs a match of the given pathname against this router and returns an object
-       * with the { routes, params } that match. Returns null if no match can be made.
-       */
-      match: function (pathname) {
-        return findMatch(pathname, routes, this.defaultRoute, this.notFoundRoute) || null;
-      },
-
-      /**
-       * Performs a transition to the given path and calls callback(error, abortReason)
-       * when the transition is finished. If both arguments are null the router's state
-       * was updated. Otherwise the transition did not complete.
-       *
-       * In a transition, a router first determines which routes are involved by beginning
-       * with the current route, up the route tree to the first parent route that is shared
-       * with the destination route, and back down the tree to the destination route. The
-       * willTransitionFrom hook is invoked on all route handlers we're transitioning away
-       * from, in reverse nesting order. Likewise, the willTransitionTo hook is invoked on
-       * all route handlers we're transitioning to.
-       *
-       * Both willTransitionFrom and willTransitionTo hooks may either abort or redirect the
-       * transition. To resolve asynchronously, they may use transition.wait(promise). If no
-       * hooks wait, the transition is fully synchronous.
-       */
-      dispatch: function (path, action, callback) {
-        if (pendingTransition) {
-          pendingTransition.abort(new Cancellation);
-          pendingTransition = null;
-        }
-
-        var prevPath = state.path;
-        if (prevPath === path)
-          return; // Nothing to do!
-
-        // Record the scroll position as early as possible to
-        // get it before browsers try update it automatically.
-        if (prevPath && action !== LocationActions.REPLACE)
-          this.recordScrollPosition(prevPath);
-
-        var pathname = Path.withoutQuery(path);
-        var match = this.match(pathname);
-
-        warning(
-          match != null,
-          'No route matches path "%s". Make sure you have <Route path="%s"> somewhere in your routes',
-          path, path
-        );
-
-        if (match == null)
-          match = {};
-
-        var prevRoutes = state.routes || [];
-        var prevParams = state.params || {};
-
-        var nextRoutes = match.routes || [];
-        var nextParams = match.params || {};
-        var nextQuery = Path.extractQuery(path) || {};
-
-        var fromRoutes, toRoutes;
-        if (prevRoutes.length) {
-          fromRoutes = prevRoutes.filter(function (route) {
-            return !hasMatch(nextRoutes, route, prevParams, nextParams);
-          });
-
-          toRoutes = nextRoutes.filter(function (route) {
-            return !hasMatch(prevRoutes, route, prevParams, nextParams);
-          });
-        } else {
-          fromRoutes = [];
-          toRoutes = nextRoutes;
-        }
-
-        var transition = new Transition(path, this.replaceWith.bind(this, path));
-        pendingTransition = transition;
-
-        transition.from(fromRoutes, components, function (error) {
-          if (error || transition.isAborted)
-            return callback.call(router, error, transition);
-
-          transition.to(toRoutes, nextParams, nextQuery, function (error) {
-            if (error || transition.isAborted)
-              return callback.call(router, error, transition);
-
-            nextState.path = path;
-            nextState.action = action;
-            nextState.pathname = pathname;
-            nextState.routes = nextRoutes;
-            nextState.params = nextParams;
-            nextState.query = nextQuery;
-
-            callback.call(router, null, transition);
-          });
-        });
-      },
-
-      /**
-       * Starts this router and calls callback(router, state) when the route changes.
-       *
-       * If the router's location is static (i.e. a URL path in a server environment)
-       * the callback is called only once. Otherwise, the location should be one of the
-       * Router.*Location objects (e.g. Router.HashLocation or Router.HistoryLocation).
-       */
-      run: function (callback) {
-        function dispatchHandler(error, transition) {
-          pendingTransition = null;
-
-          if (error) {
-            onError.call(router, error);
-          } else if (transition.isAborted) {
-            onAbort.call(router, transition.abortReason, location);
-          } else {
-            callback.call(router, router, nextState);
-          }
-        }
-
-        if (typeof location === 'string') {
-          warning(
-            !canUseDOM || "production" === 'test',
-            'You should not use a static location in a DOM environment because ' +
-            'the router will not be kept in sync with the current URL'
-          );
-
-          // Dispatch the location.
-          router.dispatch(location, null, dispatchHandler);
-        } else {
-          invariant(
-            canUseDOM,
-            'You cannot use %s in a non-DOM environment',
-            location
-          );
-
-          // Listen for changes to the location.
-          function changeListener(change) {
-            router.dispatch(change.path, change.type, dispatchHandler);
-          }
-
-          if (location.addChangeListener)
-            location.addChangeListener(changeListener);
-
-          // Bootstrap using the current path.
-          router.dispatch(location.getCurrentPath(), null, dispatchHandler);
-        }
-      }
-
-    },
-
-    propTypes: {
-      children: PropTypes.falsy
-    },
-
-    getLocation: function () {
-      return location;
-    },
-
-    getScrollBehavior: function () {
-      return scrollBehavior;
-    },
-
-    getRouteAtDepth: function (depth) {
-      var routes = this.state.routes;
-      return routes && routes[depth];
-    },
-
-    getRouteComponents: function () {
-      return components;
-    },
-
-    getInitialState: function () {
-      updateState();
-      return state;
-    },
-
-    componentWillReceiveProps: function () {
-      updateState();
-      this.setState(state);
-    },
-
-    render: function () {
-      return this.getRouteAtDepth(0) ? React.createElement(RouteHandler, this.props) : null;
-    },
-
-    childContextTypes: {
-      getRouteAtDepth: React.PropTypes.func.isRequired,
-      getRouteComponents: React.PropTypes.func.isRequired,
-      routeHandlers: React.PropTypes.array.isRequired
-    },
-
-    getChildContext: function () {
-      return {
-        getRouteComponents: this.getRouteComponents,
-        getRouteAtDepth: this.getRouteAtDepth,
-        routeHandlers: [ this ]
-      };
-    }
-
-  });
-
-  if (options.routes)
-    router.addRoutes(options.routes);
-
-  return router;
-}
-
-module.exports = createRouter;
-
-},{"../actions/LocationActions":1,"../behaviors/ImitateBrowserBehavior":2,"../components/RouteHandler":9,"../locations/HashLocation":11,"../locations/HistoryLocation":12,"../locations/RefreshLocation":13,"../mixins/NavigationContext":16,"../mixins/Scrolling":17,"../mixins/StateContext":19,"./Cancellation":20,"./Path":21,"./PropTypes":23,"./Redirect":24,"./Transition":25,"./createRoutesFromChildren":27,"./supportsHistory":31,"react/lib/ExecutionEnvironment":37,"react/lib/invariant":41,"react/lib/warning":42}],27:[function(_dereq_,module,exports){
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var warning = _dereq_('react/lib/warning');
-var invariant = _dereq_('react/lib/invariant');
-var DefaultRoute = _dereq_('../components/DefaultRoute');
-var NotFoundRoute = _dereq_('../components/NotFoundRoute');
-var Redirect = _dereq_('../components/Redirect');
-var Route = _dereq_('../components/Route');
-var Path = _dereq_('./Path');
-
-var CONFIG_ELEMENT_TYPES = [
-  DefaultRoute.type,
-  NotFoundRoute.type,
-  Redirect.type,
-  Route.type
-];
-
-function createRedirectHandler(to, _params, _query) {
-  return React.createClass({
-    statics: {
-      willTransitionTo: function (transition, params, query) {
-        transition.redirect(to, _params || params, _query || query);
-      }
-    },
-
-    render: function () {
-      return null;
-    }
-  });
-}
-
-function checkPropTypes(componentName, propTypes, props) {
-  for (var propName in propTypes) {
-    if (propTypes.hasOwnProperty(propName)) {
-      var error = propTypes[propName](props, propName, componentName);
-
-      if (error instanceof Error)
-        warning(false, error.message);
-    }
-  }
-}
-
-function createRoute(element, parentRoute, namedRoutes) {
-  var type = element.type;
-  var props = element.props;
-  var componentName = (type && type.displayName) || 'UnknownComponent';
-
-  invariant(
-    CONFIG_ELEMENT_TYPES.indexOf(type) !== -1,
-    'Unrecognized route configuration element "<%s>"',
-    componentName
-  );
-
-  if (type.propTypes)
-    checkPropTypes(componentName, type.propTypes, props);
-
-  var route = { name: props.name };
-
-  if (props.ignoreScrollBehavior) {
-    route.ignoreScrollBehavior = true;
-  }
-
-  if (type === Redirect.type) {
-    route.handler = createRedirectHandler(props.to, props.params, props.query);
-    props.path = props.path || props.from || '*';
-  } else {
-    route.handler = props.handler;
-  }
-
-  var parentPath = (parentRoute && parentRoute.path) || '/';
-
-  if ((props.path || props.name) && type !== DefaultRoute.type && type !== NotFoundRoute.type) {
-    var path = props.path || props.name;
-
-    // Relative paths extend their parent.
-    if (!Path.isAbsolute(path))
-      path = Path.join(parentPath, path);
-
-    route.path = Path.normalize(path);
-  } else {
-    route.path = parentPath;
-
-    if (type === NotFoundRoute.type)
-      route.path += '*';
-  }
-
-  route.paramNames = Path.extractParamNames(route.path);
-
-  // Make sure the route's path has all params its parent needs.
-  if (parentRoute && Array.isArray(parentRoute.paramNames)) {
-    parentRoute.paramNames.forEach(function (paramName) {
-      invariant(
-        route.paramNames.indexOf(paramName) !== -1,
-        'The nested route path "%s" is missing the "%s" parameter of its parent path "%s"',
-        route.path, paramName, parentRoute.path
-      );
-    });
-  }
-
-  // Make sure the route can be looked up by <Link>s.
-  if (props.name) {
-    invariant(
-      namedRoutes[props.name] == null,
-      'You cannot use the name "%s" for more than one route',
-      props.name
-    );
-
-    namedRoutes[props.name] = route;
-  }
-
-  // Handle <NotFoundRoute>.
-  if (type === NotFoundRoute.type) {
-    invariant(
-      parentRoute,
-      '<NotFoundRoute> must have a parent <Route>'
-    );
-
-    invariant(
-      parentRoute.notFoundRoute == null,
-      'You may not have more than one <NotFoundRoute> per <Route>'
-    );
-
-    parentRoute.notFoundRoute = route;
-
-    return null;
-  }
-
-  // Handle <DefaultRoute>.
-  if (type === DefaultRoute.type) {
-    invariant(
-      parentRoute,
-      '<DefaultRoute> must have a parent <Route>'
-    );
-
-    invariant(
-      parentRoute.defaultRoute == null,
-      'You may not have more than one <DefaultRoute> per <Route>'
-    );
-
-    parentRoute.defaultRoute = route;
-
-    return null;
-  }
-
-  route.childRoutes = createRoutesFromChildren(props.children, route, namedRoutes);
-
-  return route;
-}
-
-/**
- * Creates and returns an array of route objects from the given ReactChildren.
- */
-function createRoutesFromChildren(children, parentRoute, namedRoutes) {
-  var routes = [];
-
-  React.Children.forEach(children, function (child) {
-    // Exclude <DefaultRoute>s and <NotFoundRoute>s.
-    if (child = createRoute(child, parentRoute, namedRoutes))
-      routes.push(child);
-  });
-
-  return routes;
-}
-
-module.exports = createRoutesFromChildren;
-
-},{"../components/DefaultRoute":4,"../components/NotFoundRoute":6,"../components/Redirect":7,"../components/Route":8,"./Path":21,"react/lib/invariant":41,"react/lib/warning":42}],28:[function(_dereq_,module,exports){
-var invariant = _dereq_('react/lib/invariant');
-var canUseDOM = _dereq_('react/lib/ExecutionEnvironment').canUseDOM;
-
-/**
- * Returns the current scroll position of the window as { x, y }.
- */
-function getWindowScrollPosition() {
-  invariant(
-    canUseDOM,
-    'Cannot get current scroll position without a DOM'
-  );
-
-  return {
-    x: window.scrollX,
-    y: window.scrollY
-  };
-}
-
-module.exports = getWindowScrollPosition;
-
-},{"react/lib/ExecutionEnvironment":37,"react/lib/invariant":41}],29:[function(_dereq_,module,exports){
-function reversedArray(array) {
-  return array.slice(0).reverse();
-}
-
-module.exports = reversedArray;
-
-},{}],30:[function(_dereq_,module,exports){
-var createRouter = _dereq_('./createRouter');
-
-/**
- * A high-level convenience method that creates, configures, and
- * runs a router in one shot. The method signature is:
- *
- *   Router.run(routes[, location ], callback);
- *
- * Using `window.location.hash` to manage the URL, you could do:
- *
- *   Router.run(routes, function (Handler) {
- *     React.render(<Handler/>, document.body);
- *   });
- * 
- * Using HTML5 history and a custom "cursor" prop:
- * 
- *   Router.run(routes, Router.HistoryLocation, function (Handler) {
- *     React.render(<Handler cursor={cursor}/>, document.body);
- *   });
- *
- * Returns the newly created router.
- *
- * Note: If you need to specify further options for your router such
- * as error/abort handling or custom scroll behavior, use Router.create
- * instead.
- *
- *   var router = Router.create(options);
- *   router.run(function (Handler) {
- *     // ...
- *   });
- */
-function runRouter(routes, location, callback) {
-  if (typeof location === 'function') {
-    callback = location;
-    location = null;
-  }
-
-  var router = createRouter({
-    routes: routes,
-    location: location
-  });
-
-  router.run(callback);
-
-  return router;
-}
-
-module.exports = runRouter;
-
-},{"./createRouter":26}],31:[function(_dereq_,module,exports){
-function supportsHistory() {
-  /*! taken from modernizr
-   * https://github.com/Modernizr/Modernizr/blob/master/LICENSE
-   * https://github.com/Modernizr/Modernizr/blob/master/feature-detects/history.js
-   */
-  var ua = navigator.userAgent;
-  if ((ua.indexOf('Android 2.') !== -1 ||
-      (ua.indexOf('Android 4.0') !== -1)) &&
-      ua.indexOf('Mobile Safari') !== -1 &&
-      ua.indexOf('Chrome') === -1) {
-    return false;
-  }
-  return (window.history && 'pushState' in window.history);
-}
-
-module.exports = supportsHistory;
-
-},{}],32:[function(_dereq_,module,exports){
-module.exports = _dereq_('./lib');
-
-},{"./lib":33}],33:[function(_dereq_,module,exports){
-// Load modules
-
-var Stringify = _dereq_('./stringify');
-var Parse = _dereq_('./parse');
-
-
-// Declare internals
-
-var internals = {};
-
-
-module.exports = {
-    stringify: Stringify,
-    parse: Parse
-};
-
-},{"./parse":34,"./stringify":35}],34:[function(_dereq_,module,exports){
-// Load modules
-
-var Utils = _dereq_('./utils');
-
-
-// Declare internals
-
-var internals = {
-    delimiter: '&',
-    depth: 5,
-    arrayLimit: 20,
-    parameterLimit: 1000
-};
-
-
-internals.parseValues = function (str, options) {
-
-    var obj = {};
-    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
-
-    for (var i = 0, il = parts.length; i < il; ++i) {
-        var part = parts[i];
-        var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
-
-        if (pos === -1) {
-            obj[Utils.decode(part)] = '';
-        }
-        else {
-            var key = Utils.decode(part.slice(0, pos));
-            var val = Utils.decode(part.slice(pos + 1));
-
-            if (!obj[key]) {
-                obj[key] = val;
-            }
-            else {
-                obj[key] = [].concat(obj[key]).concat(val);
-            }
-        }
-    }
-
-    return obj;
-};
-
-
-internals.parseObject = function (chain, val, options) {
-
-    if (!chain.length) {
-        return val;
-    }
-
-    var root = chain.shift();
-
-    var obj = {};
-    if (root === '[]') {
-        obj = [];
-        obj = obj.concat(internals.parseObject(chain, val, options));
-    }
-    else {
-        var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
-        var index = parseInt(cleanRoot, 10);
-        if (!isNaN(index) &&
-            root !== cleanRoot &&
-            index <= options.arrayLimit) {
-
-            obj = [];
-            obj[index] = internals.parseObject(chain, val, options);
-        }
-        else {
-            obj[cleanRoot] = internals.parseObject(chain, val, options);
-        }
-    }
-
-    return obj;
-};
-
-
-internals.parseKeys = function (key, val, options) {
-
-    if (!key) {
-        return;
-    }
-
-    // The regex chunks
-
-    var parent = /^([^\[\]]*)/;
-    var child = /(\[[^\[\]]*\])/g;
-
-    // Get the parent
-
-    var segment = parent.exec(key);
-
-    // Don't allow them to overwrite object prototype properties
-
-    if (Object.prototype.hasOwnProperty(segment[1])) {
-        return;
-    }
-
-    // Stash the parent if it exists
-
-    var keys = [];
-    if (segment[1]) {
-        keys.push(segment[1]);
-    }
-
-    // Loop through children appending to the array until we hit depth
-
-    var i = 0;
-    while ((segment = child.exec(key)) !== null && i < options.depth) {
-
-        ++i;
-        if (!Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
-            keys.push(segment[1]);
-        }
-    }
-
-    // If there's a remainder, just add whatever is left
-
-    if (segment) {
-        keys.push('[' + key.slice(segment.index) + ']');
-    }
-
-    return internals.parseObject(keys, val, options);
-};
-
-
-module.exports = function (str, options) {
-
-    if (str === '' ||
-        str === null ||
-        typeof str === 'undefined') {
-
-        return {};
-    }
-
-    options = options || {};
-    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
-    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
-    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
-    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
-
-    var tempObj = typeof str === 'string' ? internals.parseValues(str, options) : str;
-    var obj = {};
-
-    // Iterate over the keys and setup the new object
-
-    var keys = Object.keys(tempObj);
-    for (var i = 0, il = keys.length; i < il; ++i) {
-        var key = keys[i];
-        var newObj = internals.parseKeys(key, tempObj[key], options);
-        obj = Utils.merge(obj, newObj);
-    }
-
-    return Utils.compact(obj);
-};
-
-},{"./utils":36}],35:[function(_dereq_,module,exports){
-// Load modules
-
-var Utils = _dereq_('./utils');
-
-
-// Declare internals
-
-var internals = {
-    delimiter: '&'
-};
-
-
-internals.stringify = function (obj, prefix) {
-
-    if (Utils.isBuffer(obj)) {
-        obj = obj.toString();
-    }
-    else if (obj instanceof Date) {
-        obj = obj.toISOString();
-    }
-    else if (obj === null) {
-        obj = '';
-    }
-
-    if (typeof obj === 'string' ||
-        typeof obj === 'number' ||
-        typeof obj === 'boolean') {
-
-        return [encodeURIComponent(prefix) + '=' + encodeURIComponent(obj)];
-    }
-
-    var values = [];
-
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            values = values.concat(internals.stringify(obj[key], prefix + '[' + key + ']'));
-        }
-    }
-
-    return values;
-};
-
-
-module.exports = function (obj, options) {
-
-    options = options || {};
-    var delimiter = typeof options.delimiter === 'undefined' ? internals.delimiter : options.delimiter;
-
-    var keys = [];
-
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            keys = keys.concat(internals.stringify(obj[key], key));
-        }
-    }
-
-    return keys.join(delimiter);
-};
-
-},{"./utils":36}],36:[function(_dereq_,module,exports){
-// Load modules
-
-
-// Declare internals
-
-var internals = {};
-
-
-exports.arrayToObject = function (source) {
-
-    var obj = {};
-    for (var i = 0, il = source.length; i < il; ++i) {
-        if (typeof source[i] !== 'undefined') {
-
-            obj[i] = source[i];
-        }
-    }
-
-    return obj;
-};
-
-
-exports.merge = function (target, source) {
-
-    if (!source) {
-        return target;
-    }
-
-    if (Array.isArray(source)) {
-        for (var i = 0, il = source.length; i < il; ++i) {
-            if (typeof source[i] !== 'undefined') {
-                if (typeof target[i] === 'object') {
-                    target[i] = exports.merge(target[i], source[i]);
-                }
-                else {
-                    target[i] = source[i];
-                }
-            }
-        }
-
-        return target;
-    }
-
-    if (Array.isArray(target)) {
-        if (typeof source !== 'object') {
-            target.push(source);
-            return target;
-        }
-        else {
-            target = exports.arrayToObject(target);
-        }
-    }
-
-    var keys = Object.keys(source);
-    for (var k = 0, kl = keys.length; k < kl; ++k) {
-        var key = keys[k];
-        var value = source[key];
-
-        if (value &&
-            typeof value === 'object') {
-
-            if (!target[key]) {
-                target[key] = value;
-            }
-            else {
-                target[key] = exports.merge(target[key], value);
-            }
-        }
-        else {
-            target[key] = value;
-        }
-    }
-
-    return target;
-};
-
-
-exports.decode = function (str) {
-
-    try {
-        return decodeURIComponent(str.replace(/\+/g, ' '));
-    } catch (e) {
-        return str;
-    }
-};
-
-
-exports.compact = function (obj, refs) {
-
-    if (typeof obj !== 'object' ||
-        obj === null) {
-
-        return obj;
-    }
-
-    refs = refs || [];
-    var lookup = refs.indexOf(obj);
-    if (lookup !== -1) {
-        return refs[lookup];
-    }
-
-    refs.push(obj);
-
-    if (Array.isArray(obj)) {
-        var compacted = [];
-
-        for (var i = 0, l = obj.length; i < l; ++i) {
-            if (typeof obj[i] !== 'undefined') {
-                compacted.push(obj[i]);
-            }
-        }
-
-        return compacted;
-    }
-
-    var keys = Object.keys(obj);
-    for (var i = 0, il = keys.length; i < il; ++i) {
-        var key = keys[i];
-        obj[key] = exports.compact(obj[key], refs);
-    }
-
-    return obj;
-};
-
-
-exports.isRegExp = function (obj) {
-    return Object.prototype.toString.call(obj) === '[object RegExp]';
-};
-
-
-exports.isBuffer = function (obj) {
-
-    if (typeof Buffer !== 'undefined') {
-        return Buffer.isBuffer(obj);
-    }
-    else {
-        return false;
-    }
-};
-
-},{}],37:[function(_dereq_,module,exports){
-/**
- * Copyright 2013-2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule ExecutionEnvironment
- */
-
-/*jslint evil: true */
-
-"use strict";
-
-var canUseDOM = !!(
-  typeof window !== 'undefined' &&
-  window.document &&
-  window.document.createElement
-);
-
-/**
- * Simple, lightweight module assisting with the detection and context of
- * Worker. Helps avoid circular dependencies and allows code to reason about
- * whether or not they are in a Worker, even if they never include the main
- * `ReactWorker` dependency.
- */
-var ExecutionEnvironment = {
-
-  canUseDOM: canUseDOM,
-
-  canUseWorkers: typeof Worker !== 'undefined',
-
-  canUseEventListeners:
-    canUseDOM && !!(window.addEventListener || window.attachEvent),
-
-  canUseViewport: canUseDOM && !!window.screen,
-
-  isInWorker: !canUseDOM // For now, this is true - might change in the future.
-
-};
-
-module.exports = ExecutionEnvironment;
-
-},{}],38:[function(_dereq_,module,exports){
-/**
- * Copyright 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule Object.assign
- */
-
-// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.assign
-
-function assign(target, sources) {
-  if (target == null) {
-    throw new TypeError('Object.assign target cannot be null or undefined');
-  }
-
-  var to = Object(target);
-  var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-  for (var nextIndex = 1; nextIndex < arguments.length; nextIndex++) {
-    var nextSource = arguments[nextIndex];
-    if (nextSource == null) {
-      continue;
-    }
-
-    var from = Object(nextSource);
-
-    // We don't currently support accessors nor proxies. Therefore this
-    // copy cannot throw. If we ever supported this then we must handle
-    // exceptions and side-effects. We don't support symbols so they won't
-    // be transferred.
-
-    for (var key in from) {
-      if (hasOwnProperty.call(from, key)) {
-        to[key] = from[key];
-      }
-    }
-  }
-
-  return to;
-};
-
-module.exports = assign;
-
-},{}],39:[function(_dereq_,module,exports){
-/**
- * Copyright 2013-2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule cx
- */
-
-/**
- * This function is used to mark string literals representing CSS class names
- * so that they can be transformed statically. This allows for modularization
- * and minification of CSS class names.
- *
- * In static_upstream, this function is actually implemented, but it should
- * eventually be replaced with something more descriptive, and the transform
- * that is used in the main stack should be ported for use elsewhere.
- *
- * @param string|object className to modularize, or an object of key/values.
- *                      In the object case, the values are conditions that
- *                      determine if the className keys should be included.
- * @param [string ...]  Variable list of classNames in the string case.
- * @return string       Renderable space-separated CSS className.
- */
-function cx(classNames) {
-  if (typeof classNames == 'object') {
-    return Object.keys(classNames).filter(function(className) {
-      return classNames[className];
-    }).join(' ');
-  } else {
-    return Array.prototype.join.call(arguments, ' ');
-  }
-}
-
-module.exports = cx;
-
-},{}],40:[function(_dereq_,module,exports){
-/**
- * Copyright 2013-2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule emptyFunction
- */
-
-function makeEmptyFunction(arg) {
-  return function() {
-    return arg;
-  };
-}
-
-/**
- * This function accepts and discards inputs; it has no side effects. This is
- * primarily useful idiomatically for overridable function endpoints which
- * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
- */
-function emptyFunction() {}
-
-emptyFunction.thatReturns = makeEmptyFunction;
-emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
-emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
-emptyFunction.thatReturnsNull = makeEmptyFunction(null);
-emptyFunction.thatReturnsThis = function() { return this; };
-emptyFunction.thatReturnsArgument = function(arg) { return arg; };
-
-module.exports = emptyFunction;
-
-},{}],41:[function(_dereq_,module,exports){
-/**
- * Copyright 2013-2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule invariant
- */
-
-"use strict";
-
-/**
- * Use invariant() to assert state which your program assumes to be true.
- *
- * Provide sprintf-style format (only %s is supported) and arguments
- * to provide information about what broke and what you were
- * expecting.
- *
- * The invariant message will be stripped in production, but the invariant
- * will remain to ensure logic does not differ in production.
- */
-
-var invariant = function(condition, format, a, b, c, d, e, f) {
-  if ("production" !== "production") {
-    if (format === undefined) {
-      throw new Error('invariant requires an error message argument');
-    }
-  }
-
-  if (!condition) {
-    var error;
-    if (format === undefined) {
-      error = new Error(
-        'Minified exception occurred; use the non-minified dev environment ' +
-        'for the full error message and additional helpful warnings.'
-      );
-    } else {
-      var args = [a, b, c, d, e, f];
-      var argIndex = 0;
-      error = new Error(
-        'Invariant Violation: ' +
-        format.replace(/%s/g, function() { return args[argIndex++]; })
-      );
-    }
-
-    error.framesToPop = 1; // we don't care about invariant's own frame
-    throw error;
-  }
-};
-
-module.exports = invariant;
-
-},{}],42:[function(_dereq_,module,exports){
-/**
- * Copyright 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule warning
- */
-
-"use strict";
-
-var emptyFunction = _dereq_("./emptyFunction");
-
-/**
- * Similar to invariant but only logs a warning if the condition is not met.
- * This can be used to log issues in development environments in critical
- * paths. Removing the logging code for production environments will keep the
- * same logic and follow the same code paths.
- */
-
-var warning = emptyFunction;
-
-if ("production" !== "production") {
-  warning = function(condition, format ) {var args=Array.prototype.slice.call(arguments,2);
-    if (format === undefined) {
-      throw new Error(
-        '`warning(condition, format, ...args)` requires a warning ' +
-        'message argument'
-      );
-    }
-
-    if (!condition) {
-      var argIndex = 0;
-      console.warn('Warning: ' + format.replace(/%s/g, function()  {return args[argIndex++];}));
-    }
-  };
-}
-
-module.exports = warning;
-
-},{"./emptyFunction":40}],43:[function(_dereq_,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function (_dereq_) {
-
-	var makePromise = _dereq_('./makePromise');
-	var Scheduler = _dereq_('./Scheduler');
-	var async = _dereq_('./async');
-
-	return makePromise({
-		scheduler: new Scheduler(async)
 	});
 
-});
-})(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(_dereq_); });
+	module.exports = DefaultRoute;
 
-},{"./Scheduler":45,"./async":46,"./makePromise":47}],44:[function(_dereq_,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
 
-(function(define) { 'use strict';
-define(function() {
-	/**
-	 * Circular queue
-	 * @param {number} capacityPow2 power of 2 to which this queue's capacity
-	 *  will be set initially. eg when capacityPow2 == 3, queue capacity
-	 *  will be 8.
-	 * @constructor
-	 */
-	function Queue(capacityPow2) {
-		this.head = this.tail = this.length = 0;
-		this.buffer = new Array(1 << capacityPow2);
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+	var classSet = __webpack_require__(32);
+	var assign = __webpack_require__(33);
+	var Navigation = __webpack_require__(12);
+	var State = __webpack_require__(13);
+
+	function isLeftClickEvent(event) {
+	  return event.button === 0;
 	}
 
-	Queue.prototype.push = function(x) {
-		if(this.length === this.buffer.length) {
-			this._ensureCapacity(this.length * 2);
-		}
-
-		this.buffer[this.tail] = x;
-		this.tail = (this.tail + 1) & (this.buffer.length - 1);
-		++this.length;
-		return this.length;
-	};
-
-	Queue.prototype.shift = function() {
-		var x = this.buffer[this.head];
-		this.buffer[this.head] = void 0;
-		this.head = (this.head + 1) & (this.buffer.length - 1);
-		--this.length;
-		return x;
-	};
-
-	Queue.prototype._ensureCapacity = function(capacity) {
-		var head = this.head;
-		var buffer = this.buffer;
-		var newBuffer = new Array(capacity);
-		var i = 0;
-		var len;
-
-		if(head === 0) {
-			len = this.length;
-			for(; i<len; ++i) {
-				newBuffer[i] = buffer[i];
-			}
-		} else {
-			capacity = buffer.length;
-			len = this.tail;
-			for(; head<capacity; ++i, ++head) {
-				newBuffer[i] = buffer[head];
-			}
-
-			for(head=0; head<len; ++i, ++head) {
-				newBuffer[i] = buffer[head];
-			}
-		}
-
-		this.buffer = newBuffer;
-		this.head = 0;
-		this.tail = this.length;
-	};
-
-	return Queue;
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}],45:[function(_dereq_,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(_dereq_) {
-
-	var Queue = _dereq_('./Queue');
-
-	// Credit to Twisol (https://github.com/Twisol) for suggesting
-	// this type of extensible queue + trampoline approach for next-tick conflation.
-
-	/**
-	 * Async task scheduler
-	 * @param {function} async function to schedule a single async function
-	 * @constructor
-	 */
-	function Scheduler(async) {
-		this._async = async;
-		this._queue = new Queue(15);
-		this._afterQueue = new Queue(5);
-		this._running = false;
-
-		var self = this;
-		this.drain = function() {
-			self._drain();
-		};
+	function isModifiedEvent(event) {
+	  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 	}
 
 	/**
-	 * Enqueue a task
-	 * @param {{ run:function }} task
+	 * <Link> components are used to create an <a> element that links to a route.
+	 * When that route is active, the link gets an "active" class name (or the
+	 * value of its `activeClassName` prop).
+	 *
+	 * For example, assuming you have the following route:
+	 *
+	 *   <Route name="showPost" path="/posts/:postID" handler={Post}/>
+	 *
+	 * You could use the following component to link to that route:
+	 *
+	 *   <Link to="showPost" params={{ postID: "123" }} />
+	 *
+	 * In addition to params, links may pass along query string parameters
+	 * using the `query` prop.
+	 *
+	 *   <Link to="showPost" params={{ postID: "123" }} query={{ show:true }}/>
 	 */
-	Scheduler.prototype.enqueue = function(task) {
-		this._add(this._queue, task);
-	};
+	var Link = React.createClass({
+
+	  displayName: 'Link',
+
+	  mixins: [ Navigation, State ],
+
+	  propTypes: {
+	    activeClassName: React.PropTypes.string.isRequired,
+	    to: React.PropTypes.string.isRequired,
+	    params: React.PropTypes.object,
+	    query: React.PropTypes.object,
+	    onClick: React.PropTypes.func
+	  },
+
+	  getDefaultProps: function () {
+	    return {
+	      activeClassName: 'active'
+	    };
+	  },
+
+	  handleClick: function (event) {
+	    var allowTransition = true;
+	    var clickResult;
+
+	    if (this.props.onClick)
+	      clickResult = this.props.onClick(event);
+
+	    if (isModifiedEvent(event) || !isLeftClickEvent(event))
+	      return;
+
+	    if (clickResult === false || event.defaultPrevented === true)
+	      allowTransition = false;
+
+	    event.preventDefault();
+
+	    if (allowTransition)
+	      this.transitionTo(this.props.to, this.props.params, this.props.query);
+	  },
+
+	  /**
+	   * Returns the value of the "href" attribute to use on the DOM element.
+	   */
+	  getHref: function () {
+	    return this.makeHref(this.props.to, this.props.params, this.props.query);
+	  },
+
+	  /**
+	   * Returns the value of the "class" attribute to use on the DOM element, which contains
+	   * the value of the activeClassName property when this <Link> is active.
+	   */
+	  getClassName: function () {
+	    var classNames = {};
+
+	    if (this.props.className)
+	      classNames[this.props.className] = true;
+
+	    if (this.isActive(this.props.to, this.props.params, this.props.query))
+	      classNames[this.props.activeClassName] = true;
+
+	    return classSet(classNames);
+	  },
+
+	  render: function () {
+	    var props = assign({}, this.props, {
+	      href: this.getHref(),
+	      className: this.getClassName(),
+	      onClick: this.handleClick
+	    });
+
+	    return React.DOM.a(props, this.props.children);
+	  }
+
+	});
+
+	module.exports = Link;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+	var FakeNode = __webpack_require__(18);
+	var PropTypes = __webpack_require__(19);
 
 	/**
-	 * Enqueue a task to run after the main task queue
-	 * @param {{ run:function }} task
+	 * A <NotFoundRoute> is a special kind of <Route> that
+	 * renders when the beginning of its parent's path matches
+	 * but none of its siblings do, including any <DefaultRoute>.
+	 * Only one such route may be used at any given level in the
+	 * route hierarchy.
 	 */
-	Scheduler.prototype.afterQueue = function(task) {
-		this._add(this._afterQueue, task);
-	};
+	var NotFoundRoute = React.createClass({
+
+	  displayName: 'NotFoundRoute',
+
+	  mixins: [ FakeNode ],
+
+	  propTypes: {
+	    name: React.PropTypes.string,
+	    path: PropTypes.falsy,
+	    handler: React.PropTypes.func.isRequired
+	  }
+
+	});
+
+	module.exports = NotFoundRoute;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+	var FakeNode = __webpack_require__(18);
+	var PropTypes = __webpack_require__(19);
 
 	/**
-	 * Drain the handler queue entirely, and then the after queue
+	 * A <Redirect> component is a special kind of <Route> that always
+	 * redirects to another route when it matches.
 	 */
-	Scheduler.prototype._drain = function() {
-		runQueue(this._queue);
-		this._running = false;
-		runQueue(this._afterQueue);
-	};
+	var Redirect = React.createClass({
+
+	  displayName: 'Redirect',
+
+	  mixins: [ FakeNode ],
+
+	  propTypes: {
+	    path: React.PropTypes.string,
+	    from: React.PropTypes.string, // Alias for path.
+	    to: React.PropTypes.string,
+	    handler: PropTypes.falsy
+	  }
+
+	});
+
+	module.exports = Redirect;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+	var FakeNode = __webpack_require__(18);
 
 	/**
-	 * Add a task to the q, and schedule drain if not already scheduled
-	 * @param {Queue} queue
-	 * @param {{run:function}} task
-	 * @private
+	 * <Route> components specify components that are rendered to the page when the
+	 * URL matches a given pattern.
+	 *
+	 * Routes are arranged in a nested tree structure. When a new URL is requested,
+	 * the tree is searched depth-first to find a route whose path matches the URL.
+	 * When one is found, all routes in the tree that lead to it are considered
+	 * "active" and their components are rendered into the DOM, nested in the same
+	 * order as they are in the tree.
+	 *
+	 * The preferred way to configure a router is using JSX. The XML-like syntax is
+	 * a great way to visualize how routes are laid out in an application.
+	 *
+	 *   var routes = [
+	 *     <Route handler={App}>
+	 *       <Route name="login" handler={Login}/>
+	 *       <Route name="logout" handler={Logout}/>
+	 *       <Route name="about" handler={About}/>
+	 *     </Route>
+	 *   ];
+	 *   
+	 *   Router.run(routes, function (Handler) {
+	 *     React.render(<Handler/>, document.body);
+	 *   });
+	 *
+	 * Handlers for Route components that contain children can render their active
+	 * child route using a <RouteHandler> element.
+	 *
+	 *   var App = React.createClass({
+	 *     render: function () {
+	 *       return (
+	 *         <div class="application">
+	 *           <RouteHandler/>
+	 *         </div>
+	 *       );
+	 *     }
+	 *   });
 	 */
-	Scheduler.prototype._add = function(queue, task) {
-		queue.push(task);
-		if(!this._running) {
-			this._running = true;
-			this._async(this.drain);
-		}
-	};
+	var Route = React.createClass({
+
+	  displayName: 'Route',
+
+	  mixins: [ FakeNode ],
+
+	  propTypes: {
+	    name: React.PropTypes.string,
+	    path: React.PropTypes.string,
+	    handler: React.PropTypes.func.isRequired,
+	    ignoreScrollBehavior: React.PropTypes.bool
+	  }
+
+	});
+
+	module.exports = Route;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+	var RouteHandlerMixin = __webpack_require__(20);
 
 	/**
-	 * Run all the tasks in the q
-	 * @param queue
+	 * A <RouteHandler> component renders the active child route handler
+	 * when routes are nested.
 	 */
-	function runQueue(queue) {
-		while(queue.length > 0) {
-			queue.shift().run();
-		}
+	var RouteHandler = React.createClass({
+
+	  displayName: 'RouteHandler',
+
+	  mixins: [RouteHandlerMixin],
+
+	  getDefaultProps: function () {
+	    return {
+	      ref: '__routeHandler__'
+	    };
+	  },
+
+	  render: function () {
+	    return this.getRouteHandler();
+	  }
+
+	});
+
+	module.exports = RouteHandler;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var LocationActions = __webpack_require__(30);
+	var History = __webpack_require__(16);
+	var Path = __webpack_require__(21);
+
+	/**
+	 * Returns the current URL path from the `hash` portion of the URL, including
+	 * query string.
+	 */
+	function getHashPath() {
+	  return Path.decode(
+	    // We can't use window.location.hash here because it's not
+	    // consistent across browsers - Firefox will pre-decode it!
+	    window.location.href.split('#')[1] || ''
+	  );
 	}
 
-	return Scheduler;
+	var _actionType;
 
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(_dereq_); }));
+	function ensureSlash() {
+	  var path = getHashPath();
 
-},{"./Queue":44}],46:[function(_dereq_,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
+	  if (path.charAt(0) === '/')
+	    return true;
 
-(function(define) { 'use strict';
-define(function(_dereq_) {
+	  HashLocation.replace('/' + path);
 
-	// Sniff "best" async scheduling option
-	// Prefer process.nextTick or MutationObserver, then check for
-	// vertx and finally fall back to setTimeout
-
-	/*jshint maxcomplexity:6*/
-	/*global process,document,setTimeout,MutationObserver,WebKitMutationObserver*/
-	var nextTick, MutationObs;
-
-	if (typeof process !== 'undefined' && process !== null &&
-		typeof process.nextTick === 'function') {
-		nextTick = function(f) {
-			process.nextTick(f);
-		};
-
-	} else if (MutationObs =
-		(typeof MutationObserver === 'function' && MutationObserver) ||
-		(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver)) {
-		nextTick = (function (document, MutationObserver) {
-			var scheduled;
-			var el = document.createElement('div');
-			var o = new MutationObserver(run);
-			o.observe(el, { attributes: true });
-
-			function run() {
-				var f = scheduled;
-				scheduled = void 0;
-				f();
-			}
-
-			return function (f) {
-				scheduled = f;
-				el.setAttribute('class', 'x');
-			};
-		}(document, MutationObs));
-
-	} else {
-		nextTick = (function(cjsRequire) {
-			var vertx;
-			try {
-				// vert.x 1.x || 2.x
-				vertx = cjsRequire('vertx');
-			} catch (ignore) {}
-
-			if (vertx) {
-				if (typeof vertx.runOnLoop === 'function') {
-					return vertx.runOnLoop;
-				}
-				if (typeof vertx.runOnContext === 'function') {
-					return vertx.runOnContext;
-				}
-			}
-
-			// capture setTimeout to avoid being caught by fake timers
-			// used in time based tests
-			var capturedSetTimeout = setTimeout;
-			return function (t) {
-				capturedSetTimeout(t, 0);
-			};
-		}(_dereq_));
+	  return false;
 	}
 
-	return nextTick;
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(_dereq_); }));
+	var _changeListeners = [];
+
+	function notifyChange(type) {
+	  if (type === LocationActions.PUSH)
+	    History.length += 1;
+
+	  var change = {
+	    path: getHashPath(),
+	    type: type
+	  };
+
+	  _changeListeners.forEach(function (listener) {
+	    listener(change);
+	  });
+	}
+
+	var _isListening = false;
+
+	function onHashChange() {
+	  if (ensureSlash()) {
+	    // If we don't have an _actionType then all we know is the hash
+	    // changed. It was probably caused by the user clicking the Back
+	    // button, but may have also been the Forward button or manual
+	    // manipulation. So just guess 'pop'.
+	    notifyChange(_actionType || LocationActions.POP);
+	    _actionType = null;
+	  }
+	}
+
+	/**
+	 * A Location that uses `window.location.hash`.
+	 */
+	var HashLocation = {
+
+	  addChangeListener: function (listener) {
+	    _changeListeners.push(listener);
+
+	    // Do this BEFORE listening for hashchange.
+	    ensureSlash();
+
+	    if (!_isListening) {
+	      if (window.addEventListener) {
+	        window.addEventListener('hashchange', onHashChange, false);
+	      } else {
+	        window.attachEvent('onhashchange', onHashChange);
+	      }
+
+	      _isListening = true;
+	    }
+	  },
+
+	  removeChangeListener: function(listener) {
+	    _changeListeners = _changeListeners.filter(function (l) {
+	      return l !== listener;
+	    });
+
+	    if (_changeListeners.length === 0) {
+	      if (window.removeEventListener) {
+	        window.removeEventListener('hashchange', onHashChange, false);
+	      } else {
+	        window.removeEvent('onhashchange', onHashChange);
+	      }
+
+	      _isListening = false;
+	    }
+	  },
+
+	  push: function (path) {
+	    _actionType = LocationActions.PUSH;
+	    window.location.hash = Path.encode(path);
+	  },
+
+	  replace: function (path) {
+	    _actionType = LocationActions.REPLACE;
+	    window.location.replace(window.location.pathname + window.location.search + '#' + Path.encode(path));
+	  },
+
+	  pop: function () {
+	    _actionType = LocationActions.POP;
+	    History.back();
+	  },
+
+	  getCurrentPath: getHashPath,
+
+	  toString: function () {
+	    return '<HashLocation>';
+	  }
 
-},{}],47:[function(_dereq_,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function() {
-
-	return function makePromise(environment) {
-
-		var tasks = environment.scheduler;
-
-		var objectCreate = Object.create ||
-			function(proto) {
-				function Child() {}
-				Child.prototype = proto;
-				return new Child();
-			};
-
-		/**
-		 * Create a promise whose fate is determined by resolver
-		 * @constructor
-		 * @returns {Promise} promise
-		 * @name Promise
-		 */
-		function Promise(resolver, handler) {
-			this._handler = resolver === Handler ? handler : init(resolver);
-		}
-
-		/**
-		 * Run the supplied resolver
-		 * @param resolver
-		 * @returns {Pending}
-		 */
-		function init(resolver) {
-			var handler = new Pending();
-
-			try {
-				resolver(promiseResolve, promiseReject, promiseNotify);
-			} catch (e) {
-				promiseReject(e);
-			}
-
-			return handler;
-
-			/**
-			 * Transition from pre-resolution state to post-resolution state, notifying
-			 * all listeners of the ultimate fulfillment or rejection
-			 * @param {*} x resolution value
-			 */
-			function promiseResolve (x) {
-				handler.resolve(x);
-			}
-			/**
-			 * Reject this promise with reason, which will be used verbatim
-			 * @param {Error|*} reason rejection reason, strongly suggested
-			 *   to be an Error type
-			 */
-			function promiseReject (reason) {
-				handler.reject(reason);
-			}
-
-			/**
-			 * Issue a progress event, notifying all progress listeners
-			 * @param {*} x progress event payload to pass to all listeners
-			 */
-			function promiseNotify (x) {
-				handler.notify(x);
-			}
-		}
-
-		// Creation
-
-		Promise.resolve = resolve;
-		Promise.reject = reject;
-		Promise.never = never;
-
-		Promise._defer = defer;
-		Promise._handler = getHandler;
-
-		/**
-		 * Returns a trusted promise. If x is already a trusted promise, it is
-		 * returned, otherwise returns a new trusted Promise which follows x.
-		 * @param  {*} x
-		 * @return {Promise} promise
-		 */
-		function resolve(x) {
-			return isPromise(x) ? x
-				: new Promise(Handler, new Async(getHandler(x)));
-		}
-
-		/**
-		 * Return a reject promise with x as its reason (x is used verbatim)
-		 * @param {*} x
-		 * @returns {Promise} rejected promise
-		 */
-		function reject(x) {
-			return new Promise(Handler, new Async(new Rejected(x)));
-		}
-
-		/**
-		 * Return a promise that remains pending forever
-		 * @returns {Promise} forever-pending promise.
-		 */
-		function never() {
-			return foreverPendingPromise; // Should be frozen
-		}
-
-		/**
-		 * Creates an internal {promise, resolver} pair
-		 * @private
-		 * @returns {Promise}
-		 */
-		function defer() {
-			return new Promise(Handler, new Pending());
-		}
-
-		// Transformation and flow control
-
-		/**
-		 * Transform this promise's fulfillment value, returning a new Promise
-		 * for the transformed result.  If the promise cannot be fulfilled, onRejected
-		 * is called with the reason.  onProgress *may* be called with updates toward
-		 * this promise's fulfillment.
-		 * @param {function=} onFulfilled fulfillment handler
-		 * @param {function=} onRejected rejection handler
-		 * @deprecated @param {function=} onProgress progress handler
-		 * @return {Promise} new promise
-		 */
-		Promise.prototype.then = function(onFulfilled, onRejected) {
-			var parent = this._handler;
-			var state = parent.join().state();
-
-			if ((typeof onFulfilled !== 'function' && state > 0) ||
-				(typeof onRejected !== 'function' && state < 0)) {
-				// Short circuit: value will not change, simply share handler
-				return new this.constructor(Handler, parent);
-			}
-
-			var p = this._beget();
-			var child = p._handler;
-
-			parent.chain(child, parent.receiver, onFulfilled, onRejected,
-					arguments.length > 2 ? arguments[2] : void 0);
-
-			return p;
-		};
-
-		/**
-		 * If this promise cannot be fulfilled due to an error, call onRejected to
-		 * handle the error. Shortcut for .then(undefined, onRejected)
-		 * @param {function?} onRejected
-		 * @return {Promise}
-		 */
-		Promise.prototype['catch'] = function(onRejected) {
-			return this.then(void 0, onRejected);
-		};
-
-		/**
-		 * Creates a new, pending promise of the same type as this promise
-		 * @private
-		 * @returns {Promise}
-		 */
-		Promise.prototype._beget = function() {
-			var parent = this._handler;
-			var child = new Pending(parent.receiver, parent.join().context);
-			return new this.constructor(Handler, child);
-		};
-
-		// Array combinators
-
-		Promise.all = all;
-		Promise.race = race;
-
-		/**
-		 * Return a promise that will fulfill when all promises in the
-		 * input array have fulfilled, or will reject when one of the
-		 * promises rejects.
-		 * @param {array} promises array of promises
-		 * @returns {Promise} promise for array of fulfillment values
-		 */
-		function all(promises) {
-			/*jshint maxcomplexity:8*/
-			var resolver = new Pending();
-			var pending = promises.length >>> 0;
-			var results = new Array(pending);
-
-			var i, h, x, s;
-			for (i = 0; i < promises.length; ++i) {
-				x = promises[i];
-
-				if (x === void 0 && !(i in promises)) {
-					--pending;
-					continue;
-				}
-
-				if (maybeThenable(x)) {
-					h = getHandlerMaybeThenable(x);
-
-					s = h.state();
-					if (s === 0) {
-						h.fold(settleAt, i, results, resolver);
-					} else if (s > 0) {
-						results[i] = h.value;
-						--pending;
-					} else {
-						unreportRemaining(promises, i+1, h);
-						resolver.become(h);
-						break;
-					}
-
-				} else {
-					results[i] = x;
-					--pending;
-				}
-			}
-
-			if(pending === 0) {
-				resolver.become(new Fulfilled(results));
-			}
-
-			return new Promise(Handler, resolver);
-
-			function settleAt(i, x, resolver) {
-				/*jshint validthis:true*/
-				this[i] = x;
-				if(--pending === 0) {
-					resolver.become(new Fulfilled(this));
-				}
-			}
-		}
-
-		function unreportRemaining(promises, start, rejectedHandler) {
-			var i, h, x;
-			for(i=start; i<promises.length; ++i) {
-				x = promises[i];
-				if(maybeThenable(x)) {
-					h = getHandlerMaybeThenable(x);
-
-					if(h !== rejectedHandler) {
-						h.visit(h, void 0, h._unreport);
-					}
-				}
-			}
-		}
-
-		/**
-		 * Fulfill-reject competitive race. Return a promise that will settle
-		 * to the same state as the earliest input promise to settle.
-		 *
-		 * WARNING: The ES6 Promise spec requires that race()ing an empty array
-		 * must return a promise that is pending forever.  This implementation
-		 * returns a singleton forever-pending promise, the same singleton that is
-		 * returned by Promise.never(), thus can be checked with ===
-		 *
-		 * @param {array} promises array of promises to race
-		 * @returns {Promise} if input is non-empty, a promise that will settle
-		 * to the same outcome as the earliest input promise to settle. if empty
-		 * is empty, returns a promise that will never settle.
-		 */
-		function race(promises) {
-			// Sigh, race([]) is untestable unless we return *something*
-			// that is recognizable without calling .then() on it.
-			if(Object(promises) === promises && promises.length === 0) {
-				return never();
-			}
-
-			var h = new Pending();
-			var i, x;
-			for(i=0; i<promises.length; ++i) {
-				x = promises[i];
-				if (x !== void 0 && i in promises) {
-					getHandler(x).visit(h, h.resolve, h.reject);
-				}
-			}
-			return new Promise(Handler, h);
-		}
-
-		// Promise internals
-		// Below this, everything is @private
-
-		/**
-		 * Get an appropriate handler for x, without checking for cycles
-		 * @param {*} x
-		 * @returns {object} handler
-		 */
-		function getHandler(x) {
-			if(isPromise(x)) {
-				return x._handler.join();
-			}
-			return maybeThenable(x) ? getHandlerUntrusted(x) : new Fulfilled(x);
-		}
-
-		/**
-		 * Get a handler for thenable x.
-		 * NOTE: You must only call this if maybeThenable(x) == true
-		 * @param {object|function|Promise} x
-		 * @returns {object} handler
-		 */
-		function getHandlerMaybeThenable(x) {
-			return isPromise(x) ? x._handler.join() : getHandlerUntrusted(x);
-		}
-
-		/**
-		 * Get a handler for potentially untrusted thenable x
-		 * @param {*} x
-		 * @returns {object} handler
-		 */
-		function getHandlerUntrusted(x) {
-			try {
-				var untrustedThen = x.then;
-				return typeof untrustedThen === 'function'
-					? new Thenable(untrustedThen, x)
-					: new Fulfilled(x);
-			} catch(e) {
-				return new Rejected(e);
-			}
-		}
-
-		/**
-		 * Handler for a promise that is pending forever
-		 * @constructor
-		 */
-		function Handler() {}
-
-		Handler.prototype.when
-			= Handler.prototype.become
-			= Handler.prototype.notify
-			= Handler.prototype.fail
-			= Handler.prototype._unreport
-			= Handler.prototype._report
-			= noop;
-
-		Handler.prototype._state = 0;
-
-		Handler.prototype.state = function() {
-			return this._state;
-		};
-
-		/**
-		 * Recursively collapse handler chain to find the handler
-		 * nearest to the fully resolved value.
-		 * @returns {object} handler nearest the fully resolved value
-		 */
-		Handler.prototype.join = function() {
-			var h = this;
-			while(h.handler !== void 0) {
-				h = h.handler;
-			}
-			return h;
-		};
-
-		Handler.prototype.chain = function(to, receiver, fulfilled, rejected, progress) {
-			this.when({
-				resolver: to,
-				receiver: receiver,
-				fulfilled: fulfilled,
-				rejected: rejected,
-				progress: progress
-			});
-		};
-
-		Handler.prototype.visit = function(receiver, fulfilled, rejected, progress) {
-			this.chain(failIfRejected, receiver, fulfilled, rejected, progress);
-		};
-
-		Handler.prototype.fold = function(f, z, c, to) {
-			this.visit(to, function(x) {
-				f.call(c, z, x, this);
-			}, to.reject, to.notify);
-		};
-
-		/**
-		 * Handler that invokes fail() on any handler it becomes
-		 * @constructor
-		 */
-		function FailIfRejected() {}
-
-		inherit(Handler, FailIfRejected);
-
-		FailIfRejected.prototype.become = function(h) {
-			h.fail();
-		};
-
-		var failIfRejected = new FailIfRejected();
-
-		/**
-		 * Handler that manages a queue of consumers waiting on a pending promise
-		 * @constructor
-		 */
-		function Pending(receiver, inheritedContext) {
-			Promise.createContext(this, inheritedContext);
-
-			this.consumers = void 0;
-			this.receiver = receiver;
-			this.handler = void 0;
-			this.resolved = false;
-		}
-
-		inherit(Handler, Pending);
-
-		Pending.prototype._state = 0;
-
-		Pending.prototype.resolve = function(x) {
-			this.become(getHandler(x));
-		};
-
-		Pending.prototype.reject = function(x) {
-			if(this.resolved) {
-				return;
-			}
-
-			this.become(new Rejected(x));
-		};
-
-		Pending.prototype.join = function() {
-			if (!this.resolved) {
-				return this;
-			}
-
-			var h = this;
-
-			while (h.handler !== void 0) {
-				h = h.handler;
-				if (h === this) {
-					return this.handler = cycle();
-				}
-			}
-
-			return h;
-		};
-
-		Pending.prototype.run = function() {
-			var q = this.consumers;
-			var handler = this.join();
-			this.consumers = void 0;
-
-			for (var i = 0; i < q.length; ++i) {
-				handler.when(q[i]);
-			}
-		};
-
-		Pending.prototype.become = function(handler) {
-			if(this.resolved) {
-				return;
-			}
-
-			this.resolved = true;
-			this.handler = handler;
-			if(this.consumers !== void 0) {
-				tasks.enqueue(this);
-			}
-
-			if(this.context !== void 0) {
-				handler._report(this.context);
-			}
-		};
-
-		Pending.prototype.when = function(continuation) {
-			if(this.resolved) {
-				tasks.enqueue(new ContinuationTask(continuation, this.handler));
-			} else {
-				if(this.consumers === void 0) {
-					this.consumers = [continuation];
-				} else {
-					this.consumers.push(continuation);
-				}
-			}
-		};
-
-		Pending.prototype.notify = function(x) {
-			if(!this.resolved) {
-				tasks.enqueue(new ProgressTask(x, this));
-			}
-		};
-
-		Pending.prototype.fail = function(context) {
-			var c = typeof context === 'undefined' ? this.context : context;
-			this.resolved && this.handler.join().fail(c);
-		};
-
-		Pending.prototype._report = function(context) {
-			this.resolved && this.handler.join()._report(context);
-		};
-
-		Pending.prototype._unreport = function() {
-			this.resolved && this.handler.join()._unreport();
-		};
-
-		/**
-		 * Wrap another handler and force it into a future stack
-		 * @param {object} handler
-		 * @constructor
-		 */
-		function Async(handler) {
-			this.handler = handler;
-		}
-
-		inherit(Handler, Async);
-
-		Async.prototype.when = function(continuation) {
-			tasks.enqueue(new ContinuationTask(continuation, this));
-		};
-
-		Async.prototype._report = function(context) {
-			this.join()._report(context);
-		};
-
-		Async.prototype._unreport = function() {
-			this.join()._unreport();
-		};
-
-		/**
-		 * Handler that wraps an untrusted thenable and assimilates it in a future stack
-		 * @param {function} then
-		 * @param {{then: function}} thenable
-		 * @constructor
-		 */
-		function Thenable(then, thenable) {
-			Pending.call(this);
-			tasks.enqueue(new AssimilateTask(then, thenable, this));
-		}
-
-		inherit(Pending, Thenable);
-
-		/**
-		 * Handler for a fulfilled promise
-		 * @param {*} x fulfillment value
-		 * @constructor
-		 */
-		function Fulfilled(x) {
-			Promise.createContext(this);
-			this.value = x;
-		}
-
-		inherit(Handler, Fulfilled);
-
-		Fulfilled.prototype._state = 1;
-
-		Fulfilled.prototype.fold = function(f, z, c, to) {
-			runContinuation3(f, z, this, c, to);
-		};
-
-		Fulfilled.prototype.when = function(cont) {
-			runContinuation1(cont.fulfilled, this, cont.receiver, cont.resolver);
-		};
-
-		var errorId = 0;
-
-		/**
-		 * Handler for a rejected promise
-		 * @param {*} x rejection reason
-		 * @constructor
-		 */
-		function Rejected(x) {
-			Promise.createContext(this);
-
-			this.id = ++errorId;
-			this.value = x;
-			this.handled = false;
-			this.reported = false;
-
-			this._report();
-		}
-
-		inherit(Handler, Rejected);
-
-		Rejected.prototype._state = -1;
-
-		Rejected.prototype.fold = function(f, z, c, to) {
-			to.become(this);
-		};
-
-		Rejected.prototype.when = function(cont) {
-			if(typeof cont.rejected === 'function') {
-				this._unreport();
-			}
-			runContinuation1(cont.rejected, this, cont.receiver, cont.resolver);
-		};
-
-		Rejected.prototype._report = function(context) {
-			tasks.afterQueue(new ReportTask(this, context));
-		};
-
-		Rejected.prototype._unreport = function() {
-			this.handled = true;
-			tasks.afterQueue(new UnreportTask(this));
-		};
-
-		Rejected.prototype.fail = function(context) {
-			Promise.onFatalRejection(this, context === void 0 ? this.context : context);
-		};
-
-		function ReportTask(rejection, context) {
-			this.rejection = rejection;
-			this.context = context;
-		}
-
-		ReportTask.prototype.run = function() {
-			if(!this.rejection.handled) {
-				this.rejection.reported = true;
-				Promise.onPotentiallyUnhandledRejection(this.rejection, this.context);
-			}
-		};
-
-		function UnreportTask(rejection) {
-			this.rejection = rejection;
-		}
-
-		UnreportTask.prototype.run = function() {
-			if(this.rejection.reported) {
-				Promise.onPotentiallyUnhandledRejectionHandled(this.rejection);
-			}
-		};
-
-		// Unhandled rejection hooks
-		// By default, everything is a noop
-
-		// TODO: Better names: "annotate"?
-		Promise.createContext
-			= Promise.enterContext
-			= Promise.exitContext
-			= Promise.onPotentiallyUnhandledRejection
-			= Promise.onPotentiallyUnhandledRejectionHandled
-			= Promise.onFatalRejection
-			= noop;
-
-		// Errors and singletons
-
-		var foreverPendingHandler = new Handler();
-		var foreverPendingPromise = new Promise(Handler, foreverPendingHandler);
-
-		function cycle() {
-			return new Rejected(new TypeError('Promise cycle'));
-		}
-
-		// Task runners
-
-		/**
-		 * Run a single consumer
-		 * @constructor
-		 */
-		function ContinuationTask(continuation, handler) {
-			this.continuation = continuation;
-			this.handler = handler;
-		}
-
-		ContinuationTask.prototype.run = function() {
-			this.handler.join().when(this.continuation);
-		};
-
-		/**
-		 * Run a queue of progress handlers
-		 * @constructor
-		 */
-		function ProgressTask(value, handler) {
-			this.handler = handler;
-			this.value = value;
-		}
-
-		ProgressTask.prototype.run = function() {
-			var q = this.handler.consumers;
-			if(q === void 0) {
-				return;
-			}
-
-			for (var c, i = 0; i < q.length; ++i) {
-				c = q[i];
-				runNotify(c.progress, this.value, this.handler, c.receiver, c.resolver);
-			}
-		};
-
-		/**
-		 * Assimilate a thenable, sending it's value to resolver
-		 * @param {function} then
-		 * @param {object|function} thenable
-		 * @param {object} resolver
-		 * @constructor
-		 */
-		function AssimilateTask(then, thenable, resolver) {
-			this._then = then;
-			this.thenable = thenable;
-			this.resolver = resolver;
-		}
-
-		AssimilateTask.prototype.run = function() {
-			var h = this.resolver;
-			tryAssimilate(this._then, this.thenable, _resolve, _reject, _notify);
-
-			function _resolve(x) { h.resolve(x); }
-			function _reject(x)  { h.reject(x); }
-			function _notify(x)  { h.notify(x); }
-		};
-
-		function tryAssimilate(then, thenable, resolve, reject, notify) {
-			try {
-				then.call(thenable, resolve, reject, notify);
-			} catch (e) {
-				reject(e);
-			}
-		}
-
-		// Other helpers
-
-		/**
-		 * @param {*} x
-		 * @returns {boolean} true iff x is a trusted Promise
-		 */
-		function isPromise(x) {
-			return x instanceof Promise;
-		}
-
-		/**
-		 * Test just enough to rule out primitives, in order to take faster
-		 * paths in some code
-		 * @param {*} x
-		 * @returns {boolean} false iff x is guaranteed *not* to be a thenable
-		 */
-		function maybeThenable(x) {
-			return (typeof x === 'object' || typeof x === 'function') && x !== null;
-		}
-
-		function runContinuation1(f, h, receiver, next) {
-			if(typeof f !== 'function') {
-				return next.become(h);
-			}
-
-			Promise.enterContext(h);
-			tryCatchReject(f, h.value, receiver, next);
-			Promise.exitContext();
-		}
-
-		function runContinuation3(f, x, h, receiver, next) {
-			if(typeof f !== 'function') {
-				return next.become(h);
-			}
-
-			Promise.enterContext(h);
-			tryCatchReject3(f, x, h.value, receiver, next);
-			Promise.exitContext();
-		}
-
-		function runNotify(f, x, h, receiver, next) {
-			if(typeof f !== 'function') {
-				return next.notify(x);
-			}
-
-			Promise.enterContext(h);
-			tryCatchReturn(f, x, receiver, next);
-			Promise.exitContext();
-		}
-
-		/**
-		 * Return f.call(thisArg, x), or if it throws return a rejected promise for
-		 * the thrown exception
-		 */
-		function tryCatchReject(f, x, thisArg, next) {
-			try {
-				next.become(getHandler(f.call(thisArg, x)));
-			} catch(e) {
-				next.become(new Rejected(e));
-			}
-		}
-
-		/**
-		 * Same as above, but includes the extra argument parameter.
-		 */
-		function tryCatchReject3(f, x, y, thisArg, next) {
-			try {
-				f.call(thisArg, x, y, next);
-			} catch(e) {
-				next.become(new Rejected(e));
-			}
-		}
-
-		/**
-		 * Return f.call(thisArg, x), or if it throws, *return* the exception
-		 */
-		function tryCatchReturn(f, x, thisArg, next) {
-			try {
-				next.notify(f.call(thisArg, x));
-			} catch(e) {
-				next.notify(e);
-			}
-		}
-
-		function inherit(Parent, Child) {
-			Child.prototype = objectCreate(Parent.prototype);
-			Child.prototype.constructor = Child;
-		}
-
-		function noop() {}
-
-		return Promise;
 	};
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}]},{},[10])
-(10)
-});
-if (!Function.prototype.bind) {
-  Function.prototype.bind = function(oThis) {
-    if (typeof this !== 'function') {
-      // closest thing possible to the ECMAScript 5
-      // internal IsCallable function
-      throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
-    }
+	module.exports = HashLocation;
 
-    var aArgs   = Array.prototype.slice.call(arguments, 1),
-        fToBind = this,
-        fNOP    = function() {},
-        fBound  = function() {
-          return fToBind.apply(this instanceof fNOP && oThis
-                 ? this
-                 : oThis,
-                 aArgs.concat(Array.prototype.slice.call(arguments)));
-        };
 
-    fNOP.prototype = this.prototype;
-    fBound.prototype = new fNOP();
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
 
-    return fBound;
-  };
-}
+	var LocationActions = __webpack_require__(30);
+	var History = __webpack_require__(16);
+	var Path = __webpack_require__(21);
 
+	/**
+	 * Returns the current URL path from `window.location`, including query string.
+	 */
+	function getWindowPath() {
+	  return Path.decode(
+	    window.location.pathname + window.location.search
+	  );
+	}
+
+	var _changeListeners = [];
+
+	function notifyChange(type) {
+	  var change = {
+	    path: getWindowPath(),
+	    type: type
+	  };
+
+	  _changeListeners.forEach(function (listener) {
+	    listener(change);
+	  });
+	}
+
+	var _isListening = false;
+
+	function onPopState() {
+	  notifyChange(LocationActions.POP);
+	}
+
+	/**
+	 * A Location that uses HTML5 history.
+	 */
+	var HistoryLocation = {
+
+	  addChangeListener: function (listener) {
+	    _changeListeners.push(listener);
+
+	    if (!_isListening) {
+	      if (window.addEventListener) {
+	        window.addEventListener('popstate', onPopState, false);
+	      } else {
+	        window.attachEvent('popstate', onPopState);
+	      }
+
+	      _isListening = true;
+	    }
+	  },
+
+	  removeChangeListener: function(listener) {
+	    _changeListeners = _changeListeners.filter(function (l) {
+	      return l !== listener;
+	    });
+
+	    if (_changeListeners.length === 0) {
+	      if (window.addEventListener) {
+	        window.removeEventListener('popstate', onPopState);
+	      } else {
+	        window.removeEvent('popstate', onPopState);
+	      }
+
+	      _isListening = false;
+	    }
+	  },
+
+	  push: function (path) {
+	    window.history.pushState({ path: path }, '', Path.encode(path));
+	    History.length += 1;
+	    notifyChange(LocationActions.PUSH);
+	  },
+
+	  replace: function (path) {
+	    window.history.replaceState({ path: path }, '', Path.encode(path));
+	    notifyChange(LocationActions.REPLACE);
+	  },
+
+	  pop: History.back,
+
+	  getCurrentPath: getWindowPath,
+
+	  toString: function () {
+	    return '<HistoryLocation>';
+	  }
+
+	};
+
+	module.exports = HistoryLocation;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var HistoryLocation = __webpack_require__(8);
+	var History = __webpack_require__(16);
+	var Path = __webpack_require__(21);
+
+	/**
+	 * A Location that uses full page refreshes. This is used as
+	 * the fallback for HistoryLocation in browsers that do not
+	 * support the HTML5 history API.
+	 */
+	var RefreshLocation = {
+
+	  push: function (path) {
+	    window.location = Path.encode(path);
+	  },
+
+	  replace: function (path) {
+	    window.location.replace(Path.encode(path));
+	  },
+
+	  pop: History.back,
+
+	  getCurrentPath: HistoryLocation.getCurrentPath,
+
+	  toString: function () {
+	    return '<RefreshLocation>';
+	  }
+
+	};
+
+	module.exports = RefreshLocation;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var LocationActions = __webpack_require__(30);
+
+	/**
+	 * A scroll behavior that attempts to imitate the default behavior
+	 * of modern browsers.
+	 */
+	var ImitateBrowserBehavior = {
+
+	  updateScrollPosition: function (position, actionType) {
+	    switch (actionType) {
+	      case LocationActions.PUSH:
+	      case LocationActions.REPLACE:
+	        window.scrollTo(0, 0);
+	        break;
+	      case LocationActions.POP:
+	        if (position) {
+	          window.scrollTo(position.x, position.y);
+	        } else {
+	          window.scrollTo(0, 0);
+	        }
+	        break;
+	    }
+	  }
+
+	};
+
+	module.exports = ImitateBrowserBehavior;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * A scroll behavior that always scrolls to the top of the page
+	 * after a transition.
+	 */
+	var ScrollToTopBehavior = {
+
+	  updateScrollPosition: function () {
+	    window.scrollTo(0, 0);
+	  }
+
+	};
+
+	module.exports = ScrollToTopBehavior;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+
+	/**
+	 * A mixin for components that modify the URL.
+	 *
+	 * Example:
+	 *
+	 *   var MyLink = React.createClass({
+	 *     mixins: [ Router.Navigation ],
+	 *     handleClick: function (event) {
+	 *       event.preventDefault();
+	 *       this.transitionTo('aRoute', { the: 'params' }, { the: 'query' });
+	 *     },
+	 *     render: function () {
+	 *       return (
+	 *         <a onClick={this.handleClick}>Click me!</a>
+	 *       );
+	 *     }
+	 *   });
+	 */
+	var Navigation = {
+
+	  contextTypes: {
+	    makePath: React.PropTypes.func.isRequired,
+	    makeHref: React.PropTypes.func.isRequired,
+	    transitionTo: React.PropTypes.func.isRequired,
+	    replaceWith: React.PropTypes.func.isRequired,
+	    goBack: React.PropTypes.func.isRequired
+	  },
+
+	  /**
+	   * Returns an absolute URL path created from the given route
+	   * name, URL parameters, and query values.
+	   */
+	  makePath: function (to, params, query) {
+	    return this.context.makePath(to, params, query);
+	  },
+
+	  /**
+	   * Returns a string that may safely be used as the href of a
+	   * link to the route with the given name.
+	   */
+	  makeHref: function (to, params, query) {
+	    return this.context.makeHref(to, params, query);
+	  },
+
+	  /**
+	   * Transitions to the URL specified in the arguments by pushing
+	   * a new URL onto the history stack.
+	   */
+	  transitionTo: function (to, params, query) {
+	    this.context.transitionTo(to, params, query);
+	  },
+
+	  /**
+	   * Transitions to the URL specified in the arguments by replacing
+	   * the current URL in the history stack.
+	   */
+	  replaceWith: function (to, params, query) {
+	    this.context.replaceWith(to, params, query);
+	  },
+
+	  /**
+	   * Transitions to the previous URL.
+	   */
+	  goBack: function () {
+	    this.context.goBack();
+	  }
+
+	};
+
+	module.exports = Navigation;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+
+	/**
+	 * A mixin for components that need to know the path, routes, URL
+	 * params and query that are currently active.
+	 *
+	 * Example:
+	 *
+	 *   var AboutLink = React.createClass({
+	 *     mixins: [ Router.State ],
+	 *     render: function () {
+	 *       var className = this.props.className;
+	 *   
+	 *       if (this.isActive('about'))
+	 *         className += ' is-active';
+	 *   
+	 *       return React.DOM.a({ className: className }, this.props.children);
+	 *     }
+	 *   });
+	 */
+	var State = {
+
+	  contextTypes: {
+	    getCurrentPath: React.PropTypes.func.isRequired,
+	    getCurrentRoutes: React.PropTypes.func.isRequired,
+	    getCurrentPathname: React.PropTypes.func.isRequired,
+	    getCurrentParams: React.PropTypes.func.isRequired,
+	    getCurrentQuery: React.PropTypes.func.isRequired,
+	    isActive: React.PropTypes.func.isRequired
+	  },
+
+	  /**
+	   * Returns the current URL path.
+	   */
+	  getPath: function () {
+	    return this.context.getCurrentPath();
+	  },
+
+	  /**
+	   * Returns an array of the routes that are currently active.
+	   */
+	  getRoutes: function () {
+	    return this.context.getCurrentRoutes();
+	  },
+
+	  /**
+	   * Returns the current URL path without the query string.
+	   */
+	  getPathname: function () {
+	    return this.context.getCurrentPathname();
+	  },
+
+	  /**
+	   * Returns an object of the URL params that are currently active.
+	   */
+	  getParams: function () {
+	    return this.context.getCurrentParams();
+	  },
+
+	  /**
+	   * Returns an object of the query params that are currently active.
+	   */
+	  getQuery: function () {
+	    return this.context.getCurrentQuery();
+	  },
+
+	  /**
+	   * A helper method to determine if a given route, params, and query
+	   * are active.
+	   */
+	  isActive: function (to, params, query) {
+	    return this.context.isActive(to, params, query);
+	  }
+
+	};
+
+	module.exports = State;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* jshint -W058 */
+	var React = __webpack_require__(17);
+	var warning = __webpack_require__(34);
+	var invariant = __webpack_require__(35);
+	var canUseDOM = __webpack_require__(36).canUseDOM;
+	var ImitateBrowserBehavior = __webpack_require__(10);
+	var RouteHandler = __webpack_require__(6);
+	var LocationActions = __webpack_require__(30);
+	var HashLocation = __webpack_require__(7);
+	var HistoryLocation = __webpack_require__(8);
+	var RefreshLocation = __webpack_require__(9);
+	var NavigationContext = __webpack_require__(22);
+	var StateContext = __webpack_require__(23);
+	var Scrolling = __webpack_require__(24);
+	var createRoutesFromChildren = __webpack_require__(25);
+	var supportsHistory = __webpack_require__(26);
+	var Transition = __webpack_require__(27);
+	var PropTypes = __webpack_require__(19);
+	var Redirect = __webpack_require__(28);
+	var History = __webpack_require__(16);
+	var Cancellation = __webpack_require__(29);
+	var Path = __webpack_require__(21);
+
+	/**
+	 * The default location for new routers.
+	 */
+	var DEFAULT_LOCATION = canUseDOM ? HashLocation : '/';
+
+	/**
+	 * The default scroll behavior for new routers.
+	 */
+	var DEFAULT_SCROLL_BEHAVIOR = canUseDOM ? ImitateBrowserBehavior : null;
+
+	/**
+	 * The default error handler for new routers.
+	 */
+	function defaultErrorHandler(error) {
+	  // Throw so we don't silently swallow async errors.
+	  throw error; // This error probably originated in a transition hook.
+	}
+
+	/**
+	 * The default aborted transition handler for new routers.
+	 */
+	function defaultAbortHandler(abortReason, location) {
+	  if (typeof location === 'string')
+	    throw new Error('Unhandled aborted transition! Reason: ' + abortReason);
+
+	  if (abortReason instanceof Cancellation) {
+	    return;
+	  } else if (abortReason instanceof Redirect) {
+	    location.replace(this.makePath(abortReason.to, abortReason.params, abortReason.query));
+	  } else {
+	    location.pop();
+	  }
+	}
+
+	function findMatch(pathname, routes, defaultRoute, notFoundRoute) {
+	  var match, route, params;
+
+	  for (var i = 0, len = routes.length; i < len; ++i) {
+	    route = routes[i];
+
+	    // Check the subtree first to find the most deeply-nested match.
+	    match = findMatch(pathname, route.childRoutes, route.defaultRoute, route.notFoundRoute);
+
+	    if (match != null) {
+	      match.routes.unshift(route);
+	      return match;
+	    }
+
+	    // No routes in the subtree matched, so check this route.
+	    params = Path.extractParams(route.path, pathname);
+
+	    if (params)
+	      return createMatch(route, params);
+	  }
+
+	  // No routes matched, so try the default route if there is one.
+	  if (defaultRoute && (params = Path.extractParams(defaultRoute.path, pathname)))
+	    return createMatch(defaultRoute, params);
+
+	  // Last attempt: does the "not found" route match?
+	  if (notFoundRoute && (params = Path.extractParams(notFoundRoute.path, pathname)))
+	    return createMatch(notFoundRoute, params);
+
+	  return match;
+	}
+
+	function createMatch(route, params) {
+	  return { routes: [ route ], params: params };
+	}
+
+	function hasProperties(object, properties) {
+	  for (var propertyName in properties)
+	    if (properties.hasOwnProperty(propertyName) && object[propertyName] !== properties[propertyName])
+	      return false;
+
+	  return true;
+	}
+
+	function hasMatch(routes, route, prevParams, nextParams, prevQuery, nextQuery) {
+	  return routes.some(function (r) {
+	    if (r !== route)
+	      return false;
+
+	    var paramNames = route.paramNames;
+	    var paramName;
+
+	    // Ensure that all params the route cares about did not change.
+	    for (var i = 0, len = paramNames.length; i < len; ++i) {
+	      paramName = paramNames[i];
+
+	      if (nextParams[paramName] !== prevParams[paramName])
+	        return false;
+	    }
+
+	    // Ensure the query hasn't changed.
+	    return hasProperties(prevQuery, nextQuery) && hasProperties(nextQuery, prevQuery);
+	  });
+	}
+
+	/**
+	 * Creates and returns a new router using the given options. A router
+	 * is a ReactComponent class that knows how to react to changes in the
+	 * URL and keep the contents of the page in sync.
+	 *
+	 * Options may be any of the following:
+	 *
+	 * - routes           (required) The route config
+	 * - location         The location to use. Defaults to HashLocation when
+	 *                    the DOM is available, "/" otherwise
+	 * - scrollBehavior   The scroll behavior to use. Defaults to ImitateBrowserBehavior
+	 *                    when the DOM is available, null otherwise
+	 * - onError          A function that is used to handle errors
+	 * - onAbort          A function that is used to handle aborted transitions
+	 *
+	 * When rendering in a server-side environment, the location should simply
+	 * be the URL path that was used in the request, including the query string.
+	 */
+	function createRouter(options) {
+	  options = options || {};
+
+	  if (typeof options === 'function') {
+	    options = { routes: options }; // Router.create(<Route>)
+	  } else if (Array.isArray(options)) {
+	    options = { routes: options }; // Router.create([ <Route>, <Route> ])
+	  }
+
+	  var routes = [];
+	  var namedRoutes = {};
+	  var components = [];
+	  var location = options.location || DEFAULT_LOCATION;
+	  var scrollBehavior = options.scrollBehavior || DEFAULT_SCROLL_BEHAVIOR;
+	  var onError = options.onError || defaultErrorHandler;
+	  var onAbort = options.onAbort || defaultAbortHandler;
+	  var state = {};
+	  var nextState = {};
+	  var pendingTransition = null;
+	  var changeListener = null;
+
+	  function cancelPendingTransition() {
+	    if (pendingTransition) {
+	      pendingTransition.abort(new Cancellation);
+	      pendingTransition = null;
+	    }
+	  }
+
+	  function updateState() {
+	    state = nextState;
+	    nextState = {};
+	  }
+
+	  if (typeof location === 'string') {
+	    warning(
+	      !canUseDOM || ("production") === 'test',
+	      'You should not use a static location in a DOM environment because ' +
+	      'the router will not be kept in sync with the current URL'
+	    );
+	  } else {
+	    invariant(
+	      canUseDOM,
+	      'You cannot use %s without a DOM',
+	      location
+	    );
+	  }
+
+	  // Automatically fall back to full page refreshes in
+	  // browsers that don't support the HTML history API.
+	  if (location === HistoryLocation && !supportsHistory())
+	    location = RefreshLocation;
+
+	  var router = React.createClass({
+
+	    displayName: 'Router',
+
+	    mixins: [ NavigationContext, StateContext, Scrolling ],
+
+	    statics: {
+
+	      defaultRoute: null,
+	      notFoundRoute: null,
+	      isRunning: false,
+
+	      /**
+	       * Adds routes to this router from the given children object (see ReactChildren).
+	       */
+	      addRoutes: function (children) {
+	        routes.push.apply(routes, createRoutesFromChildren(children, this, namedRoutes));
+	      },
+
+	      /**
+	       * Returns an absolute URL path created from the given route
+	       * name, URL parameters, and query.
+	       */
+	      makePath: function (to, params, query) {
+	        var path;
+	        if (Path.isAbsolute(to)) {
+	          path = Path.normalize(to);
+	        } else {
+	          var route = namedRoutes[to];
+
+	          invariant(
+	            route,
+	            'Unable to find <Route name="%s">',
+	            to
+	          );
+
+	          path = route.path;
+	        }
+
+	        return Path.withQuery(Path.injectParams(path, params), query);
+	      },
+
+	      /**
+	       * Returns a string that may safely be used as the href of a link
+	       * to the route with the given name, URL parameters, and query.
+	       */
+	      makeHref: function (to, params, query) {
+	        var path = this.makePath(to, params, query);
+	        return (location === HashLocation) ? '#' + path : path;
+	      },
+
+	      /**
+	       * Transitions to the URL specified in the arguments by pushing
+	       * a new URL onto the history stack.
+	       */
+	      transitionTo: function (to, params, query) {
+	        invariant(
+	          typeof location !== 'string',
+	          'You cannot use transitionTo with a static location'
+	        );
+
+	        var path = this.makePath(to, params, query);
+
+	        if (pendingTransition) {
+	          // Replace so pending location does not stay in history.
+	          location.replace(path);
+	        } else {
+	          location.push(path);
+	        }
+	      },
+
+	      /**
+	       * Transitions to the URL specified in the arguments by replacing
+	       * the current URL in the history stack.
+	       */
+	      replaceWith: function (to, params, query) {
+	        invariant(
+	          typeof location !== 'string',
+	          'You cannot use replaceWith with a static location'
+	        );
+
+	        location.replace(this.makePath(to, params, query));
+	      },
+
+	      /**
+	       * Transitions to the previous URL if one is available. Returns true if the
+	       * router was able to go back, false otherwise.
+	       *
+	       * Note: The router only tracks history entries in your application, not the
+	       * current browser session, so you can safely call this function without guarding
+	       * against sending the user back to some other site. However, when using
+	       * RefreshLocation (which is the fallback for HistoryLocation in browsers that
+	       * don't support HTML5 history) this method will *always* send the client back
+	       * because we cannot reliably track history length.
+	       */
+	      goBack: function () {
+	        invariant(
+	          typeof location !== 'string',
+	          'You cannot use goBack with a static location'
+	        );
+
+	        if (History.length > 1 || location === RefreshLocation) {
+	          location.pop();
+	          return true;
+	        }
+
+	        warning(false, 'goBack() was ignored because there is no router history');
+
+	        return false;
+	      },
+
+	      /**
+	       * Performs a match of the given pathname against this router and returns an object
+	       * with the { routes, params } that match. Returns null if no match can be made.
+	       */
+	      match: function (pathname) {
+	        return findMatch(pathname, routes, this.defaultRoute, this.notFoundRoute) || null;
+	      },
+
+	      /**
+	       * Performs a transition to the given path and calls callback(error, abortReason)
+	       * when the transition is finished. If both arguments are null the router's state
+	       * was updated. Otherwise the transition did not complete.
+	       *
+	       * In a transition, a router first determines which routes are involved by beginning
+	       * with the current route, up the route tree to the first parent route that is shared
+	       * with the destination route, and back down the tree to the destination route. The
+	       * willTransitionFrom hook is invoked on all route handlers we're transitioning away
+	       * from, in reverse nesting order. Likewise, the willTransitionTo hook is invoked on
+	       * all route handlers we're transitioning to.
+	       *
+	       * Both willTransitionFrom and willTransitionTo hooks may either abort or redirect the
+	       * transition. To resolve asynchronously, they may use the callback argument. If no
+	       * hooks wait, the transition is fully synchronous.
+	       */
+	      dispatch: function (path, action, callback) {
+	        cancelPendingTransition();
+
+	        var prevPath = state.path;
+	        if (prevPath === path)
+	          return; // Nothing to do!
+
+	        // Record the scroll position as early as possible to
+	        // get it before browsers try update it automatically.
+	        if (prevPath && action !== LocationActions.REPLACE)
+	          this.recordScrollPosition(prevPath);
+
+	        var pathname = Path.withoutQuery(path);
+	        var match = this.match(pathname);
+
+	        warning(
+	          match != null,
+	          'No route matches path "%s". Make sure you have <Route path="%s"> somewhere in your routes',
+	          path, path
+	        );
+
+	        if (match == null)
+	          match = {};
+
+	        var prevRoutes = state.routes || [];
+	        var prevParams = state.params || {};
+	        var prevQuery = state.query || {};
+
+	        var nextRoutes = match.routes || [];
+	        var nextParams = match.params || {};
+	        var nextQuery = Path.extractQuery(path) || {};
+
+	        var fromRoutes, toRoutes;
+	        if (prevRoutes.length) {
+	          fromRoutes = prevRoutes.filter(function (route) {
+	            return !hasMatch(nextRoutes, route, prevParams, nextParams, prevQuery, nextQuery);
+	          });
+
+	          toRoutes = nextRoutes.filter(function (route) {
+	            return !hasMatch(prevRoutes, route, prevParams, nextParams, prevQuery, nextQuery);
+	          });
+	        } else {
+	          fromRoutes = [];
+	          toRoutes = nextRoutes;
+	        }
+
+	        var transition = new Transition(path, this.replaceWith.bind(this, path));
+	        pendingTransition = transition;
+
+	        var fromComponents = components.slice(prevRoutes.length - fromRoutes.length);
+
+	        transition.from(fromRoutes, fromComponents, function (error) {
+	          if (error || transition.isAborted)
+	            return callback.call(router, error, transition);
+
+	          transition.to(toRoutes, nextParams, nextQuery, function (error) {
+	            if (error || transition.isAborted)
+	              return callback.call(router, error, transition);
+
+	            nextState.path = path;
+	            nextState.action = action;
+	            nextState.pathname = pathname;
+	            nextState.routes = nextRoutes;
+	            nextState.params = nextParams;
+	            nextState.query = nextQuery;
+
+	            callback.call(router, null, transition);
+	          });
+	        });
+	      },
+
+	      /**
+	       * Starts this router and calls callback(router, state) when the route changes.
+	       *
+	       * If the router's location is static (i.e. a URL path in a server environment)
+	       * the callback is called only once. Otherwise, the location should be one of the
+	       * Router.*Location objects (e.g. Router.HashLocation or Router.HistoryLocation).
+	       */
+	      run: function (callback) {
+	        invariant(
+	          !this.isRunning,
+	          'Router is already running'
+	        );
+
+	        var dispatchHandler = function (error, transition) {
+	          pendingTransition = null;
+
+	          if (error) {
+	            onError.call(router, error);
+	          } else if (transition.isAborted) {
+	            onAbort.call(router, transition.abortReason, location);
+	          } else {
+	            callback.call(router, router, nextState);
+	          }
+	        };
+
+	        if (typeof location === 'string') {
+	          router.dispatch(location, null, dispatchHandler);
+	        } else {
+	          // Listen for changes to the location.
+	          changeListener = function (change) {
+	            router.dispatch(change.path, change.type, dispatchHandler);
+	          };
+
+	          if (location.addChangeListener)
+	            location.addChangeListener(changeListener);
+
+	          // Bootstrap using the current path.
+	          router.dispatch(location.getCurrentPath(), null, dispatchHandler);
+
+	          this.isRunning = true;
+	        }
+	      },
+
+	      stop: function () {
+	        cancelPendingTransition();
+
+	        if (location.removeChangeListener && changeListener) {
+	          location.removeChangeListener(changeListener);
+	          changeListener = null;
+	        }
+
+	        this.isRunning = false;
+	      }
+
+	    },
+
+	    propTypes: {
+	      children: PropTypes.falsy
+	    },
+
+	    getLocation: function () {
+	      return location;
+	    },
+
+	    getScrollBehavior: function () {
+	      return scrollBehavior;
+	    },
+
+	    getRouteAtDepth: function (depth) {
+	      var routes = this.state.routes;
+	      return routes && routes[depth];
+	    },
+
+	    getRouteComponents: function () {
+	      return components;
+	    },
+
+	    getInitialState: function () {
+	      updateState();
+	      return state;
+	    },
+
+	    componentWillReceiveProps: function () {
+	      updateState();
+	      this.setState(state);
+	    },
+
+	    componentWillUnmount: function () {
+	      router.stop();
+	    },
+
+	    render: function () {
+	      return this.getRouteAtDepth(0) ? React.createElement(RouteHandler, this.props) : null;
+	    },
+
+	    childContextTypes: {
+	      getRouteAtDepth: React.PropTypes.func.isRequired,
+	      getRouteComponents: React.PropTypes.func.isRequired,
+	      routeHandlers: React.PropTypes.array.isRequired
+	    },
+
+	    getChildContext: function () {
+	      return {
+	        getRouteComponents: this.getRouteComponents,
+	        getRouteAtDepth: this.getRouteAtDepth,
+	        routeHandlers: [ this ]
+	      };
+	    }
+
+	  });
+
+	  if (options.routes)
+	    router.addRoutes(options.routes);
+
+	  return router;
+	}
+
+	module.exports = createRouter;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var createRouter = __webpack_require__(14);
+
+	/**
+	 * A high-level convenience method that creates, configures, and
+	 * runs a router in one shot. The method signature is:
+	 *
+	 *   Router.run(routes[, location ], callback);
+	 *
+	 * Using `window.location.hash` to manage the URL, you could do:
+	 *
+	 *   Router.run(routes, function (Handler) {
+	 *     React.render(<Handler/>, document.body);
+	 *   });
+	 * 
+	 * Using HTML5 history and a custom "cursor" prop:
+	 * 
+	 *   Router.run(routes, Router.HistoryLocation, function (Handler) {
+	 *     React.render(<Handler cursor={cursor}/>, document.body);
+	 *   });
+	 *
+	 * Returns the newly created router.
+	 *
+	 * Note: If you need to specify further options for your router such
+	 * as error/abort handling or custom scroll behavior, use Router.create
+	 * instead.
+	 *
+	 *   var router = Router.create(options);
+	 *   router.run(function (Handler) {
+	 *     // ...
+	 *   });
+	 */
+	function runRouter(routes, location, callback) {
+	  if (typeof location === 'function') {
+	    callback = location;
+	    location = null;
+	  }
+
+	  var router = createRouter({
+	    routes: routes,
+	    location: location
+	  });
+
+	  router.run(callback);
+
+	  return router;
+	}
+
+	module.exports = runRouter;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var invariant = __webpack_require__(35);
+	var canUseDOM = __webpack_require__(36).canUseDOM;
+
+	var History = {
+
+	  /**
+	   * Sends the browser back one entry in the history.
+	   */
+	  back: function () {
+	    invariant(
+	      canUseDOM,
+	      'Cannot use History.back without a DOM'
+	    );
+
+	    // Do this first so that History.length will
+	    // be accurate in location change listeners.
+	    History.length -= 1;
+
+	    window.history.back();
+	  },
+
+	  /**
+	   * The current number of entries in the history.
+	   */
+	  length: 1
+
+	};
+
+	module.exports = History;
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = React;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var invariant = __webpack_require__(35);
+
+	var FakeNode = {
+
+	  render: function () {
+	    invariant(
+	      false,
+	      '%s elements should not be rendered',
+	      this.constructor.displayName
+	    );
+	  }
+
+	};
+
+	module.exports = FakeNode;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var PropTypes = {
+
+	  /**
+	   * Requires that the value of a prop be falsy.
+	   */
+	  falsy: function (props, propName, componentName) {
+	    if (props[propName])
+	      return new Error('<' + componentName + '> may not have a "' + propName + '" prop');
+	  }
+
+	};
+
+	module.exports = PropTypes;
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+
+	module.exports = {
+	  contextTypes: {
+	    getRouteAtDepth: React.PropTypes.func.isRequired,
+	    getRouteComponents: React.PropTypes.func.isRequired,
+	    routeHandlers: React.PropTypes.array.isRequired
+	  },
+
+	  childContextTypes: {
+	    routeHandlers: React.PropTypes.array.isRequired
+	  },
+
+	  getChildContext: function () {
+	    return {
+	      routeHandlers: this.context.routeHandlers.concat([ this ])
+	    };
+	  },
+
+	  getRouteDepth: function () {
+	    return this.context.routeHandlers.length - 1;
+	  },
+
+	  componentDidMount: function () {
+	    this._updateRouteComponent();
+	  },
+
+	  componentDidUpdate: function () {
+	    this._updateRouteComponent();
+	  },
+
+	  _updateRouteComponent: function () {
+	    var depth = this.getRouteDepth();
+	    var components = this.context.getRouteComponents();
+	    components[depth] = this.refs[this.props.ref || '__routeHandler__'];
+	  },
+
+	  getRouteHandler: function (props) {
+	    var route = this.context.getRouteAtDepth(this.getRouteDepth());
+	    return route ? React.createElement(route.handler, props || this.props) : null;
+	  }
+	};
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var invariant = __webpack_require__(35);
+	var merge = __webpack_require__(38).merge;
+	var qs = __webpack_require__(37);
+
+	var paramCompileMatcher = /:([a-zA-Z_$][a-zA-Z0-9_$]*)|[*.()\[\]\\+|{}^$]/g;
+	var paramInjectMatcher = /:([a-zA-Z_$][a-zA-Z0-9_$?]*[?]?)|[*]/g;
+	var paramInjectTrailingSlashMatcher = /\/\/\?|\/\?/g;
+	var queryMatcher = /\?(.+)/;
+
+	var _compiledPatterns = {};
+
+	function compilePattern(pattern) {
+	  if (!(pattern in _compiledPatterns)) {
+	    var paramNames = [];
+	    var source = pattern.replace(paramCompileMatcher, function (match, paramName) {
+	      if (paramName) {
+	        paramNames.push(paramName);
+	        return '([^/?#]+)';
+	      } else if (match === '*') {
+	        paramNames.push('splat');
+	        return '(.*?)';
+	      } else {
+	        return '\\' + match;
+	      }
+	    });
+
+	    _compiledPatterns[pattern] = {
+	      matcher: new RegExp('^' + source + '$', 'i'),
+	      paramNames: paramNames
+	    };
+	  }
+
+	  return _compiledPatterns[pattern];
+	}
+
+	var Path = {
+
+	  /**
+	   * Safely decodes special characters in the given URL path.
+	   */
+	  decode: function (path) {
+	    return decodeURI(path.replace(/\+/g, ' '));
+	  },
+
+	  /**
+	   * Safely encodes special characters in the given URL path.
+	   */
+	  encode: function (path) {
+	    return encodeURI(path).replace(/%20/g, '+');
+	  },
+
+	  /**
+	   * Returns an array of the names of all parameters in the given pattern.
+	   */
+	  extractParamNames: function (pattern) {
+	    return compilePattern(pattern).paramNames;
+	  },
+
+	  /**
+	   * Extracts the portions of the given URL path that match the given pattern
+	   * and returns an object of param name => value pairs. Returns null if the
+	   * pattern does not match the given path.
+	   */
+	  extractParams: function (pattern, path) {
+	    var object = compilePattern(pattern);
+	    var match = path.match(object.matcher);
+
+	    if (!match)
+	      return null;
+
+	    var params = {};
+
+	    object.paramNames.forEach(function (paramName, index) {
+	      params[paramName] = match[index + 1];
+	    });
+
+	    return params;
+	  },
+
+	  /**
+	   * Returns a version of the given route path with params interpolated. Throws
+	   * if there is a dynamic segment of the route path for which there is no param.
+	   */
+	  injectParams: function (pattern, params) {
+	    params = params || {};
+
+	    var splatIndex = 0;
+
+	    return pattern.replace(paramInjectMatcher, function (match, paramName) {
+	      paramName = paramName || 'splat';
+
+	      // If param is optional don't check for existence
+	      if (paramName.slice(-1) !== '?') {
+	        invariant(
+	          params[paramName] != null,
+	          'Missing "' + paramName + '" parameter for path "' + pattern + '"'
+	        );
+	      } else {
+	        paramName = paramName.slice(0, -1);
+
+	        if (params[paramName] == null)
+	          return '';
+	      }
+
+	      var segment;
+	      if (paramName === 'splat' && Array.isArray(params[paramName])) {
+	        segment = params[paramName][splatIndex++];
+
+	        invariant(
+	          segment != null,
+	          'Missing splat # ' + splatIndex + ' for path "' + pattern + '"'
+	        );
+	      } else {
+	        segment = params[paramName];
+	      }
+
+	      return segment;
+	    }).replace(paramInjectTrailingSlashMatcher, '/');
+	  },
+
+	  /**
+	   * Returns an object that is the result of parsing any query string contained
+	   * in the given path, null if the path contains no query string.
+	   */
+	  extractQuery: function (path) {
+	    var match = path.match(queryMatcher);
+	    return match && qs.parse(match[1]);
+	  },
+
+	  /**
+	   * Returns a version of the given path without the query string.
+	   */
+	  withoutQuery: function (path) {
+	    return path.replace(queryMatcher, '');
+	  },
+
+	  /**
+	   * Returns a version of the given path with the parameters in the given
+	   * query merged into the query string.
+	   */
+	  withQuery: function (path, query) {
+	    var existingQuery = Path.extractQuery(path);
+
+	    if (existingQuery)
+	      query = query ? merge(existingQuery, query) : existingQuery;
+
+	    var queryString = query && qs.stringify(query);
+
+	    if (queryString)
+	      return Path.withoutQuery(path) + '?' + queryString;
+
+	    return path;
+	  },
+
+	  /**
+	   * Returns true if the given path is absolute.
+	   */
+	  isAbsolute: function (path) {
+	    return path.charAt(0) === '/';
+	  },
+
+	  /**
+	   * Returns a normalized version of the given path.
+	   */
+	  normalize: function (path, parentRoute) {
+	    return path.replace(/^\/*/, '/');
+	  },
+
+	  /**
+	   * Joins two URL paths together.
+	   */
+	  join: function (a, b) {
+	    return a.replace(/\/*$/, '/') + b;
+	  }
+
+	};
+
+	module.exports = Path;
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+
+	/**
+	 * Provides the router with context for Router.Navigation.
+	 */
+	var NavigationContext = {
+
+	  childContextTypes: {
+	    makePath: React.PropTypes.func.isRequired,
+	    makeHref: React.PropTypes.func.isRequired,
+	    transitionTo: React.PropTypes.func.isRequired,
+	    replaceWith: React.PropTypes.func.isRequired,
+	    goBack: React.PropTypes.func.isRequired
+	  },
+
+	  getChildContext: function () {
+	    return {
+	      makePath: this.constructor.makePath,
+	      makeHref: this.constructor.makeHref,
+	      transitionTo: this.constructor.transitionTo,
+	      replaceWith: this.constructor.replaceWith,
+	      goBack: this.constructor.goBack
+	    };
+	  }
+
+	};
+
+	module.exports = NavigationContext;
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(17);
+	var assign = __webpack_require__(33);
+	var Path = __webpack_require__(21);
+
+	function routeIsActive(activeRoutes, routeName) {
+	  return activeRoutes.some(function (route) {
+	    return route.name === routeName;
+	  });
+	}
+
+	function paramsAreActive(activeParams, params) {
+	  for (var property in params)
+	    if (String(activeParams[property]) !== String(params[property]))
+	      return false;
+
+	  return true;
+	}
+
+	function queryIsActive(activeQuery, query) {
+	  for (var property in query)
+	    if (String(activeQuery[property]) !== String(query[property]))
+	      return false;
+
+	  return true;
+	}
+
+	/**
+	 * Provides the router with context for Router.State.
+	 */
+	var StateContext = {
+
+	  /**
+	   * Returns the current URL path + query string.
+	   */
+	  getCurrentPath: function () {
+	    return this.state.path;
+	  },
+
+	  /**
+	   * Returns a read-only array of the currently active routes.
+	   */
+	  getCurrentRoutes: function () {
+	    return this.state.routes.slice(0);
+	  },
+
+	  /**
+	   * Returns the current URL path without the query string.
+	   */
+	  getCurrentPathname: function () {
+	    return this.state.pathname;
+	  },
+
+	  /**
+	   * Returns a read-only object of the currently active URL parameters.
+	   */
+	  getCurrentParams: function () {
+	    return assign({}, this.state.params);
+	  },
+
+	  /**
+	   * Returns a read-only object of the currently active query parameters.
+	   */
+	  getCurrentQuery: function () {
+	    return assign({}, this.state.query);
+	  },
+
+	  /**
+	   * Returns true if the given route, params, and query are active.
+	   */
+	  isActive: function (to, params, query) {
+	    if (Path.isAbsolute(to))
+	      return to === this.state.path;
+
+	    return routeIsActive(this.state.routes, to) &&
+	      paramsAreActive(this.state.params, params) &&
+	      (query == null || queryIsActive(this.state.query, query));
+	  },
+
+	  childContextTypes: {
+	    getCurrentPath: React.PropTypes.func.isRequired,
+	    getCurrentRoutes: React.PropTypes.func.isRequired,
+	    getCurrentPathname: React.PropTypes.func.isRequired,
+	    getCurrentParams: React.PropTypes.func.isRequired,
+	    getCurrentQuery: React.PropTypes.func.isRequired,
+	    isActive: React.PropTypes.func.isRequired
+	  },
+
+	  getChildContext: function () {
+	    return {
+	      getCurrentPath: this.getCurrentPath,
+	      getCurrentRoutes: this.getCurrentRoutes,
+	      getCurrentPathname: this.getCurrentPathname,
+	      getCurrentParams: this.getCurrentParams,
+	      getCurrentQuery: this.getCurrentQuery,
+	      isActive: this.isActive
+	    };
+	  }
+
+	};
+
+	module.exports = StateContext;
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var invariant = __webpack_require__(35);
+	var canUseDOM = __webpack_require__(36).canUseDOM;
+	var getWindowScrollPosition = __webpack_require__(31);
+
+	function shouldUpdateScroll(state, prevState) {
+	  if (!prevState)
+	    return true;
+
+	  // Don't update scroll position when only the query has changed.
+	  if (state.pathname === prevState.pathname)
+	    return false;
+
+	  var routes = state.routes;
+	  var prevRoutes = prevState.routes;
+
+	  var sharedAncestorRoutes = routes.filter(function (route) {
+	    return prevRoutes.indexOf(route) !== -1;
+	  });
+
+	  return !sharedAncestorRoutes.some(function (route) {
+	    return route.ignoreScrollBehavior;
+	  });
+	}
+
+	/**
+	 * Provides the router with the ability to manage window scroll position
+	 * according to its scroll behavior.
+	 */
+	var Scrolling = {
+
+	  statics: {
+	    /**
+	     * Records curent scroll position as the last known position for the given URL path.
+	     */
+	    recordScrollPosition: function (path) {
+	      if (!this.scrollHistory)
+	        this.scrollHistory = {};
+
+	      this.scrollHistory[path] = getWindowScrollPosition();
+	    },
+
+	    /**
+	     * Returns the last known scroll position for the given URL path.
+	     */
+	    getScrollPosition: function (path) {
+	      if (!this.scrollHistory)
+	        this.scrollHistory = {};
+
+	      return this.scrollHistory[path] || null;
+	    }
+	  },
+
+	  componentWillMount: function () {
+	    invariant(
+	      this.getScrollBehavior() == null || canUseDOM,
+	      'Cannot use scroll behavior without a DOM'
+	    );
+	  },
+
+	  componentDidMount: function () {
+	    this._updateScroll();
+	  },
+
+	  componentDidUpdate: function (prevProps, prevState) {
+	    this._updateScroll(prevState);
+	  },
+
+	  _updateScroll: function (prevState) {
+	    if (!shouldUpdateScroll(this.state, prevState))
+	      return;
+
+	    var scrollBehavior = this.getScrollBehavior();
+
+	    if (scrollBehavior)
+	      scrollBehavior.updateScrollPosition(
+	        this.constructor.getScrollPosition(this.state.path),
+	        this.state.action
+	      );
+	  }
+
+	};
+
+	module.exports = Scrolling;
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* jshint -W084 */
+	var React = __webpack_require__(17);
+	var warning = __webpack_require__(34);
+	var invariant = __webpack_require__(35);
+	var DefaultRoute = __webpack_require__(1);
+	var NotFoundRoute = __webpack_require__(3);
+	var Redirect = __webpack_require__(4);
+	var Route = __webpack_require__(5);
+	var Path = __webpack_require__(21);
+
+	var CONFIG_ELEMENT_TYPES = [
+	  DefaultRoute.type,
+	  NotFoundRoute.type,
+	  Redirect.type,
+	  Route.type
+	];
+
+	function createRedirectHandler(to, _params, _query) {
+	  return React.createClass({
+	    statics: {
+	      willTransitionTo: function (transition, params, query) {
+	        transition.redirect(to, _params || params, _query || query);
+	      }
+	    },
+
+	    render: function () {
+	      return null;
+	    }
+	  });
+	}
+
+	function checkPropTypes(componentName, propTypes, props) {
+	  for (var propName in propTypes) {
+	    if (propTypes.hasOwnProperty(propName)) {
+	      var error = propTypes[propName](props, propName, componentName);
+
+	      if (error instanceof Error)
+	        warning(false, error.message);
+	    }
+	  }
+	}
+
+	function createRoute(element, parentRoute, namedRoutes) {
+	  var type = element.type;
+	  var props = element.props;
+	  var componentName = (type && type.displayName) || 'UnknownComponent';
+
+	  invariant(
+	    CONFIG_ELEMENT_TYPES.indexOf(type) !== -1,
+	    'Unrecognized route configuration element "<%s>"',
+	    componentName
+	  );
+
+	  if (type.propTypes)
+	    checkPropTypes(componentName, type.propTypes, props);
+
+	  var route = { name: props.name };
+
+	  if (props.ignoreScrollBehavior) {
+	    route.ignoreScrollBehavior = true;
+	  }
+
+	  if (type === Redirect.type) {
+	    route.handler = createRedirectHandler(props.to, props.params, props.query);
+	    props.path = props.path || props.from || '*';
+	  } else {
+	    route.handler = props.handler;
+	  }
+
+	  var parentPath = (parentRoute && parentRoute.path) || '/';
+
+	  if ((props.path || props.name) && type !== DefaultRoute.type && type !== NotFoundRoute.type) {
+	    var path = props.path || props.name;
+
+	    // Relative paths extend their parent.
+	    if (!Path.isAbsolute(path))
+	      path = Path.join(parentPath, path);
+
+	    route.path = Path.normalize(path);
+	  } else {
+	    route.path = parentPath;
+
+	    if (type === NotFoundRoute.type)
+	      route.path += '*';
+	  }
+
+	  route.paramNames = Path.extractParamNames(route.path);
+
+	  // Make sure the route's path has all params its parent needs.
+	  if (parentRoute && Array.isArray(parentRoute.paramNames)) {
+	    parentRoute.paramNames.forEach(function (paramName) {
+	      invariant(
+	        route.paramNames.indexOf(paramName) !== -1,
+	        'The nested route path "%s" is missing the "%s" parameter of its parent path "%s"',
+	        route.path, paramName, parentRoute.path
+	      );
+	    });
+	  }
+
+	  // Make sure the route can be looked up by <Link>s.
+	  if (props.name) {
+	    invariant(
+	      namedRoutes[props.name] == null,
+	      'You cannot use the name "%s" for more than one route',
+	      props.name
+	    );
+
+	    namedRoutes[props.name] = route;
+	  }
+
+	  // Handle <NotFoundRoute>.
+	  if (type === NotFoundRoute.type) {
+	    invariant(
+	      parentRoute,
+	      '<NotFoundRoute> must have a parent <Route>'
+	    );
+
+	    invariant(
+	      parentRoute.notFoundRoute == null,
+	      'You may not have more than one <NotFoundRoute> per <Route>'
+	    );
+
+	    parentRoute.notFoundRoute = route;
+
+	    return null;
+	  }
+
+	  // Handle <DefaultRoute>.
+	  if (type === DefaultRoute.type) {
+	    invariant(
+	      parentRoute,
+	      '<DefaultRoute> must have a parent <Route>'
+	    );
+
+	    invariant(
+	      parentRoute.defaultRoute == null,
+	      'You may not have more than one <DefaultRoute> per <Route>'
+	    );
+
+	    parentRoute.defaultRoute = route;
+
+	    return null;
+	  }
+
+	  route.childRoutes = createRoutesFromChildren(props.children, route, namedRoutes);
+
+	  return route;
+	}
+
+	/**
+	 * Creates and returns an array of route objects from the given ReactChildren.
+	 */
+	function createRoutesFromChildren(children, parentRoute, namedRoutes) {
+	  var routes = [];
+
+	  React.Children.forEach(children, function (child) {
+	    // Exclude <DefaultRoute>s and <NotFoundRoute>s.
+	    if (child = createRoute(child, parentRoute, namedRoutes))
+	      routes.push(child);
+	  });
+
+	  return routes;
+	}
+
+	module.exports = createRoutesFromChildren;
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	function supportsHistory() {
+	  /*! taken from modernizr
+	   * https://github.com/Modernizr/Modernizr/blob/master/LICENSE
+	   * https://github.com/Modernizr/Modernizr/blob/master/feature-detects/history.js
+	   * changed to avoid false negatives for Windows Phones: https://github.com/rackt/react-router/issues/586
+	   */
+	  var ua = navigator.userAgent;
+	  if ((ua.indexOf('Android 2.') !== -1 ||
+	      (ua.indexOf('Android 4.0') !== -1)) &&
+	      ua.indexOf('Mobile Safari') !== -1 &&
+	      ua.indexOf('Chrome') === -1 &&
+	      ua.indexOf('Windows Phone') === -1) {
+	    return false;
+	  }
+	  return (window.history && 'pushState' in window.history);
+	}
+
+	module.exports = supportsHistory;
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var assign = __webpack_require__(33);
+	var Redirect = __webpack_require__(28);
+
+	/**
+	 * Calls the willTransitionFrom hook of all handlers in the given matches
+	 * serially in reverse with the transition object and the current instance of
+	 * the route's handler, so that the deepest nested handlers are called first.
+	 * Calls callback(error) when finished.
+	 */
+	function runTransitionFromHooks(transition, routes, components, callback) {
+	  var runHooks = routes.reduce(function (callback, route, index) {
+	    return function (error) {
+	      if (error || transition.isAborted) {
+	        callback(error);
+	      } else if (route.handler.willTransitionFrom) {
+	        try {
+	          route.handler.willTransitionFrom(transition, components[index], callback);
+
+	          // If there is no callback in the argument list, call it automatically.
+	          if (route.handler.willTransitionFrom.length < 3)
+	            callback();
+	        } catch (e) {
+	          callback(e);
+	        }
+	      } else {
+	        callback();
+	      }
+	    };
+	  }, callback);
+
+	  runHooks();
+	}
+
+	/**
+	 * Calls the willTransitionTo hook of all handlers in the given matches
+	 * serially with the transition object and any params that apply to that
+	 * handler. Calls callback(error) when finished.
+	 */
+	function runTransitionToHooks(transition, routes, params, query, callback) {
+	  var runHooks = routes.reduceRight(function (callback, route) {
+	    return function (error) {
+	      if (error || transition.isAborted) {
+	        callback(error);
+	      } else if (route.handler.willTransitionTo) {
+	        try {
+	          route.handler.willTransitionTo(transition, params, query, callback);
+
+	          // If there is no callback in the argument list, call it automatically.
+	          if (route.handler.willTransitionTo.length < 4)
+	            callback();
+	        } catch (e) {
+	          callback(e);
+	        }
+	      } else {
+	        callback();
+	      }
+	    };
+	  }, callback);
+
+	  runHooks();
+	}
+
+	/**
+	 * Encapsulates a transition to a given path.
+	 *
+	 * The willTransitionTo and willTransitionFrom handlers receive
+	 * an instance of this class as their first argument.
+	 */
+	function Transition(path, retry) {
+	  this.path = path;
+	  this.abortReason = null;
+	  this.isAborted = false;
+	  this.retry = retry.bind(this);
+	}
+
+	assign(Transition.prototype, {
+
+	  abort: function (reason) {
+	    if (this.isAborted) {
+	      // First abort wins.
+	      return;
+	    }
+
+	    this.abortReason = reason;
+	    this.isAborted = true;
+	  },
+
+	  redirect: function (to, params, query) {
+	    this.abort(new Redirect(to, params, query));
+	  },
+
+	  from: function (routes, components, callback) {
+	    return runTransitionFromHooks(this, routes, components, callback);
+	  },
+
+	  to: function (routes, params, query, callback) {
+	    return runTransitionToHooks(this, routes, params, query, callback);
+	  }
+
+	});
+
+	module.exports = Transition;
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Encapsulates a redirect to the given route.
+	 */
+	function Redirect(to, params, query) {
+	  this.to = to;
+	  this.params = params;
+	  this.query = query;
+	}
+
+	module.exports = Redirect;
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Represents a cancellation caused by navigating away
+	 * before the previous transition has fully resolved.
+	 */
+	function Cancellation() { }
+
+	module.exports = Cancellation;
+
+
+/***/ },
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Actions that modify the URL.
+	 */
+	var LocationActions = {
+
+	  /**
+	   * Indicates a new location is being pushed to the history stack.
+	   */
+	  PUSH: 'push',
+
+	  /**
+	   * Indicates the current location should be replaced.
+	   */
+	  REPLACE: 'replace',
+
+	  /**
+	   * Indicates the most recent entry should be removed from the history stack.
+	   */
+	  POP: 'pop'
+
+	};
+
+	module.exports = LocationActions;
+
+
+/***/ },
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var invariant = __webpack_require__(35);
+	var canUseDOM = __webpack_require__(36).canUseDOM;
+
+	/**
+	 * Returns the current scroll position of the window as { x, y }.
+	 */
+	function getWindowScrollPosition() {
+	  invariant(
+	    canUseDOM,
+	    'Cannot get current scroll position without a DOM'
+	  );
+
+	  return {
+	    x: window.pageXOffset || document.documentElement.scrollLeft,
+	    y: window.pageYOffset || document.documentElement.scrollTop
+	  };
+	}
+
+	module.exports = getWindowScrollPosition;
+
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule cx
+	 */
+
+	/**
+	 * This function is used to mark string literals representing CSS class names
+	 * so that they can be transformed statically. This allows for modularization
+	 * and minification of CSS class names.
+	 *
+	 * In static_upstream, this function is actually implemented, but it should
+	 * eventually be replaced with something more descriptive, and the transform
+	 * that is used in the main stack should be ported for use elsewhere.
+	 *
+	 * @param string|object className to modularize, or an object of key/values.
+	 *                      In the object case, the values are conditions that
+	 *                      determine if the className keys should be included.
+	 * @param [string ...]  Variable list of classNames in the string case.
+	 * @return string       Renderable space-separated CSS className.
+	 */
+	function cx(classNames) {
+	  if (typeof classNames == 'object') {
+	    return Object.keys(classNames).filter(function(className) {
+	      return classNames[className];
+	    }).join(' ');
+	  } else {
+	    return Array.prototype.join.call(arguments, ' ');
+	  }
+	}
+
+	module.exports = cx;
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule Object.assign
+	 */
+
+	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.assign
+
+	function assign(target, sources) {
+	  if (target == null) {
+	    throw new TypeError('Object.assign target cannot be null or undefined');
+	  }
+
+	  var to = Object(target);
+	  var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+	  for (var nextIndex = 1; nextIndex < arguments.length; nextIndex++) {
+	    var nextSource = arguments[nextIndex];
+	    if (nextSource == null) {
+	      continue;
+	    }
+
+	    var from = Object(nextSource);
+
+	    // We don't currently support accessors nor proxies. Therefore this
+	    // copy cannot throw. If we ever supported this then we must handle
+	    // exceptions and side-effects. We don't support symbols so they won't
+	    // be transferred.
+
+	    for (var key in from) {
+	      if (hasOwnProperty.call(from, key)) {
+	        to[key] = from[key];
+	      }
+	    }
+	  }
+
+	  return to;
+	};
+
+	module.exports = assign;
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule warning
+	 */
+
+	"use strict";
+
+	var emptyFunction = __webpack_require__(39);
+
+	/**
+	 * Similar to invariant but only logs a warning if the condition is not met.
+	 * This can be used to log issues in development environments in critical
+	 * paths. Removing the logging code for production environments will keep the
+	 * same logic and follow the same code paths.
+	 */
+
+	var warning = emptyFunction;
+
+	if (false) {
+	  warning = function(condition, format ) {for (var args=[],$__0=2,$__1=arguments.length;$__0<$__1;$__0++) args.push(arguments[$__0]);
+	    if (format === undefined) {
+	      throw new Error(
+	        '`warning(condition, format, ...args)` requires a warning ' +
+	        'message argument'
+	      );
+	    }
+
+	    if (!condition) {
+	      var argIndex = 0;
+	      console.warn('Warning: ' + format.replace(/%s/g, function()  {return args[argIndex++];}));
+	    }
+	  };
+	}
+
+	module.exports = warning;
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule invariant
+	 */
+
+	"use strict";
+
+	/**
+	 * Use invariant() to assert state which your program assumes to be true.
+	 *
+	 * Provide sprintf-style format (only %s is supported) and arguments
+	 * to provide information about what broke and what you were
+	 * expecting.
+	 *
+	 * The invariant message will be stripped in production, but the invariant
+	 * will remain to ensure logic does not differ in production.
+	 */
+
+	var invariant = function(condition, format, a, b, c, d, e, f) {
+	  if (false) {
+	    if (format === undefined) {
+	      throw new Error('invariant requires an error message argument');
+	    }
+	  }
+
+	  if (!condition) {
+	    var error;
+	    if (format === undefined) {
+	      error = new Error(
+	        'Minified exception occurred; use the non-minified dev environment ' +
+	        'for the full error message and additional helpful warnings.'
+	      );
+	    } else {
+	      var args = [a, b, c, d, e, f];
+	      var argIndex = 0;
+	      error = new Error(
+	        'Invariant Violation: ' +
+	        format.replace(/%s/g, function() { return args[argIndex++]; })
+	      );
+	    }
+
+	    error.framesToPop = 1; // we don't care about invariant's own frame
+	    throw error;
+	  }
+	};
+
+	module.exports = invariant;
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ExecutionEnvironment
+	 */
+
+	/*jslint evil: true */
+
+	"use strict";
+
+	var canUseDOM = !!(
+	  typeof window !== 'undefined' &&
+	  window.document &&
+	  window.document.createElement
+	);
+
+	/**
+	 * Simple, lightweight module assisting with the detection and context of
+	 * Worker. Helps avoid circular dependencies and allows code to reason about
+	 * whether or not they are in a Worker, even if they never include the main
+	 * `ReactWorker` dependency.
+	 */
+	var ExecutionEnvironment = {
+
+	  canUseDOM: canUseDOM,
+
+	  canUseWorkers: typeof Worker !== 'undefined',
+
+	  canUseEventListeners:
+	    canUseDOM && !!(window.addEventListener || window.attachEvent),
+
+	  canUseViewport: canUseDOM && !!window.screen,
+
+	  isInWorker: !canUseDOM // For now, this is true - might change in the future.
+
+	};
+
+	module.exports = ExecutionEnvironment;
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(40);
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Load modules
+
+
+	// Declare internals
+
+	var internals = {};
+
+
+	exports.arrayToObject = function (source) {
+
+	    var obj = {};
+	    for (var i = 0, il = source.length; i < il; ++i) {
+	        if (typeof source[i] !== 'undefined') {
+
+	            obj[i] = source[i];
+	        }
+	    }
+
+	    return obj;
+	};
+
+
+	exports.merge = function (target, source) {
+
+	    if (!source) {
+	        return target;
+	    }
+
+	    if (typeof source !== 'object') {
+	        if (Array.isArray(target)) {
+	            target.push(source);
+	        }
+	        else {
+	            target[source] = true;
+	        }
+
+	        return target;
+	    }
+
+	    if (typeof target !== 'object') {
+	        target = [target].concat(source);
+	        return target;
+	    }
+
+	    if (Array.isArray(target) &&
+	        !Array.isArray(source)) {
+
+	        target = exports.arrayToObject(target);
+	    }
+
+	    var keys = Object.keys(source);
+	    for (var k = 0, kl = keys.length; k < kl; ++k) {
+	        var key = keys[k];
+	        var value = source[key];
+
+	        if (!target[key]) {
+	            target[key] = value;
+	        }
+	        else {
+	            target[key] = exports.merge(target[key], value);
+	        }
+	    }
+
+	    return target;
+	};
+
+
+	exports.decode = function (str) {
+
+	    try {
+	        return decodeURIComponent(str.replace(/\+/g, ' '));
+	    } catch (e) {
+	        return str;
+	    }
+	};
+
+
+	exports.compact = function (obj, refs) {
+
+	    if (typeof obj !== 'object' ||
+	        obj === null) {
+
+	        return obj;
+	    }
+
+	    refs = refs || [];
+	    var lookup = refs.indexOf(obj);
+	    if (lookup !== -1) {
+	        return refs[lookup];
+	    }
+
+	    refs.push(obj);
+
+	    if (Array.isArray(obj)) {
+	        var compacted = [];
+
+	        for (var i = 0, il = obj.length; i < il; ++i) {
+	            if (typeof obj[i] !== 'undefined') {
+	                compacted.push(obj[i]);
+	            }
+	        }
+
+	        return compacted;
+	    }
+
+	    var keys = Object.keys(obj);
+	    for (i = 0, il = keys.length; i < il; ++i) {
+	        var key = keys[i];
+	        obj[key] = exports.compact(obj[key], refs);
+	    }
+
+	    return obj;
+	};
+
+
+	exports.isRegExp = function (obj) {
+	    return Object.prototype.toString.call(obj) === '[object RegExp]';
+	};
+
+
+	exports.isBuffer = function (obj) {
+
+	    if (obj === null ||
+	        typeof obj === 'undefined') {
+
+	        return false;
+	    }
+
+	    return !!(obj.constructor &&
+	        obj.constructor.isBuffer &&
+	        obj.constructor.isBuffer(obj));
+	};
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule emptyFunction
+	 */
+
+	function makeEmptyFunction(arg) {
+	  return function() {
+	    return arg;
+	  };
+	}
+
+	/**
+	 * This function accepts and discards inputs; it has no side effects. This is
+	 * primarily useful idiomatically for overridable function endpoints which
+	 * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
+	 */
+	function emptyFunction() {}
+
+	emptyFunction.thatReturns = makeEmptyFunction;
+	emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
+	emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
+	emptyFunction.thatReturnsNull = makeEmptyFunction(null);
+	emptyFunction.thatReturnsThis = function() { return this; };
+	emptyFunction.thatReturnsArgument = function(arg) { return arg; };
+
+	module.exports = emptyFunction;
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Load modules
+
+	var Stringify = __webpack_require__(41);
+	var Parse = __webpack_require__(42);
+
+
+	// Declare internals
+
+	var internals = {};
+
+
+	module.exports = {
+	    stringify: Stringify,
+	    parse: Parse
+	};
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Load modules
+
+	var Utils = __webpack_require__(38);
+
+
+	// Declare internals
+
+	var internals = {
+	    delimiter: '&',
+	    indices: true
+	};
+
+
+	internals.stringify = function (obj, prefix, options) {
+
+	    if (Utils.isBuffer(obj)) {
+	        obj = obj.toString();
+	    }
+	    else if (obj instanceof Date) {
+	        obj = obj.toISOString();
+	    }
+	    else if (obj === null) {
+	        obj = '';
+	    }
+
+	    if (typeof obj === 'string' ||
+	        typeof obj === 'number' ||
+	        typeof obj === 'boolean') {
+
+	        return [encodeURIComponent(prefix) + '=' + encodeURIComponent(obj)];
+	    }
+
+	    var values = [];
+
+	    if (typeof obj === 'undefined') {
+	        return values;
+	    }
+
+	    var objKeys = Object.keys(obj);
+	    for (var i = 0, il = objKeys.length; i < il; ++i) {
+	        var key = objKeys[i];
+	        if (!options.indices &&
+	            Array.isArray(obj)) {
+
+	            values = values.concat(internals.stringify(obj[key], prefix, options));
+	        }
+	        else {
+	            values = values.concat(internals.stringify(obj[key], prefix + '[' + key + ']', options));
+	        }
+	    }
+
+	    return values;
+	};
+
+
+	module.exports = function (obj, options) {
+
+	    options = options || {};
+	    var delimiter = typeof options.delimiter === 'undefined' ? internals.delimiter : options.delimiter;
+	    options.indices = typeof options.indices === 'boolean' ? options.indices : internals.indices;
+
+	    var keys = [];
+
+	    if (typeof obj !== 'object' ||
+	        obj === null) {
+
+	        return '';
+	    }
+
+	    var objKeys = Object.keys(obj);
+	    for (var i = 0, il = objKeys.length; i < il; ++i) {
+	        var key = objKeys[i];
+	        keys = keys.concat(internals.stringify(obj[key], key, options));
+	    }
+
+	    return keys.join(delimiter);
+	};
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Load modules
+
+	var Utils = __webpack_require__(38);
+
+
+	// Declare internals
+
+	var internals = {
+	    delimiter: '&',
+	    depth: 5,
+	    arrayLimit: 20,
+	    parameterLimit: 1000
+	};
+
+
+	internals.parseValues = function (str, options) {
+
+	    var obj = {};
+	    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
+
+	    for (var i = 0, il = parts.length; i < il; ++i) {
+	        var part = parts[i];
+	        var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
+
+	        if (pos === -1) {
+	            obj[Utils.decode(part)] = '';
+	        }
+	        else {
+	            var key = Utils.decode(part.slice(0, pos));
+	            var val = Utils.decode(part.slice(pos + 1));
+
+	            if (!obj.hasOwnProperty(key)) {
+	                obj[key] = val;
+	            }
+	            else {
+	                obj[key] = [].concat(obj[key]).concat(val);
+	            }
+	        }
+	    }
+
+	    return obj;
+	};
+
+
+	internals.parseObject = function (chain, val, options) {
+
+	    if (!chain.length) {
+	        return val;
+	    }
+
+	    var root = chain.shift();
+
+	    var obj = {};
+	    if (root === '[]') {
+	        obj = [];
+	        obj = obj.concat(internals.parseObject(chain, val, options));
+	    }
+	    else {
+	        var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
+	        var index = parseInt(cleanRoot, 10);
+	        var indexString = '' + index;
+	        if (!isNaN(index) &&
+	            root !== cleanRoot &&
+	            indexString === cleanRoot &&
+	            index >= 0 &&
+	            index <= options.arrayLimit) {
+
+	            obj = [];
+	            obj[index] = internals.parseObject(chain, val, options);
+	        }
+	        else {
+	            obj[cleanRoot] = internals.parseObject(chain, val, options);
+	        }
+	    }
+
+	    return obj;
+	};
+
+
+	internals.parseKeys = function (key, val, options) {
+
+	    if (!key) {
+	        return;
+	    }
+
+	    // The regex chunks
+
+	    var parent = /^([^\[\]]*)/;
+	    var child = /(\[[^\[\]]*\])/g;
+
+	    // Get the parent
+
+	    var segment = parent.exec(key);
+
+	    // Don't allow them to overwrite object prototype properties
+
+	    if (Object.prototype.hasOwnProperty(segment[1])) {
+	        return;
+	    }
+
+	    // Stash the parent if it exists
+
+	    var keys = [];
+	    if (segment[1]) {
+	        keys.push(segment[1]);
+	    }
+
+	    // Loop through children appending to the array until we hit depth
+
+	    var i = 0;
+	    while ((segment = child.exec(key)) !== null && i < options.depth) {
+
+	        ++i;
+	        if (!Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
+	            keys.push(segment[1]);
+	        }
+	    }
+
+	    // If there's a remainder, just add whatever is left
+
+	    if (segment) {
+	        keys.push('[' + key.slice(segment.index) + ']');
+	    }
+
+	    return internals.parseObject(keys, val, options);
+	};
+
+
+	module.exports = function (str, options) {
+
+	    if (str === '' ||
+	        str === null ||
+	        typeof str === 'undefined') {
+
+	        return {};
+	    }
+
+	    options = options || {};
+	    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
+	    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
+	    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
+	    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
+
+	    var tempObj = typeof str === 'string' ? internals.parseValues(str, options) : str;
+	    var obj = {};
+
+	    // Iterate over the keys and setup the new object
+
+	    var keys = Object.keys(tempObj);
+	    for (var i = 0, il = keys.length; i < il; ++i) {
+	        var key = keys[i];
+	        var newObj = internals.parseKeys(key, tempObj[key], options);
+	        obj = Utils.merge(obj, newObj);
+	    }
+
+	    return Utils.compact(obj);
+	};
+
+
+/***/ }
+/******/ ])
 ;
-/*!
- * https://github.com/es-shims/es5-shim
- * @license es5-shim Copyright 2009-2014 by contributors, MIT License
- * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
- */
-
-// vim: ts=4 sts=4 sw=4 expandtab
-
-//Add semicolon to prevent IIFE from being passed as argument to concated code.
-;
-
-// UMD (Universal Module Definition)
-// see https://github.com/umdjs/umd/blob/master/returnExports.js
-(function (root, factory) {
-    'use strict';
-    /*global define, exports, module */
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(factory);
-    } else if (typeof exports === 'object') {
-        // Node. Does not work with strict CommonJS, but
-        // only CommonJS-like enviroments that support module.exports,
-        // like Node.
-        module.exports = factory();
-    } else {
-        // Browser globals (root is window)
-        root.returnExports = factory();
-  }
-}(this, function () {
-
-var call = Function.prototype.call;
-var prototypeOfObject = Object.prototype;
-var owns = call.bind(prototypeOfObject.hasOwnProperty);
-
-// If JS engine supports accessors creating shortcuts.
-var defineGetter;
-var defineSetter;
-var lookupGetter;
-var lookupSetter;
-var supportsAccessors = owns(prototypeOfObject, '__defineGetter__');
-if (supportsAccessors) {
-    defineGetter = call.bind(prototypeOfObject.__defineGetter__);
-    defineSetter = call.bind(prototypeOfObject.__defineSetter__);
-    lookupGetter = call.bind(prototypeOfObject.__lookupGetter__);
-    lookupSetter = call.bind(prototypeOfObject.__lookupSetter__);
-}
-
-// ES5 15.2.3.2
-// http://es5.github.com/#x15.2.3.2
-if (!Object.getPrototypeOf) {
-    // https://github.com/es-shims/es5-shim/issues#issue/2
-    // http://ejohn.org/blog/objectgetprototypeof/
-    // recommended by fschaefer on github
-    //
-    // sure, and webreflection says ^_^
-    // ... this will nerever possibly return null
-    // ... Opera Mini breaks here with infinite loops
-    Object.getPrototypeOf = function getPrototypeOf(object) {
-        var proto = object.__proto__;
-        if (proto || proto === null) {
-            return proto;
-        } else if (object.constructor) {
-            return object.constructor.prototype;
-        } else {
-            return prototypeOfObject;
-        }
-    };
-}
-
-//ES5 15.2.3.3
-//http://es5.github.com/#x15.2.3.3
-
-function doesGetOwnPropertyDescriptorWork(object) {
-    try {
-        object.sentinel = 0;
-        return Object.getOwnPropertyDescriptor(object, 'sentinel').value === 0;
-    } catch (exception) {
-        // returns falsy
-    }
-}
-
-//check whether getOwnPropertyDescriptor works if it's given. Otherwise,
-//shim partially.
-if (Object.defineProperty) {
-    var getOwnPropertyDescriptorWorksOnObject = doesGetOwnPropertyDescriptorWork({});
-    var getOwnPropertyDescriptorWorksOnDom = typeof document === 'undefined' ||
-    doesGetOwnPropertyDescriptorWork(document.createElement('div'));
-    if (!getOwnPropertyDescriptorWorksOnDom || !getOwnPropertyDescriptorWorksOnObject) {
-        var getOwnPropertyDescriptorFallback = Object.getOwnPropertyDescriptor;
-    }
-}
-
-if (!Object.getOwnPropertyDescriptor || getOwnPropertyDescriptorFallback) {
-    var ERR_NON_OBJECT = 'Object.getOwnPropertyDescriptor called on a non-object: ';
-
-    Object.getOwnPropertyDescriptor = function getOwnPropertyDescriptor(object, property) {
-        if ((typeof object !== 'object' && typeof object !== 'function') || object === null) {
-            throw new TypeError(ERR_NON_OBJECT + object);
-        }
-
-        // make a valiant attempt to use the real getOwnPropertyDescriptor
-        // for I8's DOM elements.
-        if (getOwnPropertyDescriptorFallback) {
-            try {
-                return getOwnPropertyDescriptorFallback.call(Object, object, property);
-            } catch (exception) {
-                // try the shim if the real one doesn't work
-            }
-        }
-
-        // If object does not owns property return undefined immediately.
-        if (!owns(object, property)) {
-            return;
-        }
-
-        // If object has a property then it's for sure both `enumerable` and
-        // `configurable`.
-        var descriptor = { enumerable: true, configurable: true };
-
-        // If JS engine supports accessor properties then property may be a
-        // getter or setter.
-        if (supportsAccessors) {
-            // Unfortunately `__lookupGetter__` will return a getter even
-            // if object has own non getter property along with a same named
-            // inherited getter. To avoid misbehavior we temporary remove
-            // `__proto__` so that `__lookupGetter__` will return getter only
-            // if it's owned by an object.
-            var prototype = object.__proto__;
-            var notPrototypeOfObject = object !== prototypeOfObject;
-            // avoid recursion problem, breaking in Opera Mini when
-            // Object.getOwnPropertyDescriptor(Object.prototype, 'toString')
-            // or any other Object.prototype accessor
-            if (notPrototypeOfObject) {
-                object.__proto__ = prototypeOfObject;
-            }
-
-            var getter = lookupGetter(object, property);
-            var setter = lookupSetter(object, property);
-
-            if (notPrototypeOfObject) {
-                // Once we have getter and setter we can put values back.
-                object.__proto__ = prototype;
-            }
-
-            if (getter || setter) {
-                if (getter) {
-                    descriptor.get = getter;
-                }
-                if (setter) {
-                    descriptor.set = setter;
-                }
-                // If it was accessor property we're done and return here
-                // in order to avoid adding `value` to the descriptor.
-                return descriptor;
-            }
-        }
-
-        // If we got this far we know that object has an own property that is
-        // not an accessor so we set it as a value and return descriptor.
-        descriptor.value = object[property];
-        descriptor.writable = true;
-        return descriptor;
-    };
-}
-
-// ES5 15.2.3.4
-// http://es5.github.com/#x15.2.3.4
-if (!Object.getOwnPropertyNames) {
-    Object.getOwnPropertyNames = function getOwnPropertyNames(object) {
-        return Object.keys(object);
-    };
-}
-
-// ES5 15.2.3.5
-// http://es5.github.com/#x15.2.3.5
-if (!Object.create) {
-
-    // Contributed by Brandon Benvie, October, 2012
-    var createEmpty;
-    var supportsProto = !({ __proto__: null } instanceof Object);
-                        // the following produces false positives
-                        // in Opera Mini => not a reliable check
-                        // Object.prototype.__proto__ === null
-    /*global document */
-    if (supportsProto || typeof document === 'undefined') {
-        createEmpty = function () {
-            return { __proto__: null };
-        };
-    } else {
-        // In old IE __proto__ can't be used to manually set `null`, nor does
-        // any other method exist to make an object that inherits from nothing,
-        // aside from Object.prototype itself. Instead, create a new global
-        // object and *steal* its Object.prototype and strip it bare. This is
-        // used as the prototype to create nullary objects.
-        createEmpty = function () {
-            var iframe = document.createElement('iframe');
-            var parent = document.body || document.documentElement;
-            iframe.style.display = 'none';
-            parent.appendChild(iframe);
-            iframe.src = 'javascript:';
-            var empty = iframe.contentWindow.Object.prototype;
-            parent.removeChild(iframe);
-            iframe = null;
-            delete empty.constructor;
-            delete empty.hasOwnProperty;
-            delete empty.propertyIsEnumerable;
-            delete empty.isPrototypeOf;
-            delete empty.toLocaleString;
-            delete empty.toString;
-            delete empty.valueOf;
-            empty.__proto__ = null;
-
-            function Empty() {}
-            Empty.prototype = empty;
-            // short-circuit future calls
-            createEmpty = function () {
-                return new Empty();
-            };
-            return new Empty();
-        };
-    }
-
-    Object.create = function create(prototype, properties) {
-
-        var object;
-        function Type() {}  // An empty constructor.
-
-        if (prototype === null) {
-            object = createEmpty();
-        } else {
-            if (typeof prototype !== 'object' && typeof prototype !== 'function') {
-                // In the native implementation `parent` can be `null`
-                // OR *any* `instanceof Object`  (Object|Function|Array|RegExp|etc)
-                // Use `typeof` tho, b/c in old IE, DOM elements are not `instanceof Object`
-                // like they are in modern browsers. Using `Object.create` on DOM elements
-                // is...err...probably inappropriate, but the native version allows for it.
-                throw new TypeError('Object prototype may only be an Object or null'); // same msg as Chrome
-            }
-            Type.prototype = prototype;
-            object = new Type();
-            // IE has no built-in implementation of `Object.getPrototypeOf`
-            // neither `__proto__`, but this manually setting `__proto__` will
-            // guarantee that `Object.getPrototypeOf` will work as expected with
-            // objects created using `Object.create`
-            object.__proto__ = prototype;
-        }
-
-        if (properties !== void 0) {
-            Object.defineProperties(object, properties);
-        }
-
-        return object;
-    };
-}
-
-// ES5 15.2.3.6
-// http://es5.github.com/#x15.2.3.6
-
-// Patch for WebKit and IE8 standard mode
-// Designed by hax <hax.github.com>
-// related issue: https://github.com/es-shims/es5-shim/issues#issue/5
-// IE8 Reference:
-//     http://msdn.microsoft.com/en-us/library/dd282900.aspx
-//     http://msdn.microsoft.com/en-us/library/dd229916.aspx
-// WebKit Bugs:
-//     https://bugs.webkit.org/show_bug.cgi?id=36423
-
-function doesDefinePropertyWork(object) {
-    try {
-        Object.defineProperty(object, 'sentinel', {});
-        return 'sentinel' in object;
-    } catch (exception) {
-        // returns falsy
-    }
-}
-
-// check whether defineProperty works if it's given. Otherwise,
-// shim partially.
-if (Object.defineProperty) {
-    var definePropertyWorksOnObject = doesDefinePropertyWork({});
-    var definePropertyWorksOnDom = typeof document === 'undefined' ||
-        doesDefinePropertyWork(document.createElement('div'));
-    if (!definePropertyWorksOnObject || !definePropertyWorksOnDom) {
-        var definePropertyFallback = Object.defineProperty,
-            definePropertiesFallback = Object.defineProperties;
-    }
-}
-
-if (!Object.defineProperty || definePropertyFallback) {
-    var ERR_NON_OBJECT_DESCRIPTOR = 'Property description must be an object: ';
-    var ERR_NON_OBJECT_TARGET = 'Object.defineProperty called on non-object: ';
-    var ERR_ACCESSORS_NOT_SUPPORTED = 'getters & setters can not be defined on this javascript engine';
-
-    Object.defineProperty = function defineProperty(object, property, descriptor) {
-        if ((typeof object !== 'object' && typeof object !== 'function') || object === null) {
-            throw new TypeError(ERR_NON_OBJECT_TARGET + object);
-        }
-        if ((typeof descriptor !== 'object' && typeof descriptor !== 'function') || descriptor === null) {
-            throw new TypeError(ERR_NON_OBJECT_DESCRIPTOR + descriptor);
-        }
-        // make a valiant attempt to use the real defineProperty
-        // for I8's DOM elements.
-        if (definePropertyFallback) {
-            try {
-                return definePropertyFallback.call(Object, object, property, descriptor);
-            } catch (exception) {
-                // try the shim if the real one doesn't work
-            }
-        }
-
-        // If it's a data property.
-        if (owns(descriptor, 'value')) {
-            // fail silently if 'writable', 'enumerable', or 'configurable'
-            // are requested but not supported
-            /*
-            // alternate approach:
-            if ( // can't implement these features; allow false but not true
-                !(owns(descriptor, 'writable') ? descriptor.writable : true) ||
-                !(owns(descriptor, 'enumerable') ? descriptor.enumerable : true) ||
-                !(owns(descriptor, 'configurable') ? descriptor.configurable : true)
-            )
-                throw new RangeError(
-                    'This implementation of Object.defineProperty does not support configurable, enumerable, or writable.'
-                );
-            */
-
-            if (supportsAccessors && (lookupGetter(object, property) || lookupSetter(object, property))) {
-                // As accessors are supported only on engines implementing
-                // `__proto__` we can safely override `__proto__` while defining
-                // a property to make sure that we don't hit an inherited
-                // accessor.
-                var prototype = object.__proto__;
-                object.__proto__ = prototypeOfObject;
-                // Deleting a property anyway since getter / setter may be
-                // defined on object itself.
-                delete object[property];
-                object[property] = descriptor.value;
-                // Setting original `__proto__` back now.
-                object.__proto__ = prototype;
-            } else {
-                object[property] = descriptor.value;
-            }
-        } else {
-            if (!supportsAccessors) {
-                throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);
-            }
-            // If we got that far then getters and setters can be defined !!
-            if (owns(descriptor, 'get')) {
-                defineGetter(object, property, descriptor.get);
-            }
-            if (owns(descriptor, 'set')) {
-                defineSetter(object, property, descriptor.set);
-            }
-        }
-        return object;
-    };
-}
-
-// ES5 15.2.3.7
-// http://es5.github.com/#x15.2.3.7
-if (!Object.defineProperties || definePropertiesFallback) {
-    Object.defineProperties = function defineProperties(object, properties) {
-        // make a valiant attempt to use the real defineProperties
-        if (definePropertiesFallback) {
-            try {
-                return definePropertiesFallback.call(Object, object, properties);
-            } catch (exception) {
-                // try the shim if the real one doesn't work
-            }
-        }
-
-        for (var property in properties) {
-            if (owns(properties, property) && property !== '__proto__') {
-                Object.defineProperty(object, property, properties[property]);
-            }
-        }
-        return object;
-    };
-}
-
-// ES5 15.2.3.8
-// http://es5.github.com/#x15.2.3.8
-if (!Object.seal) {
-    Object.seal = function seal(object) {
-        if (Object(object) !== object) {
-            throw new TypeError('Object.seal can only be called on Objects.');
-        }
-        // this is misleading and breaks feature-detection, but
-        // allows "securable" code to "gracefully" degrade to working
-        // but insecure code.
-        return object;
-    };
-}
-
-// ES5 15.2.3.9
-// http://es5.github.com/#x15.2.3.9
-if (!Object.freeze) {
-    Object.freeze = function freeze(object) {
-        if (Object(object) !== object) {
-            throw new TypeError('Object.freeze can only be called on Objects.');
-        }
-        // this is misleading and breaks feature-detection, but
-        // allows "securable" code to "gracefully" degrade to working
-        // but insecure code.
-        return object;
-    };
-}
-
-// detect a Rhino bug and patch it
-try {
-    Object.freeze(function () {});
-} catch (exception) {
-    Object.freeze = (function freeze(freezeObject) {
-        return function freeze(object) {
-            if (typeof object === 'function') {
-                return object;
-            } else {
-                return freezeObject(object);
-            }
-        };
-    }(Object.freeze));
-}
-
-// ES5 15.2.3.10
-// http://es5.github.com/#x15.2.3.10
-if (!Object.preventExtensions) {
-    Object.preventExtensions = function preventExtensions(object) {
-        if (Object(object) !== object) {
-            throw new TypeError('Object.preventExtensions can only be called on Objects.');
-        }
-        // this is misleading and breaks feature-detection, but
-        // allows "securable" code to "gracefully" degrade to working
-        // but insecure code.
-        return object;
-    };
-}
-
-// ES5 15.2.3.11
-// http://es5.github.com/#x15.2.3.11
-if (!Object.isSealed) {
-    Object.isSealed = function isSealed(object) {
-        if (Object(object) !== object) {
-            throw new TypeError('Object.isSealed can only be called on Objects.');
-        }
-        return false;
-    };
-}
-
-// ES5 15.2.3.12
-// http://es5.github.com/#x15.2.3.12
-if (!Object.isFrozen) {
-    Object.isFrozen = function isFrozen(object) {
-        if (Object(object) !== object) {
-            throw new TypeError('Object.isFrozen can only be called on Objects.');
-        }
-        return false;
-    };
-}
-
-// ES5 15.2.3.13
-// http://es5.github.com/#x15.2.3.13
-if (!Object.isExtensible) {
-    Object.isExtensible = function isExtensible(object) {
-        // 1. If Type(O) is not Object throw a TypeError exception.
-        if (Object(object) !== object) {
-            throw new TypeError('Object.isExtensible can only be called on Objects.');
-        }
-        // 2. Return the Boolean value of the [[Extensible]] internal property of O.
-        var name = '';
-        while (owns(object, name)) {
-            name += '?';
-        }
-        object[name] = true;
-        var returnValue = owns(object, name);
-        delete object[name];
-        return returnValue;
-    };
-}
-
-}));
-/*!
- * https://github.com/es-shims/es5-shim
- * @license es5-shim Copyright 2009-2014 by contributors, MIT License
- * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
- */
-
-// vim: ts=4 sts=4 sw=4 expandtab
-
-
-// UMD (Universal Module Definition)
-// see https://github.com/umdjs/umd/blob/master/returnExports.js
-// Add semicolon to prevent IIFE from being passed as argument to concatenated code.
-;(function (root, factory) {
-    'use strict';
-    /*global define, exports, module */
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(factory);
-    } else if (typeof exports === 'object') {
-        // Node. Does not work with strict CommonJS, but
-        // only CommonJS-like enviroments that support module.exports,
-        // like Node.
-        module.exports = factory();
-    } else {
-        // Browser globals (root is window)
-        root.returnExports = factory();
-    }
-}(this, function () {
-
-/**
- * Brings an environment as close to ECMAScript 5 compliance
- * as is possible with the facilities of erstwhile engines.
- *
- * Annotated ES5: http://es5.github.com/ (specific links below)
- * ES5 Spec: http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-262.pdf
- * Required reading: http://javascriptweblog.wordpress.com/2011/12/05/extending-javascript-natives/
- */
-
-// Shortcut to an often accessed properties, in order to avoid multiple
-// dereference that costs universally.
-var ArrayPrototype = Array.prototype;
-var ObjectPrototype = Object.prototype;
-var FunctionPrototype = Function.prototype;
-var StringPrototype = String.prototype;
-var NumberPrototype = Number.prototype;
-var array_slice = ArrayPrototype.slice;
-var array_splice = ArrayPrototype.splice;
-var array_push = ArrayPrototype.push;
-var array_unshift = ArrayPrototype.unshift;
-var call = FunctionPrototype.call;
-
-// Having a toString local variable name breaks in Opera so use to_string.
-var to_string = ObjectPrototype.toString;
-
-var isFunction = function (val) {
-    return to_string.call(val) === '[object Function]';
-};
-var isRegex = function (val) {
-    return to_string.call(val) === '[object RegExp]';
-};
-var isArray = function isArray(obj) {
-    return to_string.call(obj) === '[object Array]';
-};
-var isString = function isString(obj) {
-    return to_string.call(obj) === '[object String]';
-};
-var isArguments = function isArguments(value) {
-    var str = to_string.call(value);
-    var isArgs = str === '[object Arguments]';
-    if (!isArgs) {
-        isArgs = !isArray(value) &&
-          value !== null &&
-          typeof value === 'object' &&
-          typeof value.length === 'number' &&
-          value.length >= 0 &&
-          isFunction(value.callee);
-    }
-    return isArgs;
-};
-
-var supportsDescriptors = Object.defineProperty && (function () {
-    try {
-        Object.defineProperty({}, 'x', {});
-        return true;
-    } catch (e) { /* this is ES3 */
-        return false;
-    }
-}());
-
-// Define configurable, writable and non-enumerable props
-// if they don't exist.
-var defineProperty;
-if (supportsDescriptors) {
-    defineProperty = function (object, name, method, forceAssign) {
-        if (!forceAssign && (name in object)) { return; }
-        Object.defineProperty(object, name, {
-            configurable: true,
-            enumerable: false,
-            writable: true,
-            value: method
-        });
-    };
-} else {
-    defineProperty = function (object, name, method, forceAssign) {
-        if (!forceAssign && (name in object)) { return; }
-        object[name] = method;
-    };
-}
-var defineProperties = function (object, map, forceAssign) {
-    for (var name in map) {
-        if (ObjectPrototype.hasOwnProperty.call(map, name)) {
-          defineProperty(object, name, map[name], forceAssign);
-        }
-    }
-};
-
-//
-// Util
-// ======
-//
-
-// ES5 9.4
-// http://es5.github.com/#x9.4
-// http://jsperf.com/to-integer
-
-function toInteger(num) {
-    var n = +num;
-    if (n !== n) { // isNaN
-        n = 0;
-    } else if (n !== 0 && n !== (1 / 0) && n !== -(1 / 0)) {
-        n = (n > 0 || -1) * Math.floor(Math.abs(n));
-    }
-    return n;
-}
-
-function isPrimitive(input) {
-    var type = typeof input;
-    return input === null ||
-        type === 'undefined' ||
-        type === 'boolean' ||
-        type === 'number' ||
-        type === 'string';
-}
-
-function toPrimitive(input) {
-    var val, valueOf, toStr;
-    if (isPrimitive(input)) {
-        return input;
-    }
-    valueOf = input.valueOf;
-    if (isFunction(valueOf)) {
-        val = valueOf.call(input);
-        if (isPrimitive(val)) {
-            return val;
-        }
-    }
-    toStr = input.toString;
-    if (isFunction(toStr)) {
-        val = toStr.call(input);
-        if (isPrimitive(val)) {
-            return val;
-        }
-    }
-    throw new TypeError();
-}
-
-var ES = {
-    // ES5 9.9
-    // http://es5.github.com/#x9.9
-    ToObject: function (o) {
-        /*jshint eqnull: true */
-        if (o == null) { // this matches both null and undefined
-            throw new TypeError("can't convert " + o + ' to object');
-        }
-        return Object(o);
-    },
-    ToUint32: function ToUint32(x) {
-        return x >>> 0;
-    }
-};
-
-//
-// Function
-// ========
-//
-
-// ES-5 15.3.4.5
-// http://es5.github.com/#x15.3.4.5
-
-var Empty = function Empty() {};
-
-defineProperties(FunctionPrototype, {
-    bind: function bind(that) { // .length is 1
-        // 1. Let Target be the this value.
-        var target = this;
-        // 2. If IsCallable(Target) is false, throw a TypeError exception.
-        if (!isFunction(target)) {
-            throw new TypeError('Function.prototype.bind called on incompatible ' + target);
-        }
-        // 3. Let A be a new (possibly empty) internal list of all of the
-        //   argument values provided after thisArg (arg1, arg2 etc), in order.
-        // XXX slicedArgs will stand in for "A" if used
-        var args = array_slice.call(arguments, 1); // for normal call
-        // 4. Let F be a new native ECMAScript object.
-        // 11. Set the [[Prototype]] internal property of F to the standard
-        //   built-in Function prototype object as specified in 15.3.3.1.
-        // 12. Set the [[Call]] internal property of F as described in
-        //   15.3.4.5.1.
-        // 13. Set the [[Construct]] internal property of F as described in
-        //   15.3.4.5.2.
-        // 14. Set the [[HasInstance]] internal property of F as described in
-        //   15.3.4.5.3.
-        var bound;
-        var binder = function () {
-
-            if (this instanceof bound) {
-                // 15.3.4.5.2 [[Construct]]
-                // When the [[Construct]] internal method of a function object,
-                // F that was created using the bind function is called with a
-                // list of arguments ExtraArgs, the following steps are taken:
-                // 1. Let target be the value of F's [[TargetFunction]]
-                //   internal property.
-                // 2. If target has no [[Construct]] internal method, a
-                //   TypeError exception is thrown.
-                // 3. Let boundArgs be the value of F's [[BoundArgs]] internal
-                //   property.
-                // 4. Let args be a new list containing the same values as the
-                //   list boundArgs in the same order followed by the same
-                //   values as the list ExtraArgs in the same order.
-                // 5. Return the result of calling the [[Construct]] internal
-                //   method of target providing args as the arguments.
-
-                var result = target.apply(
-                    this,
-                    args.concat(array_slice.call(arguments))
-                );
-                if (Object(result) === result) {
-                    return result;
-                }
-                return this;
-
-            } else {
-                // 15.3.4.5.1 [[Call]]
-                // When the [[Call]] internal method of a function object, F,
-                // which was created using the bind function is called with a
-                // this value and a list of arguments ExtraArgs, the following
-                // steps are taken:
-                // 1. Let boundArgs be the value of F's [[BoundArgs]] internal
-                //   property.
-                // 2. Let boundThis be the value of F's [[BoundThis]] internal
-                //   property.
-                // 3. Let target be the value of F's [[TargetFunction]] internal
-                //   property.
-                // 4. Let args be a new list containing the same values as the
-                //   list boundArgs in the same order followed by the same
-                //   values as the list ExtraArgs in the same order.
-                // 5. Return the result of calling the [[Call]] internal method
-                //   of target providing boundThis as the this value and
-                //   providing args as the arguments.
-
-                // equiv: target.call(this, ...boundArgs, ...args)
-                return target.apply(
-                    that,
-                    args.concat(array_slice.call(arguments))
-                );
-
-            }
-
-        };
-
-        // 15. If the [[Class]] internal property of Target is "Function", then
-        //     a. Let L be the length property of Target minus the length of A.
-        //     b. Set the length own property of F to either 0 or L, whichever is
-        //       larger.
-        // 16. Else set the length own property of F to 0.
-
-        var boundLength = Math.max(0, target.length - args.length);
-
-        // 17. Set the attributes of the length own property of F to the values
-        //   specified in 15.3.5.1.
-        var boundArgs = [];
-        for (var i = 0; i < boundLength; i++) {
-            boundArgs.push('$' + i);
-        }
-
-        // XXX Build a dynamic function with desired amount of arguments is the only
-        // way to set the length property of a function.
-        // In environments where Content Security Policies enabled (Chrome extensions,
-        // for ex.) all use of eval or Function costructor throws an exception.
-        // However in all of these environments Function.prototype.bind exists
-        // and so this code will never be executed.
-        bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this, arguments); }')(binder);
-
-        if (target.prototype) {
-            Empty.prototype = target.prototype;
-            bound.prototype = new Empty();
-            // Clean up dangling references.
-            Empty.prototype = null;
-        }
-
-        // TODO
-        // 18. Set the [[Extensible]] internal property of F to true.
-
-        // TODO
-        // 19. Let thrower be the [[ThrowTypeError]] function Object (13.2.3).
-        // 20. Call the [[DefineOwnProperty]] internal method of F with
-        //   arguments "caller", PropertyDescriptor {[[Get]]: thrower, [[Set]]:
-        //   thrower, [[Enumerable]]: false, [[Configurable]]: false}, and
-        //   false.
-        // 21. Call the [[DefineOwnProperty]] internal method of F with
-        //   arguments "arguments", PropertyDescriptor {[[Get]]: thrower,
-        //   [[Set]]: thrower, [[Enumerable]]: false, [[Configurable]]: false},
-        //   and false.
-
-        // TODO
-        // NOTE Function objects created using Function.prototype.bind do not
-        // have a prototype property or the [[Code]], [[FormalParameters]], and
-        // [[Scope]] internal properties.
-        // XXX can't delete prototype in pure-js.
-
-        // 22. Return F.
-        return bound;
-    }
-});
-
-// _Please note: Shortcuts are defined after `Function.prototype.bind` as we
-// us it in defining shortcuts.
-var owns = call.bind(ObjectPrototype.hasOwnProperty);
-
-//
-// Array
-// =====
-//
-
-// ES5 15.4.4.12
-// http://es5.github.com/#x15.4.4.12
-var spliceNoopReturnsEmptyArray = (function () {
-    var a = [1, 2];
-    var result = a.splice();
-    return a.length === 2 && isArray(result) && result.length === 0;
-}());
-defineProperties(ArrayPrototype, {
-    // Safari 5.0 bug where .splice() returns undefined
-    splice: function splice(start, deleteCount) {
-        if (arguments.length === 0) {
-            return [];
-        } else {
-            return array_splice.apply(this, arguments);
-        }
-    }
-}, spliceNoopReturnsEmptyArray);
-
-var spliceWorksWithEmptyObject = (function () {
-    var obj = {};
-    ArrayPrototype.splice.call(obj, 0, 0, 1);
-    return obj.length === 1;
-}());
-defineProperties(ArrayPrototype, {
-    splice: function splice(start, deleteCount) {
-        if (arguments.length === 0) { return []; }
-        var args = arguments;
-        this.length = Math.max(toInteger(this.length), 0);
-        if (arguments.length > 0 && typeof deleteCount !== 'number') {
-            args = array_slice.call(arguments);
-            if (args.length < 2) {
-                args.push(this.length - start);
-            } else {
-                args[1] = toInteger(deleteCount);
-            }
-        }
-        return array_splice.apply(this, args);
-    }
-}, !spliceWorksWithEmptyObject);
-
-// ES5 15.4.4.12
-// http://es5.github.com/#x15.4.4.13
-// Return len+argCount.
-// [bugfix, ielt8]
-// IE < 8 bug: [].unshift(0) === undefined but should be "1"
-var hasUnshiftReturnValueBug = [].unshift(0) !== 1;
-defineProperties(ArrayPrototype, {
-    unshift: function () {
-        array_unshift.apply(this, arguments);
-        return this.length;
-    }
-}, hasUnshiftReturnValueBug);
-
-// ES5 15.4.3.2
-// http://es5.github.com/#x15.4.3.2
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
-defineProperties(Array, { isArray: isArray });
-
-// The IsCallable() check in the Array functions
-// has been replaced with a strict check on the
-// internal class of the object to trap cases where
-// the provided function was actually a regular
-// expression literal, which in V8 and
-// JavaScriptCore is a typeof "function".  Only in
-// V8 are regular expression literals permitted as
-// reduce parameters, so it is desirable in the
-// general case for the shim to match the more
-// strict and common behavior of rejecting regular
-// expressions.
-
-// ES5 15.4.4.18
-// http://es5.github.com/#x15.4.4.18
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/forEach
-
-// Check failure of by-index access of string characters (IE < 9)
-// and failure of `0 in boxedString` (Rhino)
-var boxedString = Object('a');
-var splitString = boxedString[0] !== 'a' || !(0 in boxedString);
-
-var properlyBoxesContext = function properlyBoxed(method) {
-    // Check node 0.6.21 bug where third parameter is not boxed
-    var properlyBoxesNonStrict = true;
-    var properlyBoxesStrict = true;
-    if (method) {
-        method.call('foo', function (_, __, context) {
-            if (typeof context !== 'object') { properlyBoxesNonStrict = false; }
-        });
-
-        method.call([1], function () {
-            'use strict';
-            properlyBoxesStrict = typeof this === 'string';
-        }, 'x');
-    }
-    return !!method && properlyBoxesNonStrict && properlyBoxesStrict;
-};
-
-defineProperties(ArrayPrototype, {
-    forEach: function forEach(fun /*, thisp*/) {
-        var object = ES.ToObject(this),
-            self = splitString && isString(this) ? this.split('') : object,
-            thisp = arguments[1],
-            i = -1,
-            length = self.length >>> 0;
-
-        // If no callback function or if callback is not a callable function
-        if (!isFunction(fun)) {
-            throw new TypeError(); // TODO message
-        }
-
-        while (++i < length) {
-            if (i in self) {
-                // Invoke the callback function with call, passing arguments:
-                // context, property value, property key, thisArg object
-                // context
-                fun.call(thisp, self[i], i, object);
-            }
-        }
-    }
-}, !properlyBoxesContext(ArrayPrototype.forEach));
-
-// ES5 15.4.4.19
-// http://es5.github.com/#x15.4.4.19
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/map
-defineProperties(ArrayPrototype, {
-    map: function map(fun /*, thisp*/) {
-        var object = ES.ToObject(this),
-            self = splitString && isString(this) ? this.split('') : object,
-            length = self.length >>> 0,
-            result = Array(length),
-            thisp = arguments[1];
-
-        // If no callback function or if callback is not a callable function
-        if (!isFunction(fun)) {
-            throw new TypeError(fun + ' is not a function');
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self) {
-                result[i] = fun.call(thisp, self[i], i, object);
-            }
-        }
-        return result;
-    }
-}, !properlyBoxesContext(ArrayPrototype.map));
-
-// ES5 15.4.4.20
-// http://es5.github.com/#x15.4.4.20
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/filter
-defineProperties(ArrayPrototype, {
-    filter: function filter(fun /*, thisp */) {
-        var object = ES.ToObject(this),
-            self = splitString && isString(this) ? this.split('') : object,
-            length = self.length >>> 0,
-            result = [],
-            value,
-            thisp = arguments[1];
-
-        // If no callback function or if callback is not a callable function
-        if (!isFunction(fun)) {
-            throw new TypeError(fun + ' is not a function');
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self) {
-                value = self[i];
-                if (fun.call(thisp, value, i, object)) {
-                    result.push(value);
-                }
-            }
-        }
-        return result;
-    }
-}, !properlyBoxesContext(ArrayPrototype.filter));
-
-// ES5 15.4.4.16
-// http://es5.github.com/#x15.4.4.16
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/every
-defineProperties(ArrayPrototype, {
-    every: function every(fun /*, thisp */) {
-        var object = ES.ToObject(this),
-            self = splitString && isString(this) ? this.split('') : object,
-            length = self.length >>> 0,
-            thisp = arguments[1];
-
-        // If no callback function or if callback is not a callable function
-        if (!isFunction(fun)) {
-            throw new TypeError(fun + ' is not a function');
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self && !fun.call(thisp, self[i], i, object)) {
-                return false;
-            }
-        }
-        return true;
-    }
-}, !properlyBoxesContext(ArrayPrototype.every));
-
-// ES5 15.4.4.17
-// http://es5.github.com/#x15.4.4.17
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/some
-defineProperties(ArrayPrototype, {
-    some: function some(fun /*, thisp */) {
-        var object = ES.ToObject(this),
-            self = splitString && isString(this) ? this.split('') : object,
-            length = self.length >>> 0,
-            thisp = arguments[1];
-
-        // If no callback function or if callback is not a callable function
-        if (!isFunction(fun)) {
-            throw new TypeError(fun + ' is not a function');
-        }
-
-        for (var i = 0; i < length; i++) {
-            if (i in self && fun.call(thisp, self[i], i, object)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}, !properlyBoxesContext(ArrayPrototype.some));
-
-// ES5 15.4.4.21
-// http://es5.github.com/#x15.4.4.21
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduce
-var reduceCoercesToObject = false;
-if (ArrayPrototype.reduce) {
-    reduceCoercesToObject = typeof ArrayPrototype.reduce.call('es5', function (_, __, ___, list) { return list; }) === 'object';
-}
-defineProperties(ArrayPrototype, {
-    reduce: function reduce(fun /*, initial*/) {
-        var object = ES.ToObject(this),
-            self = splitString && isString(this) ? this.split('') : object,
-            length = self.length >>> 0;
-
-        // If no callback function or if callback is not a callable function
-        if (!isFunction(fun)) {
-            throw new TypeError(fun + ' is not a function');
-        }
-
-        // no value to return if no initial value and an empty array
-        if (!length && arguments.length === 1) {
-            throw new TypeError('reduce of empty array with no initial value');
-        }
-
-        var i = 0;
-        var result;
-        if (arguments.length >= 2) {
-            result = arguments[1];
-        } else {
-            do {
-                if (i in self) {
-                    result = self[i++];
-                    break;
-                }
-
-                // if array contains no values, no initial value to return
-                if (++i >= length) {
-                    throw new TypeError('reduce of empty array with no initial value');
-                }
-            } while (true);
-        }
-
-        for (; i < length; i++) {
-            if (i in self) {
-                result = fun.call(void 0, result, self[i], i, object);
-            }
-        }
-
-        return result;
-    }
-}, !reduceCoercesToObject);
-
-// ES5 15.4.4.22
-// http://es5.github.com/#x15.4.4.22
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduceRight
-var reduceRightCoercesToObject = false;
-if (ArrayPrototype.reduceRight) {
-    reduceRightCoercesToObject = typeof ArrayPrototype.reduceRight.call('es5', function (_, __, ___, list) { return list; }) === 'object';
-}
-defineProperties(ArrayPrototype, {
-    reduceRight: function reduceRight(fun /*, initial*/) {
-        var object = ES.ToObject(this),
-            self = splitString && isString(this) ? this.split('') : object,
-            length = self.length >>> 0;
-
-        // If no callback function or if callback is not a callable function
-        if (!isFunction(fun)) {
-            throw new TypeError(fun + ' is not a function');
-        }
-
-        // no value to return if no initial value, empty array
-        if (!length && arguments.length === 1) {
-            throw new TypeError('reduceRight of empty array with no initial value');
-        }
-
-        var result, i = length - 1;
-        if (arguments.length >= 2) {
-            result = arguments[1];
-        } else {
-            do {
-                if (i in self) {
-                    result = self[i--];
-                    break;
-                }
-
-                // if array contains no values, no initial value to return
-                if (--i < 0) {
-                    throw new TypeError('reduceRight of empty array with no initial value');
-                }
-            } while (true);
-        }
-
-        if (i < 0) {
-            return result;
-        }
-
-        do {
-            if (i in self) {
-                result = fun.call(void 0, result, self[i], i, object);
-            }
-        } while (i--);
-
-        return result;
-    }
-}, !reduceRightCoercesToObject);
-
-// ES5 15.4.4.14
-// http://es5.github.com/#x15.4.4.14
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
-var hasFirefox2IndexOfBug = Array.prototype.indexOf && [0, 1].indexOf(1, 2) !== -1;
-defineProperties(ArrayPrototype, {
-    indexOf: function indexOf(sought /*, fromIndex */) {
-        var self = splitString && isString(this) ? this.split('') : ES.ToObject(this),
-            length = self.length >>> 0;
-
-        if (!length) {
-            return -1;
-        }
-
-        var i = 0;
-        if (arguments.length > 1) {
-            i = toInteger(arguments[1]);
-        }
-
-        // handle negative indices
-        i = i >= 0 ? i : Math.max(0, length + i);
-        for (; i < length; i++) {
-            if (i in self && self[i] === sought) {
-                return i;
-            }
-        }
-        return -1;
-    }
-}, hasFirefox2IndexOfBug);
-
-// ES5 15.4.4.15
-// http://es5.github.com/#x15.4.4.15
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/lastIndexOf
-var hasFirefox2LastIndexOfBug = Array.prototype.lastIndexOf && [0, 1].lastIndexOf(0, -3) !== -1;
-defineProperties(ArrayPrototype, {
-    lastIndexOf: function lastIndexOf(sought /*, fromIndex */) {
-        var self = splitString && isString(this) ? this.split('') : ES.ToObject(this),
-            length = self.length >>> 0;
-
-        if (!length) {
-            return -1;
-        }
-        var i = length - 1;
-        if (arguments.length > 1) {
-            i = Math.min(i, toInteger(arguments[1]));
-        }
-        // handle negative indices
-        i = i >= 0 ? i : length - Math.abs(i);
-        for (; i >= 0; i--) {
-            if (i in self && sought === self[i]) {
-                return i;
-            }
-        }
-        return -1;
-    }
-}, hasFirefox2LastIndexOfBug);
-
-//
-// Object
-// ======
-//
-
-// ES5 15.2.3.14
-// http://es5.github.com/#x15.2.3.14
-
-// http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-var hasDontEnumBug = !({'toString': null}).propertyIsEnumerable('toString'),
-    hasProtoEnumBug = function () {}.propertyIsEnumerable('prototype'),
-    dontEnums = [
-        'toString',
-        'toLocaleString',
-        'valueOf',
-        'hasOwnProperty',
-        'isPrototypeOf',
-        'propertyIsEnumerable',
-        'constructor'
-    ],
-    dontEnumsLength = dontEnums.length;
-
-defineProperties(Object, {
-    keys: function keys(object) {
-        var isFn = isFunction(object),
-            isArgs = isArguments(object),
-            isObject = object !== null && typeof object === 'object',
-            isStr = isObject && isString(object);
-
-        if (!isObject && !isFn && !isArgs) {
-            throw new TypeError('Object.keys called on a non-object');
-        }
-
-        var theKeys = [];
-        var skipProto = hasProtoEnumBug && isFn;
-        if (isStr || isArgs) {
-            for (var i = 0; i < object.length; ++i) {
-                theKeys.push(String(i));
-            }
-        } else {
-            for (var name in object) {
-                if (!(skipProto && name === 'prototype') && owns(object, name)) {
-                    theKeys.push(String(name));
-                }
-            }
-        }
-
-        if (hasDontEnumBug) {
-            var ctor = object.constructor,
-                skipConstructor = ctor && ctor.prototype === object;
-            for (var j = 0; j < dontEnumsLength; j++) {
-                var dontEnum = dontEnums[j];
-                if (!(skipConstructor && dontEnum === 'constructor') && owns(object, dontEnum)) {
-                    theKeys.push(dontEnum);
-                }
-            }
-        }
-        return theKeys;
-    }
-});
-
-var keysWorksWithArguments = Object.keys && (function () {
-    // Safari 5.0 bug
-    return Object.keys(arguments).length === 2;
-}(1, 2));
-var originalKeys = Object.keys;
-defineProperties(Object, {
-    keys: function keys(object) {
-        if (isArguments(object)) {
-            return originalKeys(ArrayPrototype.slice.call(object));
-        } else {
-            return originalKeys(object);
-        }
-    }
-}, !keysWorksWithArguments);
-
-//
-// Date
-// ====
-//
-
-// ES5 15.9.5.43
-// http://es5.github.com/#x15.9.5.43
-// This function returns a String value represent the instance in time
-// represented by this Date object. The format of the String is the Date Time
-// string format defined in 15.9.1.15. All fields are present in the String.
-// The time zone is always UTC, denoted by the suffix Z. If the time value of
-// this object is not a finite Number a RangeError exception is thrown.
-var negativeDate = -62198755200000;
-var negativeYearString = '-000001';
-var hasNegativeDateBug = Date.prototype.toISOString && new Date(negativeDate).toISOString().indexOf(negativeYearString) === -1;
-
-defineProperties(Date.prototype, {
-    toISOString: function toISOString() {
-        var result, length, value, year, month;
-        if (!isFinite(this)) {
-            throw new RangeError('Date.prototype.toISOString called on non-finite value.');
-        }
-
-        year = this.getUTCFullYear();
-
-        month = this.getUTCMonth();
-        // see https://github.com/es-shims/es5-shim/issues/111
-        year += Math.floor(month / 12);
-        month = (month % 12 + 12) % 12;
-
-        // the date time string format is specified in 15.9.1.15.
-        result = [month + 1, this.getUTCDate(), this.getUTCHours(), this.getUTCMinutes(), this.getUTCSeconds()];
-        year = (
-            (year < 0 ? '-' : (year > 9999 ? '+' : '')) +
-            ('00000' + Math.abs(year)).slice(0 <= year && year <= 9999 ? -4 : -6)
-        );
-
-        length = result.length;
-        while (length--) {
-            value = result[length];
-            // pad months, days, hours, minutes, and seconds to have two
-            // digits.
-            if (value < 10) {
-                result[length] = '0' + value;
-            }
-        }
-        // pad milliseconds to have three digits.
-        return (
-            year + '-' + result.slice(0, 2).join('-') +
-            'T' + result.slice(2).join(':') + '.' +
-            ('000' + this.getUTCMilliseconds()).slice(-3) + 'Z'
-        );
-    }
-}, hasNegativeDateBug);
-
-
-// ES5 15.9.5.44
-// http://es5.github.com/#x15.9.5.44
-// This function provides a String representation of a Date object for use by
-// JSON.stringify (15.12.3).
-var dateToJSONIsSupported = false;
-try {
-    dateToJSONIsSupported = (
-        Date.prototype.toJSON &&
-        new Date(NaN).toJSON() === null &&
-        new Date(negativeDate).toJSON().indexOf(negativeYearString) !== -1 &&
-        Date.prototype.toJSON.call({ // generic
-            toISOString: function () {
-                return true;
-            }
-        })
-    );
-} catch (e) {
-}
-if (!dateToJSONIsSupported) {
-    Date.prototype.toJSON = function toJSON(key) {
-        // When the toJSON method is called with argument key, the following
-        // steps are taken:
-
-        // 1.  Let O be the result of calling ToObject, giving it the this
-        // value as its argument.
-        // 2. Let tv be toPrimitive(O, hint Number).
-        var o = Object(this),
-            tv = toPrimitive(o),
-            toISO;
-        // 3. If tv is a Number and is not finite, return null.
-        if (typeof tv === 'number' && !isFinite(tv)) {
-            return null;
-        }
-        // 4. Let toISO be the result of calling the [[Get]] internal method of
-        // O with argument "toISOString".
-        toISO = o.toISOString;
-        // 5. If IsCallable(toISO) is false, throw a TypeError exception.
-        if (typeof toISO !== 'function') {
-            throw new TypeError('toISOString property is not callable');
-        }
-        // 6. Return the result of calling the [[Call]] internal method of
-        //  toISO with O as the this value and an empty argument list.
-        return toISO.call(o);
-
-        // NOTE 1 The argument is ignored.
-
-        // NOTE 2 The toJSON function is intentionally generic; it does not
-        // require that its this value be a Date object. Therefore, it can be
-        // transferred to other kinds of objects for use as a method. However,
-        // it does require that any such object have a toISOString method. An
-        // object is free to use the argument key to filter its
-        // stringification.
-    };
-}
-
-// ES5 15.9.4.2
-// http://es5.github.com/#x15.9.4.2
-// based on work shared by Daniel Friesen (dantman)
-// http://gist.github.com/303249
-var supportsExtendedYears = Date.parse('+033658-09-27T01:46:40.000Z') === 1e15;
-var acceptsInvalidDates = !isNaN(Date.parse('2012-04-04T24:00:00.500Z')) || !isNaN(Date.parse('2012-11-31T23:59:59.000Z'));
-var doesNotParseY2KNewYear = isNaN(Date.parse('2000-01-01T00:00:00.000Z'));
-if (!Date.parse || doesNotParseY2KNewYear || acceptsInvalidDates || !supportsExtendedYears) {
-    // XXX global assignment won't work in embeddings that use
-    // an alternate object for the context.
-    /*global Date: true */
-    Date = (function (NativeDate) {
-
-        // Date.length === 7
-        function Date(Y, M, D, h, m, s, ms) {
-            var length = arguments.length;
-            if (this instanceof NativeDate) {
-                var date = length === 1 && String(Y) === Y ? // isString(Y)
-                    // We explicitly pass it through parse:
-                    new NativeDate(Date.parse(Y)) :
-                    // We have to manually make calls depending on argument
-                    // length here
-                    length >= 7 ? new NativeDate(Y, M, D, h, m, s, ms) :
-                    length >= 6 ? new NativeDate(Y, M, D, h, m, s) :
-                    length >= 5 ? new NativeDate(Y, M, D, h, m) :
-                    length >= 4 ? new NativeDate(Y, M, D, h) :
-                    length >= 3 ? new NativeDate(Y, M, D) :
-                    length >= 2 ? new NativeDate(Y, M) :
-                    length >= 1 ? new NativeDate(Y) :
-                                  new NativeDate();
-                // Prevent mixups with unfixed Date object
-                date.constructor = Date;
-                return date;
-            }
-            return NativeDate.apply(this, arguments);
-        }
-
-        // 15.9.1.15 Date Time String Format.
-        var isoDateExpression = new RegExp('^' +
-            '(\\d{4}|[+-]\\d{6})' + // four-digit year capture or sign +
-                                      // 6-digit extended year
-            '(?:-(\\d{2})' + // optional month capture
-            '(?:-(\\d{2})' + // optional day capture
-            '(?:' + // capture hours:minutes:seconds.milliseconds
-                'T(\\d{2})' + // hours capture
-                ':(\\d{2})' + // minutes capture
-                '(?:' + // optional :seconds.milliseconds
-                    ':(\\d{2})' + // seconds capture
-                    '(?:(\\.\\d{1,}))?' + // milliseconds capture
-                ')?' +
-            '(' + // capture UTC offset component
-                'Z|' + // UTC capture
-                '(?:' + // offset specifier +/-hours:minutes
-                    '([-+])' + // sign capture
-                    '(\\d{2})' + // hours offset capture
-                    ':(\\d{2})' + // minutes offset capture
-                ')' +
-            ')?)?)?)?' +
-        '$');
-
-        var months = [
-            0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
-        ];
-
-        function dayFromMonth(year, month) {
-            var t = month > 1 ? 1 : 0;
-            return (
-                months[month] +
-                Math.floor((year - 1969 + t) / 4) -
-                Math.floor((year - 1901 + t) / 100) +
-                Math.floor((year - 1601 + t) / 400) +
-                365 * (year - 1970)
-            );
-        }
-
-        function toUTC(t) {
-            return Number(new NativeDate(1970, 0, 1, 0, 0, 0, t));
-        }
-
-        // Copy any custom methods a 3rd party library may have added
-        for (var key in NativeDate) {
-            Date[key] = NativeDate[key];
-        }
-
-        // Copy "native" methods explicitly; they may be non-enumerable
-        Date.now = NativeDate.now;
-        Date.UTC = NativeDate.UTC;
-        Date.prototype = NativeDate.prototype;
-        Date.prototype.constructor = Date;
-
-        // Upgrade Date.parse to handle simplified ISO 8601 strings
-        Date.parse = function parse(string) {
-            var match = isoDateExpression.exec(string);
-            if (match) {
-                // parse months, days, hours, minutes, seconds, and milliseconds
-                // provide default values if necessary
-                // parse the UTC offset component
-                var year = Number(match[1]),
-                    month = Number(match[2] || 1) - 1,
-                    day = Number(match[3] || 1) - 1,
-                    hour = Number(match[4] || 0),
-                    minute = Number(match[5] || 0),
-                    second = Number(match[6] || 0),
-                    millisecond = Math.floor(Number(match[7] || 0) * 1000),
-                    // When time zone is missed, local offset should be used
-                    // (ES 5.1 bug)
-                    // see https://bugs.ecmascript.org/show_bug.cgi?id=112
-                    isLocalTime = Boolean(match[4] && !match[8]),
-                    signOffset = match[9] === '-' ? 1 : -1,
-                    hourOffset = Number(match[10] || 0),
-                    minuteOffset = Number(match[11] || 0),
-                    result;
-                if (
-                    hour < (
-                        minute > 0 || second > 0 || millisecond > 0 ?
-                        24 : 25
-                    ) &&
-                    minute < 60 && second < 60 && millisecond < 1000 &&
-                    month > -1 && month < 12 && hourOffset < 24 &&
-                    minuteOffset < 60 && // detect invalid offsets
-                    day > -1 &&
-                    day < (
-                        dayFromMonth(year, month + 1) -
-                        dayFromMonth(year, month)
-                    )
-                ) {
-                    result = (
-                        (dayFromMonth(year, month) + day) * 24 +
-                        hour +
-                        hourOffset * signOffset
-                    ) * 60;
-                    result = (
-                        (result + minute + minuteOffset * signOffset) * 60 +
-                        second
-                    ) * 1000 + millisecond;
-                    if (isLocalTime) {
-                        result = toUTC(result);
-                    }
-                    if (-8.64e15 <= result && result <= 8.64e15) {
-                        return result;
-                    }
-                }
-                return NaN;
-            }
-            return NativeDate.parse.apply(this, arguments);
-        };
-
-        return Date;
-    }(Date));
-    /*global Date: false */
-}
-
-// ES5 15.9.4.4
-// http://es5.github.com/#x15.9.4.4
-if (!Date.now) {
-    Date.now = function now() {
-        return new Date().getTime();
-    };
-}
-
-
-//
-// Number
-// ======
-//
-
-// ES5.1 15.7.4.5
-// http://es5.github.com/#x15.7.4.5
-var hasToFixedBugs = NumberPrototype.toFixed && (
-  (0.00008).toFixed(3) !== '0.000' ||
-  (0.9).toFixed(0) !== '1' ||
-  (1.255).toFixed(2) !== '1.25' ||
-  (1000000000000000128).toFixed(0) !== '1000000000000000128'
-);
-
-var toFixedHelpers = {
-  base: 1e7,
-  size: 6,
-  data: [0, 0, 0, 0, 0, 0],
-  multiply: function multiply(n, c) {
-      var i = -1;
-      while (++i < toFixedHelpers.size) {
-          c += n * toFixedHelpers.data[i];
-          toFixedHelpers.data[i] = c % toFixedHelpers.base;
-          c = Math.floor(c / toFixedHelpers.base);
-      }
-  },
-  divide: function divide(n) {
-      var i = toFixedHelpers.size, c = 0;
-      while (--i >= 0) {
-          c += toFixedHelpers.data[i];
-          toFixedHelpers.data[i] = Math.floor(c / n);
-          c = (c % n) * toFixedHelpers.base;
-      }
-  },
-  numToString: function numToString() {
-      var i = toFixedHelpers.size;
-      var s = '';
-      while (--i >= 0) {
-          if (s !== '' || i === 0 || toFixedHelpers.data[i] !== 0) {
-              var t = String(toFixedHelpers.data[i]);
-              if (s === '') {
-                  s = t;
-              } else {
-                  s += '0000000'.slice(0, 7 - t.length) + t;
-              }
-          }
-      }
-      return s;
-  },
-  pow: function pow(x, n, acc) {
-      return (n === 0 ? acc : (n % 2 === 1 ? pow(x, n - 1, acc * x) : pow(x * x, n / 2, acc)));
-  },
-  log: function log(x) {
-      var n = 0;
-      while (x >= 4096) {
-          n += 12;
-          x /= 4096;
-      }
-      while (x >= 2) {
-          n += 1;
-          x /= 2;
-      }
-      return n;
-  }
-};
-
-defineProperties(NumberPrototype, {
-    toFixed: function toFixed(fractionDigits) {
-        var f, x, s, m, e, z, j, k;
-
-        // Test for NaN and round fractionDigits down
-        f = Number(fractionDigits);
-        f = f !== f ? 0 : Math.floor(f);
-
-        if (f < 0 || f > 20) {
-            throw new RangeError('Number.toFixed called with invalid number of decimals');
-        }
-
-        x = Number(this);
-
-        // Test for NaN
-        if (x !== x) {
-            return 'NaN';
-        }
-
-        // If it is too big or small, return the string value of the number
-        if (x <= -1e21 || x >= 1e21) {
-            return String(x);
-        }
-
-        s = '';
-
-        if (x < 0) {
-            s = '-';
-            x = -x;
-        }
-
-        m = '0';
-
-        if (x > 1e-21) {
-            // 1e-21 < x < 1e21
-            // -70 < log2(x) < 70
-            e = toFixedHelpers.log(x * toFixedHelpers.pow(2, 69, 1)) - 69;
-            z = (e < 0 ? x * toFixedHelpers.pow(2, -e, 1) : x / toFixedHelpers.pow(2, e, 1));
-            z *= 0x10000000000000; // Math.pow(2, 52);
-            e = 52 - e;
-
-            // -18 < e < 122
-            // x = z / 2 ^ e
-            if (e > 0) {
-                toFixedHelpers.multiply(0, z);
-                j = f;
-
-                while (j >= 7) {
-                    toFixedHelpers.multiply(1e7, 0);
-                    j -= 7;
-                }
-
-                toFixedHelpers.multiply(toFixedHelpers.pow(10, j, 1), 0);
-                j = e - 1;
-
-                while (j >= 23) {
-                    toFixedHelpers.divide(1 << 23);
-                    j -= 23;
-                }
-
-                toFixedHelpers.divide(1 << j);
-                toFixedHelpers.multiply(1, 1);
-                toFixedHelpers.divide(2);
-                m = toFixedHelpers.numToString();
-            } else {
-                toFixedHelpers.multiply(0, z);
-                toFixedHelpers.multiply(1 << (-e), 0);
-                m = toFixedHelpers.numToString() + '0.00000000000000000000'.slice(2, 2 + f);
-            }
-        }
-
-        if (f > 0) {
-            k = m.length;
-
-            if (k <= f) {
-                m = s + '0.0000000000000000000'.slice(0, f - k + 2) + m;
-            } else {
-                m = s + m.slice(0, k - f) + '.' + m.slice(k - f);
-            }
-        } else {
-            m = s + m;
-        }
-
-        return m;
-    }
-}, hasToFixedBugs);
-
-
-//
-// String
-// ======
-//
-
-// ES5 15.5.4.14
-// http://es5.github.com/#x15.5.4.14
-
-// [bugfix, IE lt 9, firefox 4, Konqueror, Opera, obscure browsers]
-// Many browsers do not split properly with regular expressions or they
-// do not perform the split correctly under obscure conditions.
-// See http://blog.stevenlevithan.com/archives/cross-browser-split
-// I've tested in many browsers and this seems to cover the deviant ones:
-//    'ab'.split(/(?:ab)*/) should be ["", ""], not [""]
-//    '.'.split(/(.?)(.?)/) should be ["", ".", "", ""], not ["", ""]
-//    'tesst'.split(/(s)*/) should be ["t", undefined, "e", "s", "t"], not
-//       [undefined, "t", undefined, "e", ...]
-//    ''.split(/.?/) should be [], not [""]
-//    '.'.split(/()()/) should be ["."], not ["", "", "."]
-
-var string_split = StringPrototype.split;
-if (
-    'ab'.split(/(?:ab)*/).length !== 2 ||
-    '.'.split(/(.?)(.?)/).length !== 4 ||
-    'tesst'.split(/(s)*/)[1] === 't' ||
-    'test'.split(/(?:)/, -1).length !== 4 ||
-    ''.split(/.?/).length ||
-    '.'.split(/()()/).length > 1
-) {
-    (function () {
-        var compliantExecNpcg = typeof (/()??/).exec('')[1] === 'undefined'; // NPCG: nonparticipating capturing group
-
-        StringPrototype.split = function (separator, limit) {
-            var string = this;
-            if (typeof separator === 'undefined' && limit === 0) {
-                return [];
-            }
-
-            // If `separator` is not a regex, use native split
-            if (to_string.call(separator) !== '[object RegExp]') {
-                return string_split.call(this, separator, limit);
-            }
-
-            var output = [],
-                flags = (separator.ignoreCase ? 'i' : '') +
-                        (separator.multiline ? 'm' : '') +
-                        (separator.extended ? 'x' : '') + // Proposed for ES6
-                        (separator.sticky ? 'y' : ''), // Firefox 3+
-                lastLastIndex = 0,
-                // Make `global` and avoid `lastIndex` issues by working with a copy
-                separator2, match, lastIndex, lastLength;
-            separator = new RegExp(separator.source, flags + 'g');
-            string += ''; // Type-convert
-            if (!compliantExecNpcg) {
-                // Doesn't need flags gy, but they don't hurt
-                separator2 = new RegExp('^' + separator.source + '$(?!\\s)', flags);
-            }
-            /* Values for `limit`, per the spec:
-             * If undefined: 4294967295 // Math.pow(2, 32) - 1
-             * If 0, Infinity, or NaN: 0
-             * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
-             * If negative number: 4294967296 - Math.floor(Math.abs(limit))
-             * If other: Type-convert, then use the above rules
-             */
-            limit = typeof limit === 'undefined' ?
-                -1 >>> 0 : // Math.pow(2, 32) - 1
-                ES.ToUint32(limit);
-            while (match = separator.exec(string)) {
-                // `separator.lastIndex` is not reliable cross-browser
-                lastIndex = match.index + match[0].length;
-                if (lastIndex > lastLastIndex) {
-                    output.push(string.slice(lastLastIndex, match.index));
-                    // Fix browsers whose `exec` methods don't consistently return `undefined` for
-                    // nonparticipating capturing groups
-                    if (!compliantExecNpcg && match.length > 1) {
-                        match[0].replace(separator2, function () {
-                            for (var i = 1; i < arguments.length - 2; i++) {
-                                if (typeof arguments[i] === 'undefined') {
-                                    match[i] = void 0;
-                                }
-                            }
-                        });
-                    }
-                    if (match.length > 1 && match.index < string.length) {
-                        array_push.apply(output, match.slice(1));
-                    }
-                    lastLength = match[0].length;
-                    lastLastIndex = lastIndex;
-                    if (output.length >= limit) {
-                        break;
-                    }
-                }
-                if (separator.lastIndex === match.index) {
-                    separator.lastIndex++; // Avoid an infinite loop
-                }
-            }
-            if (lastLastIndex === string.length) {
-                if (lastLength || !separator.test('')) {
-                    output.push('');
-                }
-            } else {
-                output.push(string.slice(lastLastIndex));
-            }
-            return output.length > limit ? output.slice(0, limit) : output;
-        };
-    }());
-
-// [bugfix, chrome]
-// If separator is undefined, then the result array contains just one String,
-// which is the this value (converted to a String). If limit is not undefined,
-// then the output array is truncated so that it contains no more than limit
-// elements.
-// "0".split(undefined, 0) -> []
-} else if ('0'.split(void 0, 0).length) {
-    StringPrototype.split = function split(separator, limit) {
-        if (typeof separator === 'undefined' && limit === 0) { return []; }
-        return string_split.call(this, separator, limit);
-    };
-}
-
-var str_replace = StringPrototype.replace;
-var replaceReportsGroupsCorrectly = (function () {
-    var groups = [];
-    'x'.replace(/x(.)?/g, function (match, group) {
-        groups.push(group);
-    });
-    return groups.length === 1 && typeof groups[0] === 'undefined';
-}());
-
-if (!replaceReportsGroupsCorrectly) {
-    StringPrototype.replace = function replace(searchValue, replaceValue) {
-        var isFn = isFunction(replaceValue);
-        var hasCapturingGroups = isRegex(searchValue) && (/\)[*?]/).test(searchValue.source);
-        if (!isFn || !hasCapturingGroups) {
-            return str_replace.call(this, searchValue, replaceValue);
-        } else {
-            var wrappedReplaceValue = function (match) {
-                var length = arguments.length;
-                var originalLastIndex = searchValue.lastIndex;
-                searchValue.lastIndex = 0;
-                var args = searchValue.exec(match) || [];
-                searchValue.lastIndex = originalLastIndex;
-                args.push(arguments[length - 2], arguments[length - 1]);
-                return replaceValue.apply(this, args);
-            };
-            return str_replace.call(this, searchValue, wrappedReplaceValue);
-        }
-    };
-}
-
-// ECMA-262, 3rd B.2.3
-// Not an ECMAScript standard, although ECMAScript 3rd Edition has a
-// non-normative section suggesting uniform semantics and it should be
-// normalized across all browsers
-// [bugfix, IE lt 9] IE < 9 substr() with negative value not working in IE
-var string_substr = StringPrototype.substr;
-var hasNegativeSubstrBug = ''.substr && '0b'.substr(-1) !== 'b';
-defineProperties(StringPrototype, {
-    substr: function substr(start, length) {
-        return string_substr.call(
-            this,
-            start < 0 ? ((start = this.length + start) < 0 ? 0 : start) : start,
-            length
-        );
-    }
-}, hasNegativeSubstrBug);
-
-// ES5 15.5.4.20
-// whitespace from: http://es5.github.io/#x15.5.4.20
-var ws = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
-    '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028' +
-    '\u2029\uFEFF';
-var zeroWidth = '\u200b';
-var wsRegexChars = '[' + ws + ']';
-var trimBeginRegexp = new RegExp('^' + wsRegexChars + wsRegexChars + '*');
-var trimEndRegexp = new RegExp(wsRegexChars + wsRegexChars + '*$');
-var hasTrimWhitespaceBug = StringPrototype.trim && (ws.trim() || !zeroWidth.trim());
-defineProperties(StringPrototype, {
-    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
-    // http://perfectionkills.com/whitespace-deviations/
-    trim: function trim() {
-        if (typeof this === 'undefined' || this === null) {
-            throw new TypeError("can't convert " + this + ' to object');
-        }
-        return String(this).replace(trimBeginRegexp, '').replace(trimEndRegexp, '');
-    }
-}, hasTrimWhitespaceBug);
-
-// ES-5 15.1.2.2
-if (parseInt(ws + '08') !== 8 || parseInt(ws + '0x16') !== 22) {
-    /*global parseInt: true */
-    parseInt = (function (origParseInt) {
-        var hexRegex = /^0[xX]/;
-        return function parseIntES5(str, radix) {
-            str = String(str).trim();
-            if (!Number(radix)) {
-                radix = hexRegex.test(str) ? 16 : 10;
-            }
-            return origParseInt(str, radix);
-        };
-    }(parseInt));
-}
-
-}));
 !function(){"undefined"==typeof Math.sgn&&(Math.sgn=function(a){return 0==a?0:a>0?1:-1});var a={subtract:function(a,b){return{x:a.x-b.x,y:a.y-b.y}},dotProduct:function(a,b){return a.x*b.x+a.y*b.y},square:function(a){return Math.sqrt(a.x*a.x+a.y*a.y)},scale:function(a,b){return{x:a.x*b,y:a.y*b}}},b=64,c=Math.pow(2,-b-1),d=function(b,c){for(var d=[],e=f(b,c),h=c.length-1,i=2*h-1,j=g(e,i,d,0),k=a.subtract(b,c[0]),m=a.square(k),n=0,o=0;j>o;o++){k=a.subtract(b,l(c,h,d[o],null,null));var p=a.square(k);m>p&&(m=p,n=d[o])}return k=a.subtract(b,c[h]),p=a.square(k),m>p&&(m=p,n=1),{location:n,distance:m}},e=function(a,b){var c=d(a,b);return{point:l(b,b.length-1,c.location,null,null),location:c.location}},f=function(b,c){for(var d=c.length-1,e=2*d-1,f=[],g=[],h=[],i=[],k=[[1,.6,.3,.1],[.4,.6,.6,.4],[.1,.3,.6,1]],l=0;d>=l;l++)f[l]=a.subtract(c[l],b);for(var l=0;d-1>=l;l++)g[l]=a.subtract(c[l+1],c[l]),g[l]=a.scale(g[l],3);for(var m=0;d-1>=m;m++)for(var n=0;d>=n;n++)h[m]||(h[m]=[]),h[m][n]=a.dotProduct(g[m],f[n]);for(l=0;e>=l;l++)i[l]||(i[l]=[]),i[l].y=0,i[l].x=parseFloat(l)/e;for(var o=d,p=d-1,q=0;o+p>=q;q++){var r=Math.max(0,q-p),s=Math.min(q,o);for(l=r;s>=l;l++)j=q-l,i[l+j].y+=h[j][l]*k[j][l]}return i},g=function(a,c,d,e){var f,j,m=[],n=[],o=[],p=[];switch(h(a,c)){case 0:return 0;case 1:if(e>=b)return d[0]=(a[0].x+a[c].x)/2,1;if(i(a,c))return d[0]=k(a,c),1}l(a,c,.5,m,n),f=g(m,c,o,e+1),j=g(n,c,p,e+1);for(var q=0;f>q;q++)d[q]=o[q];for(var q=0;j>q;q++)d[q+f]=p[q];return f+j},h=function(a,b){var c,d,e=0;c=d=Math.sgn(a[0].y);for(var f=1;b>=f;f++)c=Math.sgn(a[f].y),c!=d&&e++,d=c;return e},i=function(a,b){var d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s;i=a[0].y-a[b].y,j=a[b].x-a[0].x,k=a[0].x*a[b].y-a[b].x*a[0].y;for(var t=max_distance_below=0,u=1;b>u;u++){var v=i*a[u].x+j*a[u].y+k;v>t?t=v:max_distance_below>v&&(max_distance_below=v)}return n=0,o=1,p=0,q=i,r=j,s=k-t,l=n*r-q*o,m=1/l,e=(o*s-r*p)*m,q=i,r=j,s=k-max_distance_below,l=n*r-q*o,m=1/l,f=(o*s-r*p)*m,g=Math.min(e,f),h=Math.max(e,f),d=h-g,c>d?1:0},k=function(a,b){var c=1,d=0,e=a[b].x-a[0].x,f=a[b].y-a[0].y,g=a[0].x-0,h=a[0].y-0,i=e*d-f*c,j=1/i,k=(e*h-f*g)*j;return 0+c*k},l=function(a,b,c,d,e){for(var f=[[]],g=0;b>=g;g++)f[0][g]=a[g];for(var h=1;b>=h;h++)for(var g=0;b-h>=g;g++)f[h]||(f[h]=[]),f[h][g]||(f[h][g]={}),f[h][g].x=(1-c)*f[h-1][g].x+c*f[h-1][g+1].x,f[h][g].y=(1-c)*f[h-1][g].y+c*f[h-1][g+1].y;if(null!=d)for(g=0;b>=g;g++)d[g]=f[g][0];if(null!=e)for(g=0;b>=g;g++)e[g]=f[b-g][g];return f[b][0]},m={},n=function(a){var b=m[a];if(!b){b=[];var c=function(){return function(b){return Math.pow(b,a)}},d=function(){return function(b){return Math.pow(1-b,a)}},e=function(a){return function(){return a}},f=function(){return function(a){return a}},g=function(){return function(a){return 1-a}},h=function(a){return function(b){for(var c=1,d=0;d<a.length;d++)c*=a[d](b);return c}};b.push(new c);for(var i=1;a>i;i++){for(var j=[new e(a)],k=0;a-i>k;k++)j.push(new f);for(var k=0;i>k;k++)j.push(new g);b.push(new h(j))}b.push(new d),m[a]=b}return b},o=function(a,b){for(var c=n(a.length-1),d=0,e=0,f=0;f<a.length;f++)d+=a[f].x*c[f](b),e+=a[f].y*c[f](b);return{x:d,y:e}},p=function(a,b){return Math.sqrt(Math.pow(a.x-b.x,2)+Math.pow(a.y-b.y,2))},q=function(a){return a[0].x==a[1].x&&a[0].y==a[1].y},r=function(a,b,c){if(q(a))return{point:a[0],location:b};for(var d=o(a,b),e=0,f=b,g=c>0?1:-1,h=null;e<Math.abs(c);)f+=.005*g,h=o(a,f),e+=p(h,d),d=h;return{point:h,location:f}},s=function(a){if(q(a))return 0;for(var b=o(a,0),c=0,d=0,e=1,f=null;1>d;)d+=.005*e,f=o(a,d),c+=p(f,b),b=f;return c},t=function(a,b,c){return r(a,b,c).point},u=function(a,b,c){return r(a,b,c).location},v=function(a,b){var c=o(a,b),d=o(a.slice(0,a.length-1),b),e=d.y-c.y,f=d.x-c.x;return 0==e?1/0:Math.atan(e/f)},w=function(a,b,c){var d=r(a,b,c);return d.location>1&&(d.location=1),d.location<0&&(d.location=0),v(a,d.location)},x=function(a,b,c,d){d=null==d?0:d;var e=r(a,b,d),f=v(a,e.location),g=Math.atan(-1/f),h=c/2*Math.sin(g),i=c/2*Math.cos(g);return[{x:e.point.x+i,y:e.point.y+h},{x:e.point.x-i,y:e.point.y-h}]};window.jsBezier={distanceFromCurve:d,gradientAtPoint:v,gradientAtPointAlongCurveFrom:w,nearestPointOnCurve:e,pointOnCurve:o,pointAlongCurveFrom:t,perpendicularToCurveAt:x,locationAlongCurveFrom:u,getLength:s}}(),function(){"use strict";var a=this.Biltong={},b=function(a){return"[object Array]"===Object.prototype.toString.call(a)},c=function(a,c,d){return a=b(a)?a:[a.x,a.y],c=b(c)?c:[c.x,c.y],d(a,c)},d=a.gradient=function(a,b){return c(a,b,function(a,b){return b[0]==a[0]?b[1]>a[1]?1/0:-1/0:b[1]==a[1]?b[0]>a[0]?0:-0:(b[1]-a[1])/(b[0]-a[0])})},e=(a.normal=function(a,b){return-1/d(a,b)},a.lineLength=function(a,b){return c(a,b,function(a,b){return Math.sqrt(Math.pow(b[1]-a[1],2)+Math.pow(b[0]-a[0],2))})},a.quadrant=function(a,b){return c(a,b,function(a,b){return b[0]>a[0]?b[1]>a[1]?2:1:b[0]==a[0]?b[1]>a[1]?2:1:b[1]>a[1]?3:4})}),f=(a.theta=function(a,b){return c(a,b,function(a,b){var c=d(a,b),f=Math.atan(c),g=e(a,b);return(4==g||3==g)&&(f+=Math.PI),0>f&&(f+=2*Math.PI),f})},a.intersects=function(a,b){var c=a.x,d=a.x+a.w,e=a.y,f=a.y+a.h,g=b.x,h=b.x+b.w,i=b.y,j=b.y+b.h;return g>=c&&d>=g&&i>=e&&f>=i||h>=c&&d>=h&&i>=e&&f>=i||g>=c&&d>=g&&j>=e&&f>=j||h>=c&&d>=g&&j>=e&&f>=j||c>=g&&h>=c&&e>=i&&j>=e||d>=g&&h>=d&&e>=i&&j>=e||c>=g&&h>=c&&f>=i&&j>=f||d>=g&&h>=c&&f>=i&&j>=f},a.encloses=function(a,b,c){var d=a.x,e=a.x+a.w,f=a.y,g=a.y+a.h,h=b.x,i=b.x+b.w,j=b.y,k=b.y+b.h,l=function(a,b,d,e){return c?b>=a&&d>=e:b>a&&d>e};return l(d,h,e,i)&&l(f,j,g,k)},[null,[1,-1],[1,1],[-1,1],[-1,-1]]),g=[null,[-1,-1],[-1,1],[1,1],[1,-1]];a.pointOnLine=function(a,b,c){var h=d(a,b),i=e(a,b),j=c>0?f[i]:g[i],k=Math.atan(h),l=Math.abs(c*Math.sin(k))*j[1],m=Math.abs(c*Math.cos(k))*j[0];return{x:a.x+m,y:a.y+l}},a.perpendicularLineTo=function(a,b,c){var e=d(a,b),f=Math.atan(-1/e),g=c/2*Math.sin(f),h=c/2*Math.cos(f);return[{x:b.x+h,y:b.y+g},{x:b.x-h,y:b.y-g}]}}.call(this),function(){var a=function(a){return"[object Array]"===Object.prototype.toString.call(a)},b=function(a){return"[object Number]"===Object.prototype.toString.call(a)},c=function(a){return"string"==typeof a},d=function(a){return"boolean"==typeof a},e=function(a){return null==a},f=function(a){return null==a?!1:"[object Object]"===Object.prototype.toString.call(a)},g=function(a){return"[object Date]"===Object.prototype.toString.call(a)},h=function(a){return"[object Function]"===Object.prototype.toString.call(a)},i=function(a){for(var b in a)if(a.hasOwnProperty(b))return!1;return!0};jsPlumbUtil={isArray:a,isString:c,isBoolean:d,isNull:e,isObject:f,isDate:g,isFunction:h,isEmpty:i,isNumber:b,clone:function(b){if(c(b))return""+b;if(d(b))return!!b;if(g(b))return new Date(b.getTime());if(h(b))return b;if(a(b)){for(var e=[],i=0;i<b.length;i++)e.push(this.clone(b[i]));return e}if(f(b)){var j={};for(var k in b)j[k]=this.clone(b[k]);return j}return b},matchesSelector:function(a,b,c){c=c||a.parentNode;for(var d=c.querySelectorAll(b),e=0;e<d.length;e++)if(d[e]===a)return!0;return!1},merge:function(b,e){var g=this.clone(b);for(var h in e)if(null==g[h]||c(e[h])||d(e[h]))g[h]=e[h];else if(a(e[h])){var i=[];a(g[h])&&i.push.apply(i,g[h]),i.push.apply(i,e[h]),g[h]=i}else if(f(e[h])){f(g[h])||(g[h]={});for(var j in e[h])g[h][j]=e[h][j]}return g},replace:function(a,b,c){var d=a,e=d;return b.replace(/([^\.])+/g,function(a,b,d,f){var g=a.match(/([^\[0-9]+){1}(\[)([0-9+])/),h=d+a.length>=f.length,i=function(){return e[g[1]]||function(){return e[g[1]]=[],e[g[1]]}()};if(h)g?i()[g[3]]=c:e[a]=c;else if(g){var j=i();e=j[g[3]]||function(){return j[g[3]]={},j[g[3]]}()}else e=e[a]||function(){return e[a]={},e[a]}()}),a},functionChain:function(a,b,c){for(var d=0;d<c.length;d++){var e=c[d][0][c[d][1]].apply(c[d][0],c[d][2]);if(e===b)return e}return a},populate:function(b,d){var e=function(a){var b=a.match(/(\${.*?})/g);if(null!=b)for(var c=0;c<b.length;c++){var e=d[b[c].substring(2,b[c].length-1)];null!=e&&(a=a.replace(b[c],e))}return a},g=function(b){if(null!=b){if(c(b))return e(b);if(a(b)){for(var d=[],h=0;h<b.length;h++)d.push(g(b[h]));return d}if(f(b)){var i={};for(var j in b)i[j]=g(b[j]);return i}return b}};return g(b)},convertStyle:function(a,b){if("transparent"===a)return a;var c=a,d=function(a){return 1==a.length?"0"+a:a},e=function(a){return d(Number(a).toString(16))},f=/(rgb[a]?\()(.*)(\))/;if(a.match(f)){var g=a.match(f)[2].split(",");c="#"+e(g[0])+e(g[1])+e(g[2]),b||4!=g.length||(c+=e(g[3]))}return c},findWithFunction:function(a,b){if(a)for(var c=0;c<a.length;c++)if(b(a[c]))return c;return-1},indexOf:function(a,b){return a.indexOf?a.indexOf(b):jsPlumbUtil.findWithFunction(a,function(a){return a==b})},removeWithFunction:function(a,b){var c=jsPlumbUtil.findWithFunction(a,b);return c>-1&&a.splice(c,1),-1!=c},remove:function(a,b){var c=jsPlumbUtil.indexOf(a,b);return c>-1&&a.splice(c,1),-1!=c},addWithFunction:function(a,b,c){-1==jsPlumbUtil.findWithFunction(a,c)&&a.push(b)},addToList:function(a,b,c,d){var e=a[b];return null==e&&(e=[],a[b]=e),e[d?"unshift":"push"](c),e},consume:function(a,b){a.stopPropagation?a.stopPropagation():a.returnValue=!1,!b&&a.preventDefault&&a.preventDefault()},extend:function(b,c){var d;for(c=a(c)?c:[c],d=0;d<c.length;d++)for(var e in c[d].prototype)c[d].prototype.hasOwnProperty(e)&&(b.prototype[e]=c[d].prototype[e]);var f=function(a,b){return function(){for(d=0;d<c.length;d++)c[d].prototype[a]&&c[d].prototype[a].apply(this,arguments);return b.apply(this,arguments)}},g=function(a){for(var c in a)b.prototype[c]=f(c,a[c])};if(arguments.length>2)for(d=2;d<arguments.length;d++)g(arguments[d]);return b},uuid:function(){return"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(a){var b=0|16*Math.random(),c="x"==a?b:8|3&b;return c.toString(16)})},logEnabled:!0,log:function(){if(jsPlumbUtil.logEnabled&&"undefined"!=typeof console)try{var a=arguments[arguments.length-1];console.log(a)}catch(b){}},sizeElement:function(a,b,c,d,e){a&&(a.style.height=e+"px",a.height=e,a.style.width=d+"px",a.width=d,a.style.left=b+"px",a.style.top=c+"px")},wrap:function(a,b,c){return a=a||function(){},b=b||function(){},function(){var d=null;try{d=b.apply(this,arguments)}catch(e){jsPlumbUtil.log("jsPlumb function failed : "+e)}if(null==c||d!==c)try{d=a.apply(this,arguments)}catch(e){jsPlumbUtil.log("wrapped function failed : "+e)}return d}},ieVersion:/MSIE\s([\d.]+)/.test(navigator.userAgent)?new Number(RegExp.$1):-1},jsPlumbUtil.oldIE=jsPlumbUtil.ieVersion>-1&&jsPlumbUtil.ieVersion<9,jsPlumbUtil.EventGenerator=function(){var a={},b=!1,c={ready:!0};this.bind=function(b,c,d){return jsPlumbUtil.addToList(a,b,c,d),this},this.fire=function(d,e,f){if(!b&&a[d]){var g=a[d].length,h=0,i=!1,j=null;if(!this.shouldFireEvent||this.shouldFireEvent(d,e,f))for(;!i&&g>h&&j!==!1;){if(c[d])a[d][h].apply(this,[e,f]);else try{j=a[d][h].apply(this,[e,f])}catch(k){jsPlumbUtil.log("jsPlumb: fire failed for event "+d+" : "+k)}h++,(null==a||null==a[d])&&(i=!0)}}return this},this.unbind=function(b){return b?delete a[b]:a={},this},this.getListener=function(b){return a[b]},this.setSuspendEvents=function(a){b=a},this.isSuspendEvents=function(){return b},this.cleanupListeners=function(){for(var b in a)a[b]=null}},jsPlumbUtil.EventGenerator.prototype={cleanup:function(){this.cleanupListeners()}},Function.prototype.bind||(Function.prototype.bind=function(a){if("function"!=typeof this)throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");var b=Array.prototype.slice.call(arguments,1),c=this,d=function(){},e=function(){return c.apply(this instanceof d&&a?this:a,b.concat(Array.prototype.slice.call(arguments)))};return d.prototype=this.prototype,e.prototype=new d,e})}(),function(){var a=!!window.SVGAngle||document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure","1.1"),b=function(){if(void 0===b.vml){var a=document.body.appendChild(document.createElement("div"));a.innerHTML='<v:shape id="vml_flag1" adj="1" />';var c=a.firstChild;null!=c&&null!=c.style?(c.style.behavior="url(#default#VML)",b.vml=c?"object"==typeof c.adj:!0):b.vml=!1,a.parentNode.removeChild(a)}return b.vml},c=function(){var a=-1;if("Microsoft Internet Explorer"==navigator.appName){var b=navigator.userAgent,c=new RegExp("MSIE ([0-9]{1,}[.0-9]{0,})");null!=c.exec(b)&&(a=parseFloat(RegExp.$1))}return a}(),d=c>-1&&9>c,e=function(a,b){if(null==a)return[0,0];var c=j(a),d=i(c,0);return[d[b+"X"],d[b+"Y"]]},f=function(a){return null==a?[0,0]:d?[a.clientX+document.documentElement.scrollLeft,a.clientY+document.documentElement.scrollTop]:e(a,"page")},g=function(a){return e(a,"screen")},h=function(a){return e(a,"client")},i=function(a,b){return a.item?a.item(b):a[b]},j=function(a){return a.touches&&a.touches.length>0?a.touches:a.changedTouches&&a.changedTouches.length>0?a.changedTouches:a.targetTouches&&a.targetTouches.length>0?a.targetTouches:[a]},k=function(a){var b={},c=[],d={},e={},f={};this.register=function(g){var h=a.getId(g),i=jsPlumbAdapter.getOffset(g,a);b[h]||(b[h]=g,c.push(g),d[h]={});var j=function(b){if(b)for(var c=0;c<b.childNodes.length;c++)if(3!=b.childNodes[c].nodeType&&8!=b.childNodes[c].nodeType){var g=jsPlumb.getElementObject(b.childNodes[c]),k=a.getId(b.childNodes[c],null,!0);if(k&&e[k]&&e[k]>0){var l=jsPlumbAdapter.getOffset(g,a);d[h][k]={id:k,offset:{left:l.left-i.left,top:l.top-i.top}},f[k]=h}j(b.childNodes[c])}};j(g)},this.updateOffsets=function(b){if(null!=b){var c=jsPlumb.getDOMElement(b),e=a.getId(c),g=d[e],h=jsPlumbAdapter.getOffset(c,a);if(g)for(var i in g){var j=jsPlumb.getElementObject(i),k=jsPlumbAdapter.getOffset(j,a);d[e][i]={id:i,offset:{left:k.left-h.left,top:k.top-h.top}},f[i]=e}}},this.endpointAdded=function(c){var g=document.body,h=a.getId(c),i=jsPlumbAdapter.getOffset(c,a),j=c.parentNode;for(e[h]=e[h]?e[h]+1:1;null!=j&&j!=g;){var k=a.getId(j,null,!0);if(k&&b[k]){var l=jsPlumbAdapter.getOffset(j,a);null==d[k][h]&&(d[k][h]={id:h,offset:{left:i.left-l.left,top:i.top-l.top}},f[h]=k);break}j=j.parentNode}},this.endpointDeleted=function(a){if(e[a.elementId]&&(e[a.elementId]--,e[a.elementId]<=0))for(var b in d)d[b]&&(delete d[b][a.elementId],delete f[a.elementId])},this.changeId=function(a,b){d[b]=d[a],d[a]={},f[b]=f[a],f[a]=null},this.getElementsForDraggable=function(a){return d[a]},this.elementRemoved=function(a){var b=f[a];b&&(delete d[b][a],delete f[a])},this.reset=function(){b={},c=[],d={},e={}},this.dragEnded=function(b){var c=a.getId(b),d=f[c];d&&this.updateOffsets(d)},this.setParent=function(b,c,e,g){var h=f[c];if(h){d[g]||(d[g]={}),d[g][c]=d[h][c],delete d[h][c];var i=jsPlumbAdapter.getOffset(e,a),j=jsPlumbAdapter.getOffset(b,a);d[g][c].offset={left:j.left-i.left,top:j.top-i.top},f[c]=g}}};window.console||(window.console={time:function(){},timeEnd:function(){},group:function(){},groupEnd:function(){},log:function(){}});var l=function(a){return null==a?null:a.replace(/^\s\s*/,"").replace(/\s\s*$/,"")},m=function(a,b){b=l(b),"undefined"!=typeof a.className.baseVal?a.className.baseVal=b:a.className=b},n=function(a){return"undefined"==typeof a.className.baseVal?a.className:a.className.baseVal},o=function(a,b,c){for(var d=c.split(/\s+/),e=n(a),f=e.split(/\s+/),g=0;g<d.length;g++)if(b)-1==jsPlumbUtil.indexOf(f,d[g])&&f.push(d[g]);else{var h=jsPlumbUtil.indexOf(f,d[g]);-1!=h&&f.splice(h,1)}m(a,f.join(" "))},p=function(a,b){if(null!=a)if("string"==typeof a)b(jsPlumb.getDOMElement(a));else if(null!=a.length)for(var c=0;c<a.length;c++)b(jsPlumb.getDOMElement(a[c]));else b(a)};window.jsPlumbAdapter={headless:!1,pageLocation:f,screenLocation:g,clientLocation:h,getAttribute:function(a,b){return a.getAttribute(b)},setAttribute:function(a,b,c){a.setAttribute(b,c)},appendToRoot:function(a){document.body.appendChild(a)},getRenderModes:function(){return["svg","vml"]},isRenderModeAvailable:function(c){return{svg:a,vml:b()}[c]},getDragManager:function(a){return new k(a)},setRenderMode:function(a){var b;if(a){a=a.toLowerCase();var c=this.isRenderModeAvailable("svg"),d=this.isRenderModeAvailable("vml");"svg"===a?c?b="svg":d&&(b="vml"):d&&(b="vml")}return b},addClass:function(a,b){p(a,function(a){o(a,!0,b)})},hasClass:function(a,b){return a=jsPlumb.getDOMElement(a),a.classList?a.classList.contains(b):-1!=n(a).indexOf(b)},removeClass:function(a,b){p(a,function(a){o(a,!1,b)})},setClass:function(a,b){p(a,function(a){m(a,b)})},setPosition:function(a,b){a.style.left=b.left+"px",a.style.top=b.top+"px"},getPosition:function(a){var b=function(b){var c=a.style[b];return c?c.substring(0,c.length-2):0};return{left:b("left"),top:b("top")}},getOffset:function(a,b,c){a=jsPlumb.getDOMElement(a);for(var d=b.getContainer(),e=a.offsetLeft,f=a.offsetTop,g=c||null!=d&&a.offsetParent!=d?a.offsetParent:null;null!=g;)e+=g.offsetLeft,f+=g.offsetTop,g=c?g.offsetParent:g.offsetParent==d?null:g.offsetParent;return{left:e,top:f}},getPositionOnElement:function(a,b,c){var d="undefined"!=typeof b.getBoundingClientRect?b.getBoundingClientRect():{left:0,top:0,width:0,height:0},e=document.body,f=document.documentElement,g=(b.offsetParent,window.pageYOffset||f.scrollTop||e.scrollTop),h=window.pageXOffset||f.scrollLeft||e.scrollLeft,i=f.clientTop||e.clientTop||0,j=f.clientLeft||e.clientLeft||0,k=0,l=0,m=d.top+g-i+k*c,n=d.left+h-j+l*c,o=jsPlumbAdapter.pageLocation(a),p=d.width||b.offsetWidth*c,q=d.height||b.offsetHeight*c,r=(o[0]-n)/p,s=(o[1]-m)/q;return[r,s]}}}(),function(){"use strict";var a=jsPlumbUtil,b=function(a,b,c){return jsPlumbAdapter.getOffset(a,b,c)},c=function(){return""+(new Date).getTime()},d=function(a){if(a._jsPlumb.paintStyle&&a._jsPlumb.hoverPaintStyle){var b={};t.extend(b,a._jsPlumb.paintStyle),t.extend(b,a._jsPlumb.hoverPaintStyle),delete a._jsPlumb.hoverPaintStyle,b.gradient&&a._jsPlumb.paintStyle.fillStyle&&delete b.gradient,a._jsPlumb.hoverPaintStyle=b}},e=["click","dblclick","mouseenter","mouseout","mousemove","mousedown","mouseup","contextmenu"],f={mouseout:"mouseleave",mouseexit:"mouseleave"},g=function(a,b,c,d){var e=a.getAttachedElements();if(e)for(var f=0,g=e.length;g>f;f++)d&&d==e[f]||e[f].setHover(b,!0,c)},h=function(a){return null==a?null:a.split(" ")},i=function(b,c,d){if(b.getDefaultType){for(var e=b.getTypeDescriptor(),f=a.merge({},b.getDefaultType()),g=0,h=b._jsPlumb.types.length;h>g;g++)f=a.merge(f,b._jsPlumb.instance.getType(b._jsPlumb.types[g],e));c&&(f=a.populate(f,c)),b.applyType(f,d),d||b.repaint()}},j=window.jsPlumbUIComponent=function(b){jsPlumbUtil.EventGenerator.apply(this,arguments);var c=this,d=arguments,g=c.idPrefix,h=g+(new Date).getTime();if(this._jsPlumb={instance:b._jsPlumb,parameters:b.parameters||{},paintStyle:null,hoverPaintStyle:null,paintStyleInUse:null,hover:!1,beforeDetach:b.beforeDetach,beforeDrop:b.beforeDrop,overlayPlacements:[],hoverClass:b.hoverClass||b._jsPlumb.Defaults.HoverClass,types:[]},this.getId=function(){return h},b.events)for(var i in b.events)c.bind(i,b.events[i]);this.clone=function(){var a={};return this.constructor.apply(a,d),a}.bind(this),this.isDetachAllowed=function(b){var c=!0;if(this._jsPlumb.beforeDetach)try{c=this._jsPlumb.beforeDetach(b)}catch(d){a.log("jsPlumb: beforeDetach callback failed",d)}return c},this.isDropAllowed=function(b,c,d,e,f,g,h){var i=this._jsPlumb.instance.checkCondition("beforeDrop",{sourceId:b,targetId:c,scope:d,connection:e,dropEndpoint:f,source:g,target:h});if(this._jsPlumb.beforeDrop)try{i=this._jsPlumb.beforeDrop({sourceId:b,targetId:c,scope:d,connection:e,dropEndpoint:f,source:g,target:h})}catch(j){a.log("jsPlumb: beforeDrop callback failed",j)}return i};var j=[],k=function(a,b,c){j.push([a,b,c]),a.bind(b,c)},l=[],m=function(a,b,c,d){var e=f[c]||c,g=function(a){d&&d(a)===!1||b.fire(e,b,a)};l.push([a,c,g,b]),b._jsPlumb.instance.on(a,c,g)},n=function(a,b,c,d){f[b]||b,d._jsPlumb.instance.off(a,b,c)};this.bindListeners=function(a,b,c){k(a,"click",function(a,c){b.fire("click",b,c)}),k(a,"dblclick",function(a,c){b.fire("dblclick",b,c)}),k(a,"contextmenu",function(a,c){b.fire("contextmenu",b,c)}),k(a,"mouseleave",function(a,d){b.isHover()&&(c(!1),b.fire("mouseleave",b,d))}),k(a,"mouseenter",function(a,d){b.isHover()||(c(!0),b.fire("mouseenter",b,d))}),k(a,"mousedown",function(a,c){b.fire("mousedown",b,c)}),k(a,"mouseup",function(a,c){b.fire("mouseup",b,c)})},this.unbindListeners=function(){for(var a=0;a<j.length;a++){var b=j[a];b[0].unbind(b[1],b[2])}j=null},this.attachListeners=function(a,b,c){c=c||{};for(var d=0,f=e.length;f>d;d++)m(a,b,e[d],c[e[d]])},this.detachListeners=function(){for(var a=0;a<l.length;a++)n(l[a][0],l[a][1],l[a][2],l[a][3]);l=null},this.reattachListenersForElement=function(a){if(arguments.length>1){for(var b=0,c=e.length;c>b;b++)n(a,e[b]);for(b=1,c=arguments.length;c>b;b++)this.attachListeners(a,arguments[b])}}};jsPlumbUtil.extend(j,jsPlumbUtil.EventGenerator,{getParameter:function(a){return this._jsPlumb.parameters[a]},setParameter:function(a,b){this._jsPlumb.parameters[a]=b},getParameters:function(){return this._jsPlumb.parameters},setParameters:function(a){this._jsPlumb.parameters=a},addClass:function(a){jsPlumbAdapter.addClass(this.canvas,a)},removeClass:function(a){jsPlumbAdapter.removeClass(this.canvas,a)},setType:function(a,b,c){this._jsPlumb.types=h(a)||[],i(this,b,c)},getType:function(){return this._jsPlumb.types},reapplyTypes:function(a,b){i(this,a,b)},hasType:function(a){return-1!=jsPlumbUtil.indexOf(this._jsPlumb.types,a)},addType:function(a,b,c){var d=h(a),e=!1;if(null!=d){for(var f=0,g=d.length;g>f;f++)this.hasType(d[f])||(this._jsPlumb.types.push(d[f]),e=!0);e&&i(this,b,c)}},removeType:function(b,c){var d=h(b),e=!1,f=function(b){var c=a.indexOf(this._jsPlumb.types,b);return-1!=c?(this._jsPlumb.types.splice(c,1),!0):!1}.bind(this);if(null!=d){for(var g=0,j=d.length;j>g;g++)e=f(d[g])||e;e&&i(this,null,c)}},toggleType:function(a,b,c){var d=h(a);if(null!=d){for(var e=0,f=d.length;f>e;e++){var g=jsPlumbUtil.indexOf(this._jsPlumb.types,d[e]);-1!=g?this._jsPlumb.types.splice(g,1):this._jsPlumb.types.push(d[e])}i(this,b,c)}},applyType:function(a,b){if(this.setPaintStyle(a.paintStyle,b),this.setHoverPaintStyle(a.hoverPaintStyle,b),a.parameters)for(var c in a.parameters)this.setParameter(c,a.parameters[c])},setPaintStyle:function(a,b){this._jsPlumb.paintStyle=a,this._jsPlumb.paintStyleInUse=this._jsPlumb.paintStyle,d(this),b||this.repaint()},getPaintStyle:function(){return this._jsPlumb.paintStyle},setHoverPaintStyle:function(a,b){this._jsPlumb.hoverPaintStyle=a,d(this),b||this.repaint()},getHoverPaintStyle:function(){return this._jsPlumb.hoverPaintStyle},cleanup:function(){this.unbindListeners(),this.detachListeners()},destroy:function(){this.cleanupListeners(),this.clone=null,this._jsPlumb=null},isHover:function(){return this._jsPlumb.hover},setHover:function(a,b,d){if(this._jsPlumb&&!this._jsPlumb.instance.currentlyDragging&&!this._jsPlumb.instance.isHoverSuspended()){if(this._jsPlumb.hover=a,null!=this.canvas){if(null!=this._jsPlumb.instance.hoverClass){var e=a?"addClass":"removeClass";this._jsPlumb.instance[e](this.canvas,this._jsPlumb.instance.hoverClass)}null!=this._jsPlumb.hoverClass&&this._jsPlumb.instance[e](this.canvas,this._jsPlumb.hoverClass)}null!=this._jsPlumb.hoverPaintStyle&&(this._jsPlumb.paintStyleInUse=a?this._jsPlumb.hoverPaintStyle:this._jsPlumb.paintStyle,this._jsPlumb.instance.isSuspendDrawing()||(d=d||c(),this.repaint({timestamp:d,recalc:!1}))),this.getAttachedElements&&!b&&g(this,a,c(),this)}}});var k="__label",l=function(a,b){for(var c=-1,d=0,e=a._jsPlumb.overlays.length;e>d;d++)if(b===a._jsPlumb.overlays[d].id){c=d;break}return c},m=function(a,b){var c={cssClass:b.cssClass,labelStyle:a.labelStyle,id:k,component:a,_jsPlumb:a._jsPlumb.instance},d=t.extend(c,b);return new(t.Overlays[a._jsPlumb.instance.getRenderMode()].Label)(d)},n=function(b,c){var d=null;if(a.isArray(c)){var e=c[0],f=t.extend({component:b,_jsPlumb:b._jsPlumb.instance},c[1]);3==c.length&&t.extend(f,c[2]),d=new(t.Overlays[b._jsPlumb.instance.getRenderMode()][e])(f)}else d=c.constructor==String?new(t.Overlays[b._jsPlumb.instance.getRenderMode()][c])({component:b,_jsPlumb:b._jsPlumb.instance}):c;b._jsPlumb.overlays.push(d)},o=function(a,b){var c=a.defaultOverlayKeys||[],d=b.overlays,e=function(b){return a._jsPlumb.instance.Defaults[b]||t.Defaults[b]||[]};d||(d=[]);for(var f=0,g=c.length;g>f;f++)d.unshift.apply(d,e(c[f]));return d},p=window.OverlayCapableJsPlumbUIComponent=function(a){j.apply(this,arguments),this._jsPlumb.overlays=[];var b=o(this,a);if(b)for(var c=0,d=b.length;d>c;c++)n(this,b[c]);if(a.label){var e=a.labelLocation||this.defaultLabelLocation||.5,f=a.labelStyle||this._jsPlumb.instance.Defaults.LabelStyle;this._jsPlumb.overlays.push(m(this,{label:a.label,location:e,labelStyle:f}))}};jsPlumbUtil.extend(p,j,{applyType:function(a,b){if(this.removeAllOverlays(b),a.overlays)for(var c=0,d=a.overlays.length;d>c;c++)this.addOverlay(a.overlays[c],!0)},setHover:function(a){if(this._jsPlumb&&!this._jsPlumb.instance.isConnectionBeingDragged())for(var b=0,c=this._jsPlumb.overlays.length;c>b;b++)this._jsPlumb.overlays[b][a?"addClass":"removeClass"](this._jsPlumb.instance.hoverClass)},addOverlay:function(a,b){n(this,a),b||this.repaint()},getOverlay:function(a){var b=l(this,a);return b>=0?this._jsPlumb.overlays[b]:null},getOverlays:function(){return this._jsPlumb.overlays},hideOverlay:function(a){var b=this.getOverlay(a);b&&b.hide()},hideOverlays:function(){for(var a=0,b=this._jsPlumb.overlays.length;b>a;a++)this._jsPlumb.overlays[a].hide()},showOverlay:function(a){var b=this.getOverlay(a);b&&b.show()},showOverlays:function(){for(var a=0,b=this._jsPlumb.overlays.length;b>a;a++)this._jsPlumb.overlays[a].show()},removeAllOverlays:function(a){for(var b=0,c=this._jsPlumb.overlays.length;c>b;b++)this._jsPlumb.overlays[b].cleanup&&this._jsPlumb.overlays[b].cleanup();this._jsPlumb.overlays.splice(0,this._jsPlumb.overlays.length),this._jsPlumb.overlayPositions=null,a||this.repaint()},removeOverlay:function(a){var b=l(this,a);if(-1!=b){var c=this._jsPlumb.overlays[b];c.cleanup&&c.cleanup(),this._jsPlumb.overlays.splice(b,1),this._jsPlumb.overlayPositions&&delete this._jsPlumb.overlayPositions[a]}},removeOverlays:function(){for(var a=0,b=arguments.length;b>a;a++)this.removeOverlay(arguments[a])},moveParent:function(a){this.bgCanvas&&(this.bgCanvas.parentNode.removeChild(this.bgCanvas),a.appendChild(this.bgCanvas)),this.canvas.parentNode.removeChild(this.canvas),a.appendChild(this.canvas);for(var b=0;b<this._jsPlumb.overlays.length;b++)this._jsPlumb.overlays[b].isAppendedAtTopLevel&&(this._jsPlumb.overlays[b].canvas.parentNode.removeChild(this._jsPlumb.overlays[b].canvas),a.appendChild(this._jsPlumb.overlays[b].canvas))},getLabel:function(){var a=this.getOverlay(k);return null!=a?a.getLabel():null},getLabelOverlay:function(){return this.getOverlay(k)},setLabel:function(a){var b=this.getOverlay(k);if(b)a.constructor==String||a.constructor==Function?b.setLabel(a):(a.label&&b.setLabel(a.label),a.location&&b.setLocation(a.location));else{var c=a.constructor==String||a.constructor==Function?{label:a}:a;b=m(this,c),this._jsPlumb.overlays.push(b)}this._jsPlumb.instance.isSuspendDrawing()||this.repaint()},cleanup:function(){for(var a=0;a<this._jsPlumb.overlays.length;a++)this._jsPlumb.overlays[a].cleanup(),this._jsPlumb.overlays[a].destroy();this._jsPlumb.overlays.splice(0),this._jsPlumb.overlayPositions=null},setVisible:function(a){this[a?"showOverlays":"hideOverlays"]()},setAbsoluteOverlayPosition:function(a,b){this._jsPlumb.overlayPositions=this._jsPlumb.overlayPositions||{},this._jsPlumb.overlayPositions[a.id]=b},getAbsoluteOverlayPosition:function(a){return this._jsPlumb.overlayPositions?this._jsPlumb.overlayPositions[a.id]:null}});var q=0,r=function(){var a=q+1;return q++,a},s=window.jsPlumbInstance=function(d){this.Defaults={Anchor:"BottomCenter",Anchors:[null,null],ConnectionsDetachable:!0,ConnectionOverlays:[],Connector:"Bezier",Container:null,DoNotThrowErrors:!1,DragOptions:{},DropOptions:{},Endpoint:"Dot",EndpointOverlays:[],Endpoints:[null,null],EndpointStyle:{fillStyle:"#456"},EndpointStyles:[null,null],EndpointHoverStyle:null,EndpointHoverStyles:[null,null],HoverPaintStyle:null,LabelStyle:{color:"black"},LogEnabled:!1,Overlays:[],MaxConnections:1,PaintStyle:{lineWidth:8,strokeStyle:"#456"},ReattachConnections:!1,RenderMode:"svg",Scope:"jsPlumb_DefaultScope"},d&&t.extend(this.Defaults,d),this.logEnabled=this.Defaults.LogEnabled,this._connectionTypes={},this._endpointTypes={},jsPlumbUtil.EventGenerator.apply(this);var e=this,f=r(),g=e.bind,h={},i=1,k=function(a){var b=e.getDOMElement(a);return{el:b,id:jsPlumbUtil.isString(a)&&null==b?a:Y(b)}};this.getInstanceIndex=function(){return f},this.setZoom=function(a,b){return jsPlumbUtil.oldIE||(i=a,e.fire("zoom",i),b&&e.repaintEverything()),!jsPlumbUtil.oldIE},this.getZoom=function(){return i};for(var l in this.Defaults)h[l]=this.Defaults[l];var m;this.setContainer=function(a){a=this.getDOMElement(a),this.select().each(function(b){b.moveParent(a)}),this.selectEndpoints().each(function(b){b.moveParent(a)}),m=a},this.getContainer=function(){return m},this.bind=function(a,b){"ready"===a&&o?b():g.apply(e,[a,b])},e.importDefaults=function(a){for(var b in a)e.Defaults[b]=a[b];return a.Container&&this.setContainer(a.Container),e},e.restoreDefaults=function(){return e.Defaults=t.extend({},h),e};var n=null,o=!1,p=[],q={},s={},u={},v={},w={},x={},y=!1,z=[],A=!1,B=null,C=this.Defaults.Scope,D=null,E=1,F=function(){return""+E++},G=function(a,b){m?m.appendChild(a):b?t.getDOMElement(b).appendChild(a):e.appendToRoot(a)},H=function(a){return a._nodes?a._nodes:a},I=function(a,b,d,f){if(!jsPlumbAdapter.headless&&!A){var g=Y(a),h=e.dragManager.getElementsForDraggable(g);null==d&&(d=c());var i=W({elId:g,offset:b,recalc:!1,timestamp:d});if(h)for(var j in h)W({elId:h[j].id,offset:{left:i.o.left+h[j].offset.left,top:i.o.top+h[j].offset.top},recalc:!1,timestamp:d});if(e.anchorManager.redraw(g,b,d,null,f),h)for(var k in h)e.anchorManager.redraw(h[k].id,b,d,h[k].offset,f,!0)}},J=function(b,c){var d,f,g,h=null;if(a.isArray(b)){h=[];for(var i=0,j=b.length;j>i;i++)d=e.getElementObject(b[i]),g=e.getDOMElement(d),f=e.getAttribute(g,"id"),h.push(c.apply(e,[g,f]))}else d=e.getDOMElement(b),f=e.getId(d),h=c.apply(e,[d,f]);return h},K=function(a){return s[a]},L=function(b,c,d){if(!jsPlumbAdapter.headless){var f=null==c?!1:c;if(f&&t.isDragSupported(b,e)&&!t.isAlreadyDraggable(b,e)){var g=d||e.Defaults.DragOptions;g=t.extend({},g);var h=t.dragEvents.drag,i=t.dragEvents.stop,j=t.dragEvents.start;g[j]=a.wrap(g[j],function(){return e.setHoverSuspended(!0),e.select({source:b}).addClass(e.elementDraggingClass+" "+e.sourceElementDraggingClass,!0),e.select({target:b}).addClass(e.elementDraggingClass+" "+e.targetElementDraggingClass,!0),e.setConnectionBeingDragged(!0),g.canDrag?d.canDrag():void 0},!1),g[h]=a.wrap(g[h],function(){var a=e.getUIPosition(arguments,e.getZoom());I(b,a,null,!0),e.addClass(b,"jsPlumb_dragged")}),g[i]=a.wrap(g[i],function(){var a=e.getUIPosition(arguments,e.getZoom(),!0);I(b,a),e.removeClass(b,"jsPlumb_dragged"),e.setHoverSuspended(!1),e.select({source:b}).removeClass(e.elementDraggingClass+" "+e.sourceElementDraggingClass,!0),e.select({target:b}).removeClass(e.elementDraggingClass+" "+e.targetElementDraggingClass,!0),e.setConnectionBeingDragged(!1),e.dragManager.dragEnded(b)});var k=Y(b);x[k]=!0;var l=x[k];g.disabled=null==l?!1:!l,e.initDraggable(b,g,!1),e.dragManager.register(b)}}},M=function(b,c){var d=t.extend({},b);if(c&&t.extend(d,c),d.source&&(d.source.endpoint?d.sourceEndpoint=d.source:d.source=e.getDOMElement(d.source)),d.target&&(d.target.endpoint?d.targetEndpoint=d.target:d.target=e.getDOMElement(d.target)),b.uuids&&(d.sourceEndpoint=K(b.uuids[0]),d.targetEndpoint=K(b.uuids[1])),d.sourceEndpoint&&d.sourceEndpoint.isFull())return a.log(e,"could not add connection; source endpoint is full"),void 0;if(d.targetEndpoint&&d.targetEndpoint.isFull())return a.log(e,"could not add connection; target endpoint is full"),void 0;if(!d.type&&d.sourceEndpoint&&(d.type=d.sourceEndpoint.connectionType),d.sourceEndpoint&&d.sourceEndpoint.connectorOverlays){d.overlays=d.overlays||[];
 for(var f=0,g=d.sourceEndpoint.connectorOverlays.length;g>f;f++)d.overlays.push(d.sourceEndpoint.connectorOverlays[f])}!d["pointer-events"]&&d.sourceEndpoint&&d.sourceEndpoint.connectorPointerEvents&&(d["pointer-events"]=d.sourceEndpoint.connectorPointerEvents);var h,i,j;if(d.target&&!d.target.endpoint&&!d.targetEndpoint&&!d.newConnection&&(h=Y(d.target),i=this.targetEndpointDefinitions[h])){if(!i.enabled)return;i.isTarget=!0,j=null!=i.endpoint&&i.endpoint._jsPlumb?i.endpoint:e.addEndpoint(d.target,i.def),i.uniqueEndpoint&&(i.endpoint=j),d.targetEndpoint=j,j._doNotDeleteOnDetach=!1,j._deleteOnDetach=!0}if(d.source&&!d.source.endpoint&&!d.sourceEndpoint&&!d.newConnection&&(h=Y(d.source),i=this.sourceEndpointDefinitions[h])){if(!i.enabled)return;j=null!=i.endpoint&&i.endpoint._jsPlumb?i.endpoint:e.addEndpoint(d.source,i.def),i.uniqueEndpoint&&(i.endpoint=j),d.sourceEndpoint=j,j._doNotDeleteOnDetach=!1,j._deleteOnDetach=!0}return d}.bind(e),N=function(a){var b=e.Defaults.ConnectionType||e.getDefaultConnectionType();e.Defaults.EndpointType||t.Endpoint,a._jsPlumb=e,a.newConnection=N,a.newEndpoint=Q,a.endpointsByUUID=s,a.endpointsByElement=q,a.finaliseConnection=O;var c=new b(a);return c.id="con_"+F(),P("click","click",c),P("dblclick","dblclick",c),P("contextmenu","contextmenu",c),c.isDetachable()&&(c.endpoints[0].initDraggable(),c.endpoints[1].initDraggable()),c},O=function(a,b,c,d){if(b=b||{},a.suspendedEndpoint||p.push(a),(null==a.suspendedEndpoint||d)&&e.anchorManager.newConnection(a),I(a.source),!b.doNotFireConnectionEvent&&b.fireEvent!==!1){var f={connection:a,source:a.source,target:a.target,sourceId:a.sourceId,targetId:a.targetId,sourceEndpoint:a.endpoints[0],targetEndpoint:a.endpoints[1]};e.fire("connection",f,c)}},P=function(a,b,c){c.bind(a,function(a,d){e.fire(b,c,d)})},Q=function(a){var b=e.Defaults.EndpointType||t.Endpoint,c=t.extend({},a);c._jsPlumb=e,c.newConnection=N,c.newEndpoint=Q,c.endpointsByUUID=s,c.endpointsByElement=q,c.finaliseConnection=O,c.fireDetachEvent=_,c.fireMoveEvent=ab,c.floatingConnections=w,c.elementId=Y(c.source);var d=new b(c);return d.id="ep_"+F(),P("click","endpointClick",d),P("dblclick","endpointDblClick",d),P("contextmenu","contextmenu",d),jsPlumbAdapter.headless||e.dragManager.endpointAdded(c.source),d},R=function(a,b,c){var d=q[a];if(d&&d.length)for(var e=0,f=d.length;f>e;e++){for(var g=0,h=d[e].connections.length;h>g;g++){var i=b(d[e].connections[g]);if(i)return}c&&c(d[e])}},S=function(a,b){return J(a,function(a,c){x[c]=b,this.isDragSupported(a)&&this.setElementDraggable(a,b)})},T=function(a,b,c){b="block"===b;var d=null;c&&(d=b?function(a){a.setVisible(!0,!0,!0)}:function(a){a.setVisible(!1,!0,!0)});var e=k(a);R(e.id,function(a){if(b&&c){var d=a.sourceId===e.id?1:0;a.endpoints[d].isVisible()&&a.setVisible(!0)}else a.setVisible(b)},d)},U=function(a){return J(a,function(a,b){var c=null==x[b]?!1:x[b];return c=!c,x[b]=c,this.setDraggable(a,c),c})},V=function(a,b){var c=null;b&&(c=function(a){var b=a.isVisible();a.setVisible(!b)}),R(a,function(a){var b=a.isVisible();a.setVisible(!b)},c)},W=this.updateOffset=function(a){var c,d=a.timestamp,f=a.recalc,g=a.offset,h=a.elId;return A&&!d&&(d=B),!f&&d&&d===v[h]?{o:a.offset||u[h],s:z[h]}:(f||!g?(c=document.getElementById(h),null!=c&&(z[h]=e.getSize(c),u[h]=b(c,e),v[h]=d)):(u[h]=g,null==z[h]&&(c=document.getElementById(h),null!=c&&(z[h]=e.getSize(c))),v[h]=d),u[h]&&!u[h].right&&(u[h].right=u[h].left+z[h][0],u[h].bottom=u[h].top+z[h][1],u[h].width=z[h][0],u[h].height=z[h][1],u[h].centerx=u[h].left+u[h].width/2,u[h].centery=u[h].top+u[h].height/2),{o:u[h],s:z[h]})},X=function(a){var b=u[a];return b?{o:b,s:z[a]}:W({elId:a})},Y=function(a,b,c){if(jsPlumbUtil.isString(a))return a;if(null==a)return null;var d=e.getAttribute(a,"id");return d&&"undefined"!==d||(2==arguments.length&&void 0!==arguments[1]?d=b:(1==arguments.length||3==arguments.length&&!arguments[2])&&(d="jsPlumb_"+f+"_"+F()),c||e.setAttribute(a,"id",d)),d};this.setConnectionBeingDragged=function(a){y=a},this.isConnectionBeingDragged=function(){return y},this.connectorClass="_jsPlumb_connector",this.hoverClass="_jsPlumb_hover",this.endpointClass="_jsPlumb_endpoint",this.endpointConnectedClass="_jsPlumb_endpoint_connected",this.endpointFullClass="_jsPlumb_endpoint_full",this.endpointDropAllowedClass="_jsPlumb_endpoint_drop_allowed",this.endpointDropForbiddenClass="_jsPlumb_endpoint_drop_forbidden",this.overlayClass="_jsPlumb_overlay",this.draggingClass="_jsPlumb_dragging",this.elementDraggingClass="_jsPlumb_element_dragging",this.sourceElementDraggingClass="_jsPlumb_source_element_dragging",this.targetElementDraggingClass="_jsPlumb_target_element_dragging",this.endpointAnchorClassPrefix="_jsPlumb_endpoint_anchor",this.hoverSourceClass="_jsPlumb_source_hover",this.hoverTargetClass="_jsPlumb_target_hover",this.dragSelectClass="_jsPlumb_drag_select",this.Anchors={},this.Connectors={svg:{},vml:{}},this.Endpoints={svg:{},vml:{}},this.Overlays={svg:{},vml:{}},this.ConnectorRenderers={},this.SVG="svg",this.VML="vml",this.addEndpoint=function(b,c,d){d=d||{};var f=t.extend({},d);t.extend(f,c),f.endpoint=f.endpoint||e.Defaults.Endpoint,f.paintStyle=f.paintStyle||e.Defaults.EndpointStyle,b=H(b);for(var g=[],h=a.isArray(b)||null!=b.length&&!a.isString(b)?b:[b],i=0,j=h.length;j>i;i++){var k=e.getDOMElement(h[i]),l=Y(k);f.source=k,qb(f.source),W({elId:l,timestamp:B});var m=Q(f);f.parentAnchor&&(m.parentAnchor=f.parentAnchor),a.addToList(q,l,m);var n=u[l],o=z[l],p=m.anchor.compute({xy:[n.left,n.top],wh:o,element:m,timestamp:B}),r={anchorLoc:p,timestamp:B};A&&(r.recalc=!1),A||m.paint(r),g.push(m),m._doNotDeleteOnDetach=!0}return 1==g.length?g[0]:g},this.addEndpoints=function(b,c,d){for(var f=[],g=0,h=c.length;h>g;g++){var i=e.addEndpoint(b,c[g],d);a.isArray(i)?Array.prototype.push.apply(f,i):f.push(i)}return f},this.animate=function(b,c,d){d=d||{};var f=this.getElementObject(b),g=this.getDOMElement(b),h=Y(g),i=t.animEvents.step,j=t.animEvents.complete;d[i]=a.wrap(d[i],function(){e.repaint(h)}),d[j]=a.wrap(d[j],function(){e.repaint(h)}),e.doAnimate(f,c,d)},this.checkCondition=function(b,c){var d=e.getListener(b),f=!0;if(d&&d.length>0)try{for(var g=0,h=d.length;h>g;g++)f=f&&d[g](c)}catch(i){a.log(e,"cannot check condition ["+b+"]"+i)}return f},this.checkASyncCondition=function(b,c,d,f){var g=e.getListener(b);if(g&&g.length>0)try{g[0](c,d,f)}catch(h){a.log(e,"cannot asynchronously check condition ["+b+"]"+h)}},this.connect=function(a,b){var c,d=M(a,b);return d&&(qb(d.source),c=N(d),O(c,d)),c};var Z=[{el:"source",elId:"sourceId",epDefs:"sourceEndpointDefinitions"},{el:"target",elId:"targetId",epDefs:"targetEndpointDefinitions"}],$=function(a,b,c,d){var e,f,g,h=Z[c],i=a[h.elId],j=(a[h.el],a.endpoints[c]),k={index:c,originalSourceId:0===c?i:a.sourceId,newSourceId:a.sourceId,originalTargetId:1==c?i:a.targetId,newTargetId:a.targetId,connection:a};if(b.constructor==t.Endpoint)e=b,e.addConnection(a);else if(f=Y(b),g=this[h.epDefs][f],f===a[h.elId])e=null;else if(g){if(!g.enabled)return;e=null!=g.endpoint&&g.endpoint._jsPlumb?g.endpoint:this.addEndpoint(b,g.def),g.uniqueEndpoint&&(g.endpoint=e),e._doNotDeleteOnDetach=!1,e._deleteOnDetach=!0,e.addConnection(a)}else e=a.makeEndpoint(0===c,b,f),e._doNotDeleteOnDetach=!1,e._deleteOnDetach=!0;return null!=e&&(j.detachFromConnection(a),a.endpoints[c]=e,a[h.el]=e.element,a[h.elId]=e.elementId,k[0===c?"newSourceId":"newTargetId"]=e.elementId,ab(k),d||a.repaint()),k}.bind(this);this.setSource=function(a,b,c){var d=$(a,b,0,c);this.anchorManager.sourceChanged(d.originalSourceId,d.newSourceId,a)},this.setTarget=function(a,b,c){var d=$(a,b,1,c);this.anchorManager.updateOtherEndpoint(d.originalSourceId,d.originalTargetId,d.newTargetId,a)},this.deleteEndpoint=function(a,b){var c=e.setSuspendDrawing(!0),d="string"==typeof a?s[a]:a;return d&&e.deleteObject({endpoint:d}),c||e.setSuspendDrawing(!1,b),e},this.deleteEveryEndpoint=function(){var a=e.setSuspendDrawing(!0);for(var b in q){var c=q[b];if(c&&c.length)for(var d=0,f=c.length;f>d;d++)e.deleteEndpoint(c[d],!0)}return q={},s={},e.anchorManager.reset(),e.dragManager.reset(),a||e.setSuspendDrawing(!1),e};var _=function(a,b,c){var d=e.Defaults.ConnectionType||e.getDefaultConnectionType(),f=a.constructor==d,g=f?{connection:a,source:a.source,target:a.target,sourceId:a.sourceId,targetId:a.targetId,sourceEndpoint:a.endpoints[0],targetEndpoint:a.endpoints[1]}:a;b&&e.fire("connectionDetached",g,c),e.anchorManager.connectionDetached(g)},ab=function(a,b){e.fire("connectionMoved",a,b)};this.unregisterEndpoint=function(a){a._jsPlumb.uuid&&(s[a._jsPlumb.uuid]=null),e.anchorManager.deleteEndpoint(a);for(var b in q){var c=q[b];if(c){for(var d=[],f=0,g=c.length;g>f;f++)c[f]!=a&&d.push(c[f]);q[b]=d}q[b].length<1&&delete q[b]}},this.detach=function(){if(0!==arguments.length){var a=e.Defaults.ConnectionType||e.getDefaultConnectionType(),b=arguments[0].constructor==a,c=2==arguments.length?b?arguments[1]||{}:arguments[0]:arguments[0],d=c.fireEvent!==!1,f=c.forceDetach,g=b?arguments[0]:c.connection;if(g)(f||jsPlumbUtil.functionChain(!0,!1,[[g.endpoints[0],"isDetachAllowed",[g]],[g.endpoints[1],"isDetachAllowed",[g]],[g,"isDetachAllowed",[g]],[e,"checkCondition",["beforeDetach",g]]]))&&g.endpoints[0].detach(g,!1,!0,d);else{var h=t.extend({},c);if(h.uuids)K(h.uuids[0]).detachFrom(K(h.uuids[1]),d);else if(h.sourceEndpoint&&h.targetEndpoint)h.sourceEndpoint.detachFrom(h.targetEndpoint);else{var i=Y(e.getDOMElement(h.source)),j=Y(e.getDOMElement(h.target));R(i,function(a){(a.sourceId==i&&a.targetId==j||a.targetId==i&&a.sourceId==j)&&e.checkCondition("beforeDetach",a)&&a.endpoints[0].detach(a,!1,!0,d)})}}}},this.detachAllConnections=function(a,b){b=b||{},a=e.getDOMElement(a);var c=Y(a),d=q[c];if(d&&d.length)for(var f=0,g=d.length;g>f;f++)d[f].detachAll(b.fireEvent!==!1);return e},this.detachEveryConnection=function(a){return a=a||{},e.doWhileSuspended(function(){for(var b in q){var c=q[b];if(c&&c.length)for(var d=0,e=c.length;e>d;d++)c[d].detachAll(a.fireEvent!==!1)}p.splice(0)}),e},this.deleteObject=function(a){var b={endpoints:{},connections:{},endpointCount:0,connectionCount:0},c=a.fireEvent!==!1,d=a.deleteAttachedObjects!==!1,f=function(a){if(null!=a&&null==b.connections[a.id]&&(null!=a._jsPlumb&&a.setHover(!1),b.connections[a.id]=a,b.connectionCount++,d))for(var c=0;c<a.endpoints.length;c++)a.endpoints[c]._deleteOnDetach&&g(a.endpoints[c])},g=function(a){if(null!=a&&null==b.endpoints[a.id]&&(null!=a._jsPlumb&&a.setHover(!1),b.endpoints[a.id]=a,b.endpointCount++,d))for(var c=0;c<a.connections.length;c++){var e=a.connections[c];f(e)}};a.connection?f(a.connection):g(a.endpoint);for(var h in b.connections){var i=b.connections[h];i._jsPlumb&&(jsPlumbUtil.removeWithFunction(p,function(a){return i.id==a.id}),_(i,c,a.originalEvent),i.endpoints[0].detachFromConnection(i),i.endpoints[1].detachFromConnection(i),i.cleanup(),i.destroy())}for(var j in b.endpoints){var k=b.endpoints[j];k._jsPlumb&&(e.unregisterEndpoint(k),k.cleanup(),k.destroy())}return b},this.draggable=function(a,b){var c,d,f;if("object"==typeof a&&a.length)for(c=0,d=a.length;d>c;c++)f=e.getDOMElement(a[c]),f&&L(f,!0,b);else if(a._nodes)for(c=0,d=a._nodes.length;d>c;c++)f=e.getDOMElement(a._nodes[c]),f&&L(f,!0,b);else f=e.getDOMElement(a),f&&L(f,!0,b);return e};var bb=function(a,b,c,d){for(var e=0,f=a.length;f>e;e++)a[e][b].apply(a[e],c);return d(a)},cb=function(a,b,c){for(var d=[],e=0,f=a.length;f>e;e++)d.push([a[e][b].apply(a[e],c),a[e]]);return d},db=function(a,b,c){return function(){return bb(a,b,arguments,c)}},eb=function(a,b){return function(){return cb(a,b,arguments)}},fb=function(a,b){var c=[];if(a)if("string"==typeof a){if("*"===a)return a;c.push(a)}else if(b)c=a;else if(a.length)for(var d=0,e=a.length;e>d;d++)c.push(k(a[d]).id);else c.push(k(a).id);return c},gb=function(a,b,c){return"*"===a?!0:a.length>0?-1!=jsPlumbUtil.indexOf(a,b):!c};this.getConnections=function(a,b){a?a.constructor==String&&(a={scope:a}):a={};for(var c=a.scope||e.getDefaultScope(),d=fb(c,!0),f=fb(a.source),g=fb(a.target),h=!b&&d.length>1?{}:[],i=function(a,c){if(!b&&d.length>1){var e=h[a];null==e&&(e=h[a]=[]),e.push(c)}else h.push(c)},j=0,k=p.length;k>j;j++){var l=p[j];gb(d,l.scope)&&gb(f,l.sourceId)&&gb(g,l.targetId)&&i(l.scope,l)}return h};var hb=function(a,b){return function(c){for(var d=0,e=a.length;e>d;d++)c(a[d]);return b(a)}},ib=function(a){return function(b){return a[b]}},jb=function(a,b){var c,d,e={length:a.length,each:hb(a,b),get:ib(a)},f=["setHover","removeAllOverlays","setLabel","addClass","addOverlay","removeOverlay","removeOverlays","showOverlay","hideOverlay","showOverlays","hideOverlays","setPaintStyle","setHoverPaintStyle","setSuspendEvents","setParameter","setParameters","setVisible","repaint","addType","toggleType","removeType","removeClass","setType","bind","unbind"],g=["getLabel","getOverlay","isHover","getParameter","getParameters","getPaintStyle","getHoverPaintStyle","isVisible","hasType","getType","isSuspendEvents"];for(c=0,d=f.length;d>c;c++)e[f[c]]=db(a,f[c],b);for(c=0,d=g.length;d>c;c++)e[g[c]]=eb(a,g[c]);return e},kb=function(a){var b=jb(a,kb);return t.extend(b,{setDetachable:db(a,"setDetachable",kb),setReattach:db(a,"setReattach",kb),setConnector:db(a,"setConnector",kb),detach:function(){for(var b=0,c=a.length;c>b;b++)e.detach(a[b])},isDetachable:eb(a,"isDetachable"),isReattach:eb(a,"isReattach")})},lb=function(a){var b=jb(a,lb);return t.extend(b,{setEnabled:db(a,"setEnabled",lb),setAnchor:db(a,"setAnchor",lb),isEnabled:eb(a,"isEnabled"),detachAll:function(){for(var b=0,c=a.length;c>b;b++)a[b].detachAll()},remove:function(){for(var b=0,c=a.length;c>b;b++)e.deleteObject({endpoint:a[b]})}})};this.select=function(a){return a=a||{},a.scope=a.scope||"*",kb(a.connections||e.getConnections(a,!0))},this.selectEndpoints=function(a){a=a||{},a.scope=a.scope||"*";var b=!a.element&&!a.source&&!a.target,c=b?"*":fb(a.element),d=b?"*":fb(a.source),e=b?"*":fb(a.target),f=fb(a.scope,!0),g=[];for(var h in q){var i=gb(c,h,!0),j=gb(d,h,!0),k="*"!=d,l=gb(e,h,!0),m="*"!=e;if(i||j||l)a:for(var n=0,o=q[h].length;o>n;n++){var p=q[h][n];if(gb(f,p.scope,!0)){var r=k&&d.length>0&&!p.isSource,s=m&&e.length>0&&!p.isTarget;if(r||s)continue a;g.push(p)}}}return lb(g)},this.getAllConnections=function(){return p},this.getDefaultScope=function(){return C},this.getEndpoint=K,this.getEndpoints=function(a){return q[k(a).id]},this.getDefaultEndpointType=function(){return t.Endpoint},this.getDefaultConnectionType=function(){return t.Connection},this.getId=Y,this.getOffset=function(a){return u[a],W({elId:a})},this.appendElement=G;var mb=!1;this.isHoverSuspended=function(){return mb},this.setHoverSuspended=function(a){mb=a};var nb=function(a){return function(){return jsPlumbAdapter.isRenderModeAvailable(a)}};this.isSVGAvailable=nb("svg"),this.isVMLAvailable=nb("vml"),this.hide=function(a,b){return T(a,"none",b),e},this.idstamp=F,this.connectorsInitialized=!1;var ob=[],pb=["svg","vml"];this.registerConnectorType=function(a,b){ob.push([a,b])};var qb=function(a){if(!m&&a){var b=e.getDOMElement(a);b.offsetParent&&(m=b.offsetParent)}},rb=function(){e.Defaults.Container&&(m=e.getDOMElement(e.Defaults.Container))};this.init=function(){var a=function(a,b,c){t.Connectors[a][b]=function(){c.apply(this,arguments),t.ConnectorRenderers[a].apply(this,arguments)},jsPlumbUtil.extend(t.Connectors[a][b],[c,t.ConnectorRenderers[a]])};if(!t.connectorsInitialized){for(var b=0;b<ob.length;b++)for(var c=0;c<pb.length;c++)a(pb[c],ob[b][1],ob[b][0]);t.connectorsInitialized=!0}o||(rb(),e.anchorManager=new t.AnchorManager({jsPlumbInstance:e}),e.setRenderMode(e.Defaults.RenderMode),o=!0,e.fire("ready",e))}.bind(this),this.log=n,this.jsPlumbUIComponent=j,this.makeAnchor=function(){var b,c=function(a,b){if(t.Anchors[a])return new t.Anchors[a](b);if(!e.Defaults.DoNotThrowErrors)throw{msg:"jsPlumb: unknown anchor type '"+a+"'"}};if(0===arguments.length)return null;var d=arguments[0],f=arguments[1],g=arguments[2],h=null;if(d.compute&&d.getOrientation)return d;if("string"==typeof d)h=c(arguments[0],{elementId:f,jsPlumbInstance:e});else if(a.isArray(d))if(a.isArray(d[0])||a.isString(d[0]))2==d.length&&a.isObject(d[1])?a.isString(d[0])?(b=t.extend({elementId:f,jsPlumbInstance:e},d[1]),h=c(d[0],b)):(b=t.extend({elementId:f,jsPlumbInstance:e,anchors:d[0]},d[1]),h=new t.DynamicAnchor(b)):h=new t.DynamicAnchor({anchors:d,selector:null,elementId:f,jsPlumbInstance:g});else{var i={x:d[0],y:d[1],orientation:d.length>=4?[d[2],d[3]]:[0,0],offsets:d.length>=6?[d[4],d[5]]:[0,0],elementId:f,jsPlumbInstance:g,cssClass:7==d.length?d[6]:null};h=new t.Anchor(i),h.clone=function(){return new t.Anchor(i)}}return h.id||(h.id="anchor_"+F()),h},this.makeAnchors=function(b,c,d){for(var f=[],g=0,h=b.length;h>g;g++)"string"==typeof b[g]?f.push(t.Anchors[b[g]]({elementId:c,jsPlumbInstance:d})):a.isArray(b[g])&&f.push(e.makeAnchor(b[g],c,d));return f},this.makeDynamicAnchor=function(a,b){return new t.DynamicAnchor({anchors:a,selector:b,elementId:null,jsPlumbInstance:e})},this.targetEndpointDefinitions={};var sb=function(a,b,c){a.paintStyle=a.paintStyle||c.Defaults.EndpointStyles[b]||c.Defaults.EndpointStyle,a.hoverPaintStyle=a.hoverPaintStyle||c.Defaults.EndpointHoverStyles[b]||c.Defaults.EndpointHoverStyle,a.anchor=a.anchor||c.Defaults.Anchors[b]||c.Defaults.Anchor,a.endpoint=a.endpoint||c.Defaults.Endpoints[b]||c.Defaults.Endpoint};this.sourceEndpointDefinitions={};var tb=function(a,b,c,d,e){for(var f=a.target||a.srcElement,g=!1,h=d.getSelector(b,c),i=0;i<h.length;i++)if(h[i]==f){g=!0;break}return e?!g:g};this.makeTarget=function(c,d,f){var g=t.extend({_jsPlumb:this},f);t.extend(g,d),sb(g,1,this);var h=g.scope||e.Defaults.Scope,i=!(g.deleteEndpointsOnDetach===!1),l=g.maxConnections||-1,m=g.onMaxConnections,n=function(c){var d=k(c),e=d.id,f=new j(g),n=t.extend({},g.dropOptions||{});qb(e),this.targetEndpointDefinitions[e]={def:g,uniqueEndpoint:g.uniqueEndpoint,maxConnections:l,enabled:!0};var o=function(){this.currentlyDragging=!1;var a=this.getDropEvent(arguments),c=this.select({target:e}).length,h=this.getDOMElement(this.getDragObject(arguments)),j=this.getAttribute(h,"dragId"),k=this.getAttribute(h,"originalScope"),l=w[j],n=l.endpoints[0].isFloating()?0:1,o=l.endpoints[0],p=(g.endpoint?t.extend({},g.endpoint):{},this.targetEndpointDefinitions[e]);if(!p.enabled||p.maxConnections>0&&c>=p.maxConnections)return m&&m({element:d.el,connection:l},a),!1;if(o.anchor.locked=!1,k&&this.setDragScope(h,k),null==l.suspendedEndpoint&&!l.pending)return!1;var q=f.isDropAllowed(0===n?e:l.sourceId,0===n?l.targetId:e,l.scope,l,null,0===n?d.el:l.source,0===n?l.target:d.el);if(l.suspendedEndpoint){l[n?"targetId":"sourceId"]=l.suspendedEndpoint.elementId,l[n?"target":"source"]=l.suspendedEndpoint.element,l.endpoints[n]=l.suspendedEndpoint;var r=(l.suspendedEndpoint.getElement(),l.suspendedEndpoint.elementId);ab({index:n,originalSourceId:0===n?r:l.sourceId,newSourceId:0===n?e:l.sourceId,originalTargetId:1==n?r:l.targetId,newTargetId:1==n?e:l.targetId,connection:l},a)}if(q){var s=this.getElementObject(d.el),u=p.endpoint;if((null==u||null==u._jsPlumb)&&(u=this.addEndpoint(s,g)),g.uniqueEndpoint&&(p.endpoint=u),u._doNotDeleteOnDetach=!1,u._deleteOnDetach=!0,null!=u.anchor.positionFinder){var v=this.getUIPosition(arguments,this.getZoom()),x=b(s,this),y=this.getSize(s),z=u.anchor.positionFinder(v,x,y,u.anchor.constructorParams);u.anchor.x=z[0],u.anchor.y=z[1]}l[n?"target":"source"]=u.element,l[n?"targetId":"sourceId"]=u.elementId,l.endpoints[n].detachFromConnection(l),l.endpoints[n]._deleteOnDetach&&(l.endpoints[n].deleteAfterDragStop=!0),u.addConnection(l),l.endpoints[n]=u,l.deleteEndpointsOnDetach=i,1==n?this.anchorManager.updateOtherEndpoint(l.sourceId,l.suspendedElementId,l.targetId,l):this.anchorManager.sourceChanged(l.suspendedEndpoint.elementId,l.sourceId,l),O(l,null,a),l.pending=!1}else l.suspendedEndpoint&&(l.isReattach()?(l.setHover(!1),l.floatingAnchorIndex=null,l.suspendedEndpoint.addConnection(l),this.repaint(o.elementId)):o.detach(l,!1,!0,!0,a))}.bind(this),p=t.dragEvents.drop;n.scope=n.scope||h,n[p]=a.wrap(n[p],o),this.initDroppable(this.getElementObject(d.el),n,!0)}.bind(this);c=H(c);for(var o=c.length&&c.constructor!=String?c:[c],p=0,q=o.length;q>p;p++)n(o[p]);return this},this.unmakeTarget=function(a,b){var c=k(a);return t.destroyDroppable(c.el),b||delete this.targetEndpointDefinitions[c.id],this},this.makeSource=function(c,d,f){var g=t.extend({},f);t.extend(g,d),sb(g,0,this);var h=g.maxConnections||-1,j=g.onMaxConnections,l=function(c){var d=c.id,f=this.getElementObject(c.el),k=this.getDOMElement(f),l=function(){return null==g.parent?null:"parent"===g.parent?c.el.parentNode:e.getDOMElement(g.parent)},n=null!=g.parent?this.getId(l()):d;qb(n),this.sourceEndpointDefinitions[n]={def:g,uniqueEndpoint:g.uniqueEndpoint,maxConnections:h,enabled:!0};var o=t.dragEvents.stop,p=t.dragEvents.drag,q=t.extend({},g.dragOptions||{}),r=q.drag,s=q.stop,u=null,v=!1;q.scope=q.scope||g.scope,q[p]=a.wrap(q[p],function(){r&&r.apply(this,arguments),v=!1}),q[o]=a.wrap(q[o],function(){if(s&&s.apply(this,arguments),this.currentlyDragging=!1,null!=u._jsPlumb){var a=g.anchor||this.Defaults.Anchor,c=u.anchor,e=u.connections[0],f=this.makeAnchor(a,d,this),h=u.element;if(null!=f.positionFinder){var i=b(h,this),j=this.getSize(h),k={left:i.left+c.x*j[0],top:i.top+c.y*j[1]},n=f.positionFinder(k,i,j,f.constructorParams);f.x=n[0],f.y=n[1]}if(u.setAnchor(f,!0),g.parent){var o=l();if(o){var p=g.container||m;u.setElement(o,p)}}u.repaint(),this.repaint(u.elementId),this.repaint(e.targetId)}}.bind(this));var w=function(a){var b=this.getOriginalEvent(a),c=this.sourceEndpointDefinitions[n];if(d=this.getId(this.getDOMElement(f)),c.enabled){if(g.filter){var m=jsPlumbUtil.isString(g.filter)?tb(b,f,g.filter,this,g.filterExclude):g.filter(b,f);if(m===!1)return}var o=this.select({source:n}).length;if(c.maxConnections>=0&&o>=c.maxConnections)return j&&j({element:f,maxConnections:h},a),!1;var p=jsPlumbAdapter.getPositionOnElement(b,k,i),r=p;g.parent&&(r=jsPlumbAdapter.getPositionOnElement(b,l(),i));var s={};t.extend(s,g),s.isSource=!0,s.anchor=[p[0],p[1],0,0],s.parentAnchor=[r[0],r[1],0,0],s.dragOptions=q,u=this.addEndpoint(d,s),v=!0,u.endpointWillMoveTo=g.parent?l():null,u._doNotDeleteOnDetach=!1,u._deleteOnDetach=!0;var w=function(){v&&(v=!1,e.deleteEndpoint(u))};e.registerListener(u.canvas,"mouseup",w),e.registerListener(f,"mouseup",w),e.trigger(u.canvas,"mousedown",a),jsPlumbUtil.consume(a)}}.bind(this);this.registerListener(f,"mousedown",w),this.sourceEndpointDefinitions[n].trigger=w,g.filter&&jsPlumbUtil.isString(g.filter)&&e.setDragFilter(f,g.filter)}.bind(this);c=H(c);for(var n=c.length&&c.constructor!=String?c:[c],o=0,p=n.length;p>o;o++)l(k(n[o]));return this},this.unmakeSource=function(a,b){var c=k(a),d=this.sourceEndpointDefinitions[c.id].trigger;return d&&e.unregisterListener(c.el,"mousedown",d),b||delete this.sourceEndpointDefinitions[c.id],this},this.unmakeEverySource=function(){for(var a in this.sourceEndpointDefinitions)e.unmakeSource(a,!0);return this.sourceEndpointDefinitions={},this},this.unmakeEveryTarget=function(){for(var a in this.targetEndpointDefinitions)e.unmakeTarget(a,!0);return this.targetEndpointDefinitions={},this};var ub=function(b,c,d,e){var f="source"==b?this.sourceEndpointDefinitions:this.targetEndpointDefinitions;if(c=H(c),a.isString(c))f[c].enabled=e?!f[c].enabled:d;else if(c.length)for(var g=0,h=c.length;h>g;g++){var i=k(c[g]);f[i.id]&&(f[i.id].enabled=e?!f[i.id].enabled:d)}else{var j=k(c).id;f[j].enabled=e?!f[j].enabled:d}return this}.bind(this),vb=function(b,c){return b=H(b),a.isString(b)||!b.length?c.apply(this,[b]):b.length?c.apply(this,[b[0]]):void 0}.bind(this);this.toggleSourceEnabled=function(a){return ub("source",a,null,!0),this.isSourceEnabled(a)},this.setSourceEnabled=function(a,b){return ub("source",a,b)},this.isSource=function(a){return vb(a,function(a){return null!=this.sourceEndpointDefinitions[k(a).id]})},this.isSourceEnabled=function(a){return vb(a,function(a){var b=this.sourceEndpointDefinitions[k(a).id];return b&&b.enabled===!0})},this.toggleTargetEnabled=function(a){return ub("target",a,null,!0),this.isTargetEnabled(a)},this.isTarget=function(a){return vb(a,function(a){return null!=this.targetEndpointDefinitions[k(a).id]})},this.isTargetEnabled=function(a){return vb(a,function(a){var b=this.targetEndpointDefinitions[k(a).id];return b&&b.enabled===!0})},this.setTargetEnabled=function(a,b){return ub("target",a,b)},this.ready=function(a){e.bind("ready",a)},this.repaint=function(a,b,c){if("object"==typeof a&&a.length)for(var d=0,f=a.length;f>d;d++)I(a[d],b,c);else I(a,b,c);return e},this.repaintEverything=function(a){var b=c();for(var d in q)I(d,null,b,a);return this},this.removeAllEndpoints=function(a,b){var c=function(a){var d,f,g=k(a),h=q[g.id];if(h)for(d=0,f=h.length;f>d;d++)e.deleteEndpoint(h[d]);if(delete q[g.id],b&&g.el&&3!=g.el.nodeType&&8!=g.el.nodeType)for(d=0,f=g.el.childNodes.length;f>d;d++)c(g.el.childNodes[d])};return c(a),this},this.remove=function(a,b){var c=k(a);return e.doWhileSuspended(function(){e.removeAllEndpoints(c.id,!0),e.dragManager.elementRemoved(c.id),delete w[c.id],e.anchorManager.clearFor(c.id),e.anchorManager.removeFloatingConnection(c.id)},b===!1),c.el&&e.removeElement(c.el),e};var wb={},xb=function(){for(var a in wb)for(var b=0,c=wb[a].length;c>b;b++){var d=wb[a][b];e.off(d.el,d.event,d.listener)}wb={}};this.registerListener=function(a,b,c){e.on(a,b,c),jsPlumbUtil.addToList(wb,b,{el:a,event:b,listener:c})},this.unregisterListener=function(a,b,c){e.off(a,b,c),jsPlumbUtil.removeWithFunction(wb,function(a){return a.type==b&&a.listener==c})},this.reset=function(){e.deleteEveryEndpoint(),e.unbind(),this.targetEndpointDefinitions={},this.sourceEndpointDefinitions={},p.splice(0),xb(),e.anchorManager.reset(),jsPlumbAdapter.headless||e.dragManager.reset()},this.setDefaultScope=function(a){return C=a,e},this.setDraggable=S,this.setId=function(a,b,c){var d;jsPlumbUtil.isString(a)?d=a:(a=this.getDOMElement(a),d=this.getId(a));var e=this.getConnections({source:d,scope:"*"},!0),f=this.getConnections({target:d,scope:"*"},!0);b=""+b,c?a=this.getDOMElement(b):(a=this.getDOMElement(d),this.setAttribute(a,"id",b)),q[b]=q[d]||[];for(var g=0,h=q[b].length;h>g;g++)q[b][g].setElementId(b),q[b][g].setReferenceElement(a);delete q[d],this.anchorManager.changeId(d,b),this.dragManager&&this.dragManager.changeId(d,b);var i=function(c,d,e){for(var f=0,g=c.length;g>f;f++)c[f].endpoints[d].setElementId(b),c[f].endpoints[d].setReferenceElement(a),c[f][e+"Id"]=b,c[f][e]=a};i(e,0,"source"),i(f,1,"target"),this.repaint(b)},this.setDebugLog=function(a){n=a},this.setSuspendDrawing=function(a,b){var c=A;return A=a,B=a?(new Date).getTime():null,b&&this.repaintEverything(),c},this.isSuspendDrawing=function(){return A},this.getSuspendedAt=function(){return B},this.doWhileSuspended=function(b,c){var d=this.isSuspendDrawing();d||this.setSuspendDrawing(!0);try{b()}catch(e){a.log("Function run while suspended failed",e)}d||this.setSuspendDrawing(!1,!c)},this.getOffset=function(a){return u[a]},this.getCachedData=X,this.timestamp=c,this.setRenderMode=function(a){if(a!==t.SVG&&a!==t.VML)throw new TypeError("Render mode ["+a+"] not supported");return D=jsPlumbAdapter.setRenderMode(a)},this.getRenderMode=function(){return D},this.show=function(a,b){return T(a,"block",b),e},this.toggleVisible=V,this.toggleDraggable=U,this.addListener=this.bind,jsPlumbAdapter.headless||(e.dragManager=jsPlumbAdapter.getDragManager(e),e.recalculateOffsets=e.dragManager.updateOffsets)};jsPlumbUtil.extend(s,jsPlumbUtil.EventGenerator,{setAttribute:function(a,b,c){this.setAttribute(a,b,c)},getAttribute:function(a,b){return this.getAttribute(t.getDOMElement(a),b)},registerConnectionType:function(a,b){this._connectionTypes[a]=t.extend({},b)},registerConnectionTypes:function(a){for(var b in a)this._connectionTypes[b]=t.extend({},a[b])},registerEndpointType:function(a,b){this._endpointTypes[a]=t.extend({},b)},registerEndpointTypes:function(a){for(var b in a)this._endpointTypes[b]=t.extend({},a[b])},getType:function(a,b){return"connection"===b?this._connectionTypes[a]:this._endpointTypes[a]},setIdChanged:function(a,b){this.setId(a,b,!0)},setParent:function(a,b){var c=this.getElementObject(a),d=this.getDOMElement(c),e=this.getId(d),f=this.getElementObject(b),g=this.getDOMElement(f),h=this.getId(g);d.parentNode.removeChild(d),g.appendChild(d),this.dragManager.setParent(c,e,f,h)},getSize:function(a){return[a.offsetWidth,a.offsetHeight]},getWidth:function(a){return a.offsetWidth},getHeight:function(a){return a.offsetHeight},extend:function(a,b,c){var d;if(c)for(d=0;d<c.length;d++)a[c[d]]=b[c[d]];else for(d in b)a[d]=b[d];return a}},jsPlumbAdapter);var t=new s;"undefined"!=typeof window&&(window.jsPlumb=t),t.getInstance=function(a){var b=new s(a);return b.init(),b},"function"==typeof define&&(define("jsplumb",[],function(){return t}),define("jsplumbinstance",[],function(){return t.getInstance()})),"undefined"!=typeof exports&&(exports.jsPlumb=t)}(),function(){"use strict";var a=function(a,b){var c=!1;return{drag:function(){if(c)return c=!1,!0;var d=jsPlumb.getUIPosition(arguments,b.getZoom());a.element&&(jsPlumbAdapter.setPosition(a.element,d),b.repaint(a.element,d))},stopDrag:function(){c=!0}}},b=function(a,b){var c=document.createElement("div");c.style.position="absolute";var d=b.getContainer()||document.body;d.appendChild(c);var e=b.getId(c);b.updateOffset({elId:e}),a.id=e,a.element=c},c=function(a,b,c,d,e,f,g){var h=new jsPlumb.FloatingAnchor({reference:b,referenceCanvas:d,jsPlumbInstance:f});return g({paintStyle:a,endpoint:c,anchor:h,source:e,scope:"__floating"})},d=["connectorStyle","connectorHoverStyle","connectorOverlays","connector","connectionType","connectorClass","connectorHoverClass"],e=function(a,b){var c=0;if(null!=b)for(var d=0;d<a.connections.length;d++)if(a.connections[d].sourceId==b||a.connections[d].targetId==b){c=d;break}return a.connections[c]},f=function(a,b){return jsPlumbUtil.findWithFunction(b.connections,function(b){return b.id==a.id})};jsPlumb.Endpoint=function(g){var h=g._jsPlumb,i=(jsPlumbAdapter.getAttribute,jsPlumb.getElementObject),j=jsPlumbUtil,k=g.newConnection,l=g.newEndpoint,m=g.finaliseConnection,n=(g.fireDetachEvent,g.fireMoveEvent),o=g.floatingConnections;this.idPrefix="_jsplumb_e_",this.defaultLabelLocation=[.5,.5],this.defaultOverlayKeys=["Overlays","EndpointOverlays"],OverlayCapableJsPlumbUIComponent.apply(this,arguments),this.getDefaultType=function(){return{parameters:{},scope:null,maxConnections:this._jsPlumb.instance.Defaults.MaxConnections,paintStyle:this._jsPlumb.instance.Defaults.EndpointStyle||jsPlumb.Defaults.EndpointStyle,endpoint:this._jsPlumb.instance.Defaults.Endpoint||jsPlumb.Defaults.Endpoint,hoverPaintStyle:this._jsPlumb.instance.Defaults.EndpointHoverStyle||jsPlumb.Defaults.EndpointHoverStyle,overlays:this._jsPlumb.instance.Defaults.EndpointOverlays||jsPlumb.Defaults.EndpointOverlays,connectorStyle:g.connectorStyle,connectorHoverStyle:g.connectorHoverStyle,connectorClass:g.connectorClass,connectorHoverClass:g.connectorHoverClass,connectorOverlays:g.connectorOverlays,connector:g.connector,connectorTooltip:g.connectorTooltip}},this._jsPlumb.enabled=!(g.enabled===!1),this._jsPlumb.visible=!0,this.element=jsPlumb.getDOMElement(g.source),this._jsPlumb.uuid=g.uuid,this._jsPlumb.floatingEndpoint=null;var p=null;this._jsPlumb.uuid&&(g.endpointsByUUID[this._jsPlumb.uuid]=this),this.elementId=g.elementId,this._jsPlumb.connectionCost=g.connectionCost,this._jsPlumb.connectionsDirected=g.connectionsDirected,this._jsPlumb.currentAnchorClass="",this._jsPlumb.events={};var q=function(){jsPlumbAdapter.removeClass(this.element,h.endpointAnchorClassPrefix+"_"+this._jsPlumb.currentAnchorClass),this.removeClass(h.endpointAnchorClassPrefix+"_"+this._jsPlumb.currentAnchorClass),this._jsPlumb.currentAnchorClass=this.anchor.getCssClass(),this.addClass(h.endpointAnchorClassPrefix+"_"+this._jsPlumb.currentAnchorClass),jsPlumbAdapter.addClass(this.element,h.endpointAnchorClassPrefix+"_"+this._jsPlumb.currentAnchorClass)
 }.bind(this);this.setAnchor=function(a,b){return this._jsPlumb.instance.continuousAnchorFactory.clear(this.elementId),this.anchor=this._jsPlumb.instance.makeAnchor(a,this.elementId,h),q(),this.anchor.bind("anchorChanged",function(a){this.fire("anchorChanged",{endpoint:this,anchor:a}),q()}.bind(this)),b||this._jsPlumb.instance.repaint(this.elementId),this};var r=g.anchor?g.anchor:g.anchors?g.anchors:h.Defaults.Anchor||"Top";this.setAnchor(r,!0);var s=function(a){this.connections.length>0?this.connections[0].setHover(a,!1):this.setHover(a)}.bind(this);g._transient||this._jsPlumb.instance.anchorManager.add(this,this.elementId),this.setEndpoint=function(a){null!=this.endpoint&&(this.endpoint.cleanup(),this.endpoint.destroy());var b=function(a,b){var c=h.getRenderMode();if(jsPlumb.Endpoints[c][a])return new jsPlumb.Endpoints[c][a](b);if(!h.Defaults.DoNotThrowErrors)throw{msg:"jsPlumb: unknown endpoint type '"+a+"'"}},c={_jsPlumb:this._jsPlumb.instance,cssClass:g.cssClass,container:g.container,tooltip:g.tooltip,connectorTooltip:g.connectorTooltip,endpoint:this};j.isString(a)?this.endpoint=b(a,c):j.isArray(a)?(c=j.merge(a[1],c),this.endpoint=b(a[0],c)):this.endpoint=a.clone(),jsPlumb.extend({},c),this.endpoint.clone=function(){return j.isString(a)?b(a,c):j.isArray(a)?(c=j.merge(a[1],c),b(a[0],c)):void 0}.bind(this),this.type=this.endpoint.type,this.bindListeners(this.endpoint,this,s)},this.setEndpoint(g.endpoint||h.Defaults.Endpoint||jsPlumb.Defaults.Endpoint||"Dot"),this.setPaintStyle(g.paintStyle||g.style||h.Defaults.EndpointStyle||jsPlumb.Defaults.EndpointStyle,!0),this.setHoverPaintStyle(g.hoverPaintStyle||h.Defaults.EndpointHoverStyle||jsPlumb.Defaults.EndpointHoverStyle,!0),this._jsPlumb.paintStyleInUse=this.getPaintStyle(),jsPlumb.extend(this,g,d),this.isSource=g.isSource||!1,this.isTarget=g.isTarget||!1,this._jsPlumb.maxConnections=g.maxConnections||h.Defaults.MaxConnections,this.canvas=this.endpoint.canvas,this.addClass(h.endpointAnchorClassPrefix+"_"+this._jsPlumb.currentAnchorClass),jsPlumbAdapter.addClass(this.element,h.endpointAnchorClassPrefix+"_"+this._jsPlumb.currentAnchorClass),this.connections=g.connections||[],this.connectorPointerEvents=g["connector-pointer-events"],this.scope=g.scope||h.getDefaultScope(),this.timestamp=null,this.reattachConnections=g.reattach||h.Defaults.ReattachConnections,this.connectionsDetachable=h.Defaults.ConnectionsDetachable,(g.connectionsDetachable===!1||g.detachable===!1)&&(this.connectionsDetachable=!1),this.dragAllowedWhenFull=g.dragAllowedWhenFull||!0,g.onMaxConnections&&this.bind("maxConnections",g.onMaxConnections),this.addConnection=function(a){this.connections.push(a),this[(this.connections.length>0?"add":"remove")+"Class"](h.endpointConnectedClass),this[(this.isFull()?"add":"remove")+"Class"](h.endpointFullClass)},this.detachFromConnection=function(a,b,c){b=null==b?f(a,this):b,b>=0&&(this.connections.splice(b,1),this[(this.connections.length>0?"add":"remove")+"Class"](h.endpointConnectedClass),this[(this.isFull()?"add":"remove")+"Class"](h.endpointFullClass)),!c&&this._deleteOnDetach&&0===this.connections.length&&h.deleteObject({endpoint:this,fireEvent:!1,deleteAttachedObjects:!1})},this.detach=function(a,b,c,d,e,g,i){var j=null==i?f(a,this):i,k=!1;return d=d!==!1,j>=0&&(c||a._forceDetach||a.isDetachable()&&a.isDetachAllowed(a)&&this.isDetachAllowed(a))&&(h.deleteObject({connection:a,fireEvent:!b&&d,originalEvent:e,deleteAttachedObjects:!1}),k=!0),k},this.detachAll=function(a,b){for(;this.connections.length>0;)this.detach(this.connections[0],!1,!0,a!==!1,b,this,0);return this},this.detachFrom=function(a,b,c){for(var d=[],e=0;e<this.connections.length;e++)(this.connections[e].endpoints[1]==a||this.connections[e].endpoints[0]==a)&&d.push(this.connections[e]);for(var f=0;f<d.length;f++)this.detach(d[f],!1,!0,b,c);return this},this.getElement=function(){return this.element},this.setElement=function(a){var b=this._jsPlumb.instance.getId(a),c=this.elementId;return j.removeWithFunction(g.endpointsByElement[this.elementId],function(a){return a.id==this.id}.bind(this)),this.element=jsPlumb.getDOMElement(a),this.elementId=h.getId(this.element),h.anchorManager.rehomeEndpoint(this,c,this.element),h.dragManager.endpointAdded(this.element),j.addToList(g.endpointsByElement,b,this),this},this.makeInPlaceCopy=function(){var a=this.anchor.getCurrentLocation({element:this}),b=this.anchor.getOrientation(this),c=this.anchor.getCssClass(),d={bind:function(){},compute:function(){return[a[0],a[1]]},getCurrentLocation:function(){return[a[0],a[1]]},getOrientation:function(){return b},getCssClass:function(){return c}};return l({dropOptions:g.dropOptions,anchor:d,source:this.element,paintStyle:this.getPaintStyle(),endpoint:g.hideOnDrag?"Blank":this.endpoint,_transient:!0,scope:this.scope})},this.connectorSelector=function(){var a=this.connections[0];return this.isTarget&&a?a:this.connections.length<this._jsPlumb.maxConnections||-1==this._jsPlumb.maxConnections?null:a},this.setStyle=this.setPaintStyle,this.paint=function(a){a=a||{};var b=a.timestamp,c=!(a.recalc===!1);if(!b||this.timestamp!==b){var d=h.updateOffset({elId:this.elementId,timestamp:b}),f=a.offset?a.offset.o:d.o;if(null!=f){var g=a.anchorPoint,i=a.connectorPaintStyle;if(null==g){var j=a.dimensions||d.s,k={xy:[f.left,f.top],wh:j,element:this,timestamp:b};if(c&&this.anchor.isDynamic&&this.connections.length>0){var l=e(this,a.elementWithPrecedence),m=l.endpoints[0]==this?1:0,n=0===m?l.sourceId:l.targetId,o=h.getCachedData(n),p=o.o,q=o.s;k.txy=[p.left,p.top],k.twh=q,k.tElement=l.endpoints[m]}g=this.anchor.compute(k)}this.endpoint.compute(g,this.anchor.getOrientation(this),this._jsPlumb.paintStyleInUse,i||this.paintStyleInUse),this.endpoint.paint(this._jsPlumb.paintStyleInUse,this.anchor),this.timestamp=b;for(var r=0;r<this._jsPlumb.overlays.length;r++){var s=this._jsPlumb.overlays[r];s.isVisible()&&(this._jsPlumb.overlayPlacements[r]=s.draw(this.endpoint,this._jsPlumb.paintStyleInUse),s.paint(this._jsPlumb.overlayPlacements[r]))}}}},this.repaint=this.paint;var t=!1;this.initDraggable=function(){if(!t&&jsPlumb.isDragSupported(this.element)){var d={id:null,element:null},e=null,f=!1,m=null,n=a(d,h),q=function(){e=this.connectorSelector();var a=!0;if(this.isEnabled()||(a=!1),null!=e||this.isSource||(a=!1),this.isSource&&this.isFull()&&!this.dragAllowedWhenFull&&(a=!1),null==e||e.isDetachable()||(a=!1),a===!1)return h.stopDrag&&h.stopDrag(this.canvas),n.stopDrag(),!1;for(var q=0;q<this.connections.length;q++)this.connections[q].setHover(!1);this.addClass("endpointDrag"),h.setConnectionBeingDragged(!0),e&&!this.isFull()&&this.isSource&&(e=null),h.updateOffset({elId:this.elementId}),p=this.makeInPlaceCopy(),p.referenceEndpoint=this,p.paint(),b(d,h);var r=i(p.canvas),s=jsPlumbAdapter.getOffset(r,this._jsPlumb.instance),t=i(this.canvas);if(jsPlumbAdapter.setPosition(d.element,s),this.parentAnchor&&(this.anchor=h.makeAnchor(this.parentAnchor,this.elementId,h)),h.setAttribute(this.canvas,"dragId",d.id),h.setAttribute(this.canvas,"elId",this.elementId),this._jsPlumb.floatingEndpoint=c(this.getPaintStyle(),this.anchor,this.endpoint,this.canvas,d.element,h,l),this.canvas.style.visibility="hidden",null==e)this.anchor.locked=!0,this.setHover(!1,!1),e=k({sourceEndpoint:this,targetEndpoint:this._jsPlumb.floatingEndpoint,source:this.endpointWillMoveTo||this.element,target:d.element,anchors:[this.anchor,this._jsPlumb.floatingEndpoint.anchor],paintStyle:g.connectorStyle,hoverPaintStyle:g.connectorHoverStyle,connector:g.connector,overlays:g.connectorOverlays,type:this.connectionType,cssClass:this.connectorClass,hoverClass:this.connectorHoverClass}),e.pending=!0,e.addClass(h.draggingClass),this._jsPlumb.floatingEndpoint.addClass(h.draggingClass),h.fire("connectionDrag",e);else{f=!0,e.setHover(!1);var u=e.endpoints[0].id==this.id?0:1;e.floatingAnchorIndex=u,this.detachFromConnection(e,null,!0);var v=h.getDragScope(t);h.setAttribute(this.canvas,"originalScope",v);var w=h.getDropScope(t);h.setDragScope(t,w),h.fire("connectionDrag",e),0===u?(m=[e.source,e.sourceId,t,v],e.source=d.element,e.sourceId=d.id):(m=[e.target,e.targetId,t,v],e.target=d.element,e.targetId=d.id),e.endpoints[0===u?1:0].anchor.locked=!0,e.suspendedEndpoint=e.endpoints[u],e.suspendedElement=e.endpoints[u].getElement(),e.suspendedElementId=e.endpoints[u].elementId,e.suspendedElementType=0===u?"source":"target",e.suspendedEndpoint.setHover(!1),this._jsPlumb.floatingEndpoint.referenceEndpoint=e.suspendedEndpoint,e.endpoints[u]=this._jsPlumb.floatingEndpoint,e.addClass(h.draggingClass),this._jsPlumb.floatingEndpoint.addClass(h.draggingClass)}o[d.id]=e,h.anchorManager.addFloatingConnection(d.id,e),j.addToList(g.endpointsByElement,d.id,this._jsPlumb.floatingEndpoint),h.currentlyDragging=!0}.bind(this),r=g.dragOptions||{},s={},u=jsPlumb.dragEvents.start,v=jsPlumb.dragEvents.stop,w=jsPlumb.dragEvents.drag;r=jsPlumb.extend(s,r),r.scope=r.scope||this.scope,r[u]=j.wrap(r[u],q,!1),r[w]=j.wrap(r[w],n.drag),r[v]=j.wrap(r[v],function(){if(h.setConnectionBeingDragged(!1),e&&null!=e.endpoints){var a=h.getDropEvent(arguments),b=null==e.floatingAnchorIndex?1:e.floatingAnchorIndex;e.endpoints[0===b?1:0].anchor.locked=!1,e.removeClass(h.draggingClass),e.endpoints[b]==this._jsPlumb.floatingEndpoint&&f&&e.suspendedEndpoint&&(0===b?(e.source=m[0],e.sourceId=m[1]):(e.target=m[0],e.targetId=m[1]),h.setDragScope(m[2],m[3]),e.endpoints[b]=e.suspendedEndpoint,e.isReattach()||e._forceReattach||e._forceDetach||!e.endpoints[0===b?1:0].detach(e,!1,!1,!0,a)?(e.setHover(!1),e.floatingAnchorIndex=null,e._forceDetach=null,e._forceReattach=null,this._jsPlumb.floatingEndpoint.detachFromConnection(e),e.suspendedEndpoint.addConnection(e),h.repaint(m[1])):e.suspendedEndpoint.detachFromConnection(e)),h.remove(d.element,!1),h.deleteObject({endpoint:p}),this.deleteAfterDragStop?h.deleteObject({endpoint:this}):this._jsPlumb&&(this._jsPlumb.floatingEndpoint=null,this.canvas.style.visibility="visible",this.anchor.locked=!1,this.paint({recalc:!1})),h.fire("connectionDragStop",e,a),h.currentlyDragging=!1,e=null}}.bind(this));var x=i(this.canvas);h.initDraggable(x,r,!0),t=!0}},(this.isSource||this.isTarget)&&this.initDraggable();var u=function(a,b,c,d){if((this.isTarget||b)&&jsPlumb.isDropSupported(this.element)){var e=g.dropOptions||h.Defaults.DropOptions||jsPlumb.Defaults.DropOptions;e=jsPlumb.extend({},e),e.scope=e.scope||this.scope;var f=jsPlumb.dragEvents.drop,i=jsPlumb.dragEvents.over,k=jsPlumb.dragEvents.out,l=function(){this.removeClass(h.endpointDropAllowedClass),this.removeClass(h.endpointDropForbiddenClass);var a=h.getDropEvent(arguments),b=h.getDOMElement(h.getDragObject(arguments)),c=h.getAttribute(b,"dragId"),e=(h.getAttribute(b,"elId"),h.getAttribute(b,"originalScope")),f=o[c];if(null!=f){var g=f.suspendedEndpoint&&(f.suspendedEndpoint.id==this.id||this.referenceEndpoint&&f.suspendedEndpoint.id==this.referenceEndpoint.id);if(g)return f._forceReattach=!0,void 0;var i=null==f.floatingAnchorIndex?1:f.floatingAnchorIndex;e&&h.setDragScope(b,e);var j=null!=d?d.isEnabled():!0;if(this.isFull()&&this.fire("maxConnections",{endpoint:this,connection:f,maxConnections:this._jsPlumb.maxConnections},a),!this.isFull()&&(0!==i||this.isSource)&&(1!=i||this.isTarget)&&j){var k=!0;f.suspendedEndpoint&&f.suspendedEndpoint.id!=this.id&&(0===i?(f.source=f.suspendedEndpoint.element,f.sourceId=f.suspendedEndpoint.elementId):(f.target=f.suspendedEndpoint.element,f.targetId=f.suspendedEndpoint.elementId),f.isDetachAllowed(f)&&f.endpoints[i].isDetachAllowed(f)&&f.suspendedEndpoint.isDetachAllowed(f)&&h.checkCondition("beforeDetach",f)||(k=!1)),0===i?(f.source=this.element,f.sourceId=this.elementId):(f.target=this.element,f.targetId=this.elementId);var l=function(){f.floatingAnchorIndex=null},p=function(){f.pending=!1,f.endpoints[i].detachFromConnection(f),f.suspendedEndpoint&&f.suspendedEndpoint.detachFromConnection(f),f.endpoints[i]=this,this.addConnection(f);var b=this.getParameters();for(var c in b)f.setParameter(c,b[c]);if(f.suspendedEndpoint){var d=(f.suspendedEndpoint.getElement(),f.suspendedEndpoint.elementId);n({index:i,originalSourceId:0===i?d:f.sourceId,newSourceId:0===i?this.elementId:f.sourceId,originalTargetId:1==i?d:f.targetId,newTargetId:1==i?this.elementId:f.targetId,originalSourceEndpoint:0===i?f.suspendedEndpoint:f.endpoints[0],newSourceEndpoint:0===i?this:f.endpoints[0],originalTargetEndpoint:1==i?f.suspendedEndpoint:f.endpoints[1],newTargetEndpoint:1==i?this:f.endpoints[1],connection:f},a)}else b.draggable&&jsPlumb.initDraggable(this.element,dragOptions,!0,h);1==i?h.anchorManager.updateOtherEndpoint(f.sourceId,f.suspendedElementId,f.targetId,f):h.anchorManager.sourceChanged(f.suspendedEndpoint.elementId,f.sourceId,f),m(f,null,a),l()}.bind(this),q=function(){f.suspendedEndpoint&&(f.endpoints[i]=f.suspendedEndpoint,f.setHover(!1),f._forceDetach=!0,0===i?(f.source=f.suspendedEndpoint.element,f.sourceId=f.suspendedEndpoint.elementId):(f.target=f.suspendedEndpoint.element,f.targetId=f.suspendedEndpoint.elementId),f.suspendedEndpoint.addConnection(f),f.endpoints[0].repaint(),f.repaint(),h.repaint(f.sourceId),f._forceDetach=!1),l()};k=k&&this.isDropAllowed(f.sourceId,f.targetId,f.scope,f,this),k?p():q()}h.currentlyDragging=!1}}.bind(this);e[f]=j.wrap(e[f],l),e[i]=j.wrap(e[i],function(){var a=jsPlumb.getDragObject(arguments),b=h.getAttribute(jsPlumb.getDOMElement(a),"dragId"),c=o[b];if(null!=c){var d=null==c.floatingAnchorIndex?1:c.floatingAnchorIndex,e=this.isTarget&&0!==c.floatingAnchorIndex||c.suspendedEndpoint&&this.referenceEndpoint&&this.referenceEndpoint.id==c.suspendedEndpoint.id;if(e){var f=h.checkCondition("checkDropAllowed",{sourceEndpoint:c.endpoints[d],targetEndpoint:this,connection:c});this[(f?"add":"remove")+"Class"](h.endpointDropAllowedClass),this[(f?"remove":"add")+"Class"](h.endpointDropForbiddenClass),c.endpoints[d].anchor.over(this.anchor,this)}}}.bind(this)),e[k]=j.wrap(e[k],function(){var a=jsPlumb.getDragObject(arguments),b=null==a?null:h.getAttribute(jsPlumb.getDOMElement(a),"dragId"),c=b?o[b]:null;if(null!=c){var d=null==c.floatingAnchorIndex?1:c.floatingAnchorIndex,e=this.isTarget&&0!==c.floatingAnchorIndex||c.suspendedEndpoint&&this.referenceEndpoint&&this.referenceEndpoint.id==c.suspendedEndpoint.id;e&&(this.removeClass(h.endpointDropAllowedClass),this.removeClass(h.endpointDropForbiddenClass),c.endpoints[d].anchor.out())}}.bind(this)),h.initDroppable(a,e,!0,c)}}.bind(this);return this.anchor.isFloating||u(i(this.canvas),!0,!(g._transient||this.anchor.isFloating),this),g.type&&this.addType(g.type,g.data,h.isSuspendDrawing()),this},jsPlumbUtil.extend(jsPlumb.Endpoint,OverlayCapableJsPlumbUIComponent,{getTypeDescriptor:function(){return"endpoint"},isVisible:function(){return this._jsPlumb.visible},setVisible:function(a,b,c){if(this._jsPlumb.visible=a,this.canvas&&(this.canvas.style.display=a?"block":"none"),this[a?"showOverlays":"hideOverlays"](),!b)for(var d=0;d<this.connections.length;d++)if(this.connections[d].setVisible(a),!c){var e=this===this.connections[d].endpoints[0]?1:0;1==this.connections[d].endpoints[e].connections.length&&this.connections[d].endpoints[e].setVisible(a,!0,!0)}},getAttachedElements:function(){return this.connections},applyType:function(a){null!=a.maxConnections&&(this._jsPlumb.maxConnections=a.maxConnections),a.scope&&(this.scope=a.scope),jsPlumb.extend(this,a,d),a.anchor&&(this.anchor=this._jsPlumb.instance.makeAnchor(a.anchor))},isEnabled:function(){return this._jsPlumb.enabled},setEnabled:function(a){this._jsPlumb.enabled=a},cleanup:function(){jsPlumbAdapter.removeClass(this.element,this._jsPlumb.instance.endpointAnchorClassPrefix+"_"+this._jsPlumb.currentAnchorClass),this.anchor=null,this.endpoint.cleanup(),this.endpoint.destroy(),this.endpoint=null;var a=jsPlumb.getElementObject(this.canvas);this._jsPlumb.instance.destroyDraggable(a),this._jsPlumb.instance.destroyDroppable(a)},setHover:function(a){this.endpoint&&this._jsPlumb&&!this._jsPlumb.instance.isConnectionBeingDragged()&&this.endpoint.setHover(a)},isFull:function(){return!(this.isFloating()||this._jsPlumb.maxConnections<1||this.connections.length<this._jsPlumb.maxConnections)},isFloating:function(){return null!=this.anchor&&this.anchor.isFloating},getConnectionCost:function(){return this._jsPlumb.connectionCost},setConnectionCost:function(a){this._jsPlumb.connectionCost=a},areConnectionsDirected:function(){return this._jsPlumb.connectionsDirected},setConnectionsDirected:function(a){this._jsPlumb.connectionsDirected=a},setElementId:function(a){this.elementId=a,this.anchor.elementId=a},setReferenceElement:function(a){this.element=jsPlumb.getDOMElement(a)},setDragAllowedWhenFull:function(a){this.dragAllowedWhenFull=a},equals:function(a){return this.anchor.equals(a.anchor)},getUuid:function(){return this._jsPlumb.uuid},computeAnchor:function(a){return this.anchor.compute(a)}})}(),function(){"use strict";var a=function(a,b,c,d){if(!a.Defaults.DoNotThrowErrors&&null==jsPlumb.Connectors[b][c])throw{msg:"jsPlumb: unknown connector type '"+c+"'"};return new jsPlumb.Connectors[b][c](d)},b=function(a,b,c){return a?c.makeAnchor(a,b,c):null};jsPlumb.Connection=function(a){var b=(a.newConnection,a.newEndpoint),c=(jsPlumb.getElementObject,jsPlumbUtil);this.connector=null,this.idPrefix="_jsplumb_c_",this.defaultLabelLocation=.5,this.defaultOverlayKeys=["Overlays","ConnectionOverlays"],this.previousConnection=a.previousConnection,this.source=jsPlumb.getDOMElement(a.source),this.target=jsPlumb.getDOMElement(a.target),a.sourceEndpoint&&(this.source=a.sourceEndpoint.endpointWillMoveTo||a.sourceEndpoint.getElement()),a.targetEndpoint&&(this.target=a.targetEndpoint.getElement()),OverlayCapableJsPlumbUIComponent.apply(this,arguments),this.sourceId=this._jsPlumb.instance.getId(this.source),this.targetId=this._jsPlumb.instance.getId(this.target),this.scope=a.scope,this.endpoints=[],this.endpointStyles=[];var d=this._jsPlumb.instance;this._jsPlumb.visible=!0,this._jsPlumb.editable=a.editable===!0,this._jsPlumb.params={cssClass:a.cssClass,container:a.container,"pointer-events":a["pointer-events"],editorParams:a.editorParams},this._jsPlumb.lastPaintedAt=null,this.getDefaultType=function(){return{parameters:{},scope:null,detachable:this._jsPlumb.instance.Defaults.ConnectionsDetachable,rettach:this._jsPlumb.instance.Defaults.ReattachConnections,paintStyle:this._jsPlumb.instance.Defaults.PaintStyle||jsPlumb.Defaults.PaintStyle,connector:this._jsPlumb.instance.Defaults.Connector||jsPlumb.Defaults.Connector,hoverPaintStyle:this._jsPlumb.instance.Defaults.HoverPaintStyle||jsPlumb.Defaults.HoverPaintStyle,overlays:this._jsPlumb.instance.Defaults.ConnectorOverlays||jsPlumb.Defaults.ConnectorOverlays}},this.makeEndpoint=function(c,e,f,g){return f=f||this._jsPlumb.instance.getId(e),this.prepareEndpoint(d,b,this,g,c?0:1,a,e,f)};var e=this.makeEndpoint(!0,this.source,this.sourceId,a.sourceEndpoint),f=this.makeEndpoint(!1,this.target,this.targetId,a.targetEndpoint);e&&c.addToList(a.endpointsByElement,this.sourceId,e),f&&c.addToList(a.endpointsByElement,this.targetId,f),this.scope||(this.scope=this.endpoints[0].scope),null!=a.deleteEndpointsOnDetach?(this.endpoints[0]._deleteOnDetach=a.deleteEndpointsOnDetach,this.endpoints[1]._deleteOnDetach=a.deleteEndpointsOnDetach):(this.endpoints[0]._doNotDeleteOnDetach||(this.endpoints[0]._deleteOnDetach=!0),this.endpoints[1]._doNotDeleteOnDetach||(this.endpoints[1]._deleteOnDetach=!0)),this.setConnector(this.endpoints[0].connector||this.endpoints[1].connector||a.connector||d.Defaults.Connector||jsPlumb.Defaults.Connector,!0),a.path&&this.connector.setPath(a.path),this.setPaintStyle(this.endpoints[0].connectorStyle||this.endpoints[1].connectorStyle||a.paintStyle||d.Defaults.PaintStyle||jsPlumb.Defaults.PaintStyle,!0),this.setHoverPaintStyle(this.endpoints[0].connectorHoverStyle||this.endpoints[1].connectorHoverStyle||a.hoverPaintStyle||d.Defaults.HoverPaintStyle||jsPlumb.Defaults.HoverPaintStyle,!0),this._jsPlumb.paintStyleInUse=this.getPaintStyle();var g=d.getSuspendedAt();if(d.updateOffset({elId:this.sourceId,timestamp:g}),d.updateOffset({elId:this.targetId,timestamp:g}),!d.isSuspendDrawing()){var h=d.getCachedData(this.sourceId),i=h.o,j=h.s,k=d.getCachedData(this.targetId),l=k.o,m=k.s,n=g||d.timestamp(),o=this.endpoints[0].anchor.compute({xy:[i.left,i.top],wh:j,element:this.endpoints[0],elementId:this.endpoints[0].elementId,txy:[l.left,l.top],twh:m,tElement:this.endpoints[1],timestamp:n});this.endpoints[0].paint({anchorLoc:o,timestamp:n}),o=this.endpoints[1].anchor.compute({xy:[l.left,l.top],wh:m,element:this.endpoints[1],elementId:this.endpoints[1].elementId,txy:[i.left,i.top],twh:j,tElement:this.endpoints[0],timestamp:n}),this.endpoints[1].paint({anchorLoc:o,timestamp:n})}this._jsPlumb.detachable=d.Defaults.ConnectionsDetachable,a.detachable===!1&&(this._jsPlumb.detachable=!1),this.endpoints[0].connectionsDetachable===!1&&(this._jsPlumb.detachable=!1),this.endpoints[1].connectionsDetachable===!1&&(this._jsPlumb.detachable=!1),this._jsPlumb.reattach=a.reattach||this.endpoints[0].reattachConnections||this.endpoints[1].reattachConnections||d.Defaults.ReattachConnections,this._jsPlumb.cost=a.cost||this.endpoints[0].getConnectionCost(),this._jsPlumb.directed=a.directed,null==a.directed&&(this._jsPlumb.directed=this.endpoints[0].areConnectionsDirected());var p=jsPlumb.extend({},this.endpoints[1].getParameters());jsPlumb.extend(p,this.endpoints[0].getParameters()),jsPlumb.extend(p,this.getParameters()),this.setParameters(p);var q=[a.type,this.endpoints[0].connectionType,this.endpoints[1].connectionType].join(" ");/[^\s]/.test(q)&&this.addType(q,a.data,!0)},jsPlumbUtil.extend(jsPlumb.Connection,OverlayCapableJsPlumbUIComponent,{applyType:function(a,b){null!=a.detachable&&this.setDetachable(a.detachable),null!=a.reattach&&this.setReattach(a.reattach),a.scope&&(this.scope=a.scope),this.setConnector(a.connector,b)},getTypeDescriptor:function(){return"connection"},getAttachedElements:function(){return this.endpoints},addClass:function(a,b){b&&(this.endpoints[0].addClass(a),this.endpoints[1].addClass(a),this.suspendedEndpoint&&this.suspendedEndpoint.addClass(a)),this.connector&&this.connector.addClass(a)},removeClass:function(a,b){b&&(this.endpoints[0].removeClass(a),this.endpoints[1].removeClass(a),this.suspendedEndpoint&&this.suspendedEndpoint.removeClass(a)),this.connector&&this.connector.removeClass(a)},isVisible:function(){return this._jsPlumb.visible},setVisible:function(a){this._jsPlumb.visible=a,this.connector&&this.connector.setVisible(a),this.repaint()},cleanup:function(){this.endpoints=null,this.source=null,this.target=null,null!=this.connector&&(this.connector.cleanup(),this.connector.destroy()),this.connector=null},isDetachable:function(){return this._jsPlumb.detachable===!0},setDetachable:function(a){this._jsPlumb.detachable=a===!0},isReattach:function(){return this._jsPlumb.reattach===!0},setReattach:function(a){this._jsPlumb.reattach=a===!0},setHover:function(a){this.connector&&this._jsPlumb&&!this._jsPlumb.instance.isConnectionBeingDragged()&&(this.connector.setHover(a),jsPlumbAdapter[a?"addClass":"removeClass"](this.source,this._jsPlumb.instance.hoverSourceClass),jsPlumbAdapter[a?"addClass":"removeClass"](this.target,this._jsPlumb.instance.hoverTargetClass))},getCost:function(){return this._jsPlumb.cost},setCost:function(a){this._jsPlumb.cost=a},isDirected:function(){return this._jsPlumb.directed===!0},getConnector:function(){return this.connector},setConnector:function(b,c){var d=jsPlumbUtil;null!=this.connector&&(this.connector.cleanup(),this.connector.destroy());var e={_jsPlumb:this._jsPlumb.instance,cssClass:this._jsPlumb.params.cssClass,container:this._jsPlumb.params.container,"pointer-events":this._jsPlumb.params["pointer-events"]},f=this._jsPlumb.instance.getRenderMode();d.isString(b)?this.connector=a(this._jsPlumb.instance,f,b,e):d.isArray(b)&&(this.connector=1==b.length?a(this._jsPlumb.instance,f,b[0],e):a(this._jsPlumb.instance,f,b[0],d.merge(b[1],e))),this.bindListeners(this.connector,this,function(a){this.setHover(a,!1)}.bind(this)),this.canvas=this.connector.canvas,this.bgCanvas=this.connector.bgCanvas,this._jsPlumb.editable&&null!=jsPlumb.ConnectorEditors&&jsPlumb.ConnectorEditors[this.connector.type]&&this.connector.isEditable()?new jsPlumb.ConnectorEditors[this.connector.type]({connector:this.connector,connection:this,params:this._jsPlumb.params.editorParams||{}}):this._jsPlumb.editable=!1,c||this.repaint()},paint:function(a){if(!this._jsPlumb.instance.isSuspendDrawing()&&this._jsPlumb.visible){a=a||{};var b=(a.elId,a.ui),c=a.recalc,d=a.timestamp,e=!1,f=e?this.sourceId:this.targetId,g=e?this.targetId:this.sourceId,h=e?0:1,i=e?1:0;if(null==d||d!=this._jsPlumb.lastPaintedAt){var j=this._jsPlumb.instance.updateOffset({elId:g,offset:b,recalc:c,timestamp:d}).o,k=this._jsPlumb.instance.updateOffset({elId:f,timestamp:d}).o,l=this.endpoints[i],m=this.endpoints[h];a.clearEdits&&(this._jsPlumb.overlayPositions=null,l.anchor.clearUserDefinedLocation(),m.anchor.clearUserDefinedLocation(),this.connector.setEdited(!1));var n=l.anchor.getCurrentLocation({xy:[j.left,j.top],wh:[j.width,j.height],element:l,timestamp:d}),o=m.anchor.getCurrentLocation({xy:[k.left,k.top],wh:[k.width,k.height],element:m,timestamp:d});this.connector.resetBounds(),this.connector.compute({sourcePos:n,targetPos:o,sourceEndpoint:this.endpoints[i],targetEndpoint:this.endpoints[h],lineWidth:this._jsPlumb.paintStyleInUse.lineWidth,sourceInfo:j,targetInfo:k,clearEdits:a.clearEdits===!0});for(var p={minX:1/0,minY:1/0,maxX:-1/0,maxY:-1/0},q=0;q<this._jsPlumb.overlays.length;q++){var r=this._jsPlumb.overlays[q];r.isVisible()&&(this._jsPlumb.overlayPlacements[q]=r.draw(this.connector,this._jsPlumb.paintStyleInUse,this.getAbsoluteOverlayPosition(r)),p.minX=Math.min(p.minX,this._jsPlumb.overlayPlacements[q].minX),p.maxX=Math.max(p.maxX,this._jsPlumb.overlayPlacements[q].maxX),p.minY=Math.min(p.minY,this._jsPlumb.overlayPlacements[q].minY),p.maxY=Math.max(p.maxY,this._jsPlumb.overlayPlacements[q].maxY))}var s=parseFloat(this._jsPlumb.paintStyleInUse.lineWidth||1)/2,t=parseFloat(this._jsPlumb.paintStyleInUse.lineWidth||0),u={xmin:Math.min(this.connector.bounds.minX-(s+t),p.minX),ymin:Math.min(this.connector.bounds.minY-(s+t),p.minY),xmax:Math.max(this.connector.bounds.maxX+(s+t),p.maxX),ymax:Math.max(this.connector.bounds.maxY+(s+t),p.maxY)};this.connector.paint(this._jsPlumb.paintStyleInUse,null,u);for(var v=0;v<this._jsPlumb.overlays.length;v++){var w=this._jsPlumb.overlays[v];w.isVisible()&&w.paint(this._jsPlumb.overlayPlacements[v],u)}}this._jsPlumb.lastPaintedAt=d}},repaint:function(a){a=a||{},this.paint({elId:this.sourceId,recalc:!(a.recalc===!1),timestamp:a.timestamp,clearEdits:a.clearEdits})},prepareEndpoint:function(a,c,d,e,f,g,h,i){var j;if(e)d.endpoints[f]=e,e.addConnection(d);else{g.endpoints||(g.endpoints=[null,null]);var k=g.endpoints[f]||g.endpoint||a.Defaults.Endpoints[f]||jsPlumb.Defaults.Endpoints[f]||a.Defaults.Endpoint||jsPlumb.Defaults.Endpoint;g.endpointStyles||(g.endpointStyles=[null,null]),g.endpointHoverStyles||(g.endpointHoverStyles=[null,null]);var l=g.endpointStyles[f]||g.endpointStyle||a.Defaults.EndpointStyles[f]||jsPlumb.Defaults.EndpointStyles[f]||a.Defaults.EndpointStyle||jsPlumb.Defaults.EndpointStyle;null==l.fillStyle&&null!=g.paintStyle&&(l.fillStyle=g.paintStyle.strokeStyle),null==l.outlineColor&&null!=g.paintStyle&&(l.outlineColor=g.paintStyle.outlineColor),null==l.outlineWidth&&null!=g.paintStyle&&(l.outlineWidth=g.paintStyle.outlineWidth);var m=g.endpointHoverStyles[f]||g.endpointHoverStyle||a.Defaults.EndpointHoverStyles[f]||jsPlumb.Defaults.EndpointHoverStyles[f]||a.Defaults.EndpointHoverStyle||jsPlumb.Defaults.EndpointHoverStyle;null!=g.hoverPaintStyle&&(null==m&&(m={}),null==m.fillStyle&&(m.fillStyle=g.hoverPaintStyle.strokeStyle));var n=g.anchors?g.anchors[f]:g.anchor?g.anchor:b(a.Defaults.Anchors[f],i,a)||b(jsPlumb.Defaults.Anchors[f],i,a)||b(a.Defaults.Anchor,i,a)||b(jsPlumb.Defaults.Anchor,i,a),o=g.uuids?g.uuids[f]:null;j=c({paintStyle:l,hoverPaintStyle:m,endpoint:k,connections:[d],uuid:o,anchor:n,source:h,scope:g.scope,reattach:g.reattach||a.Defaults.ReattachConnections,detachable:g.detachable||a.Defaults.ConnectionsDetachable}),d.endpoints[f]=j,g.drawEndpoints===!1&&j.setVisible(!1,!0,!0)}return j}})}(),function(){jsPlumb.AnchorManager=function(a){var b={},c={},d={},e={},f={},g={HORIZONTAL:"horizontal",VERTICAL:"vertical",DIAGONAL:"diagonal",IDENTITY:"identity"},h={},i=this,j={},k=a.jsPlumbInstance,l={},m=function(a,b,c,d,e,f){if(a===b)return{orientation:g.IDENTITY,a:["top","top"]};var h=Math.atan2(d.centery-c.centery,d.centerx-c.centerx),i=Math.atan2(c.centery-d.centery,c.centerx-d.centerx),j=c.left<=d.left&&c.right>=d.left||c.left<=d.right&&c.right>=d.right||c.left<=d.left&&c.right>=d.right||d.left<=c.left&&d.right>=c.right,k=c.top<=d.top&&c.bottom>=d.top||c.top<=d.bottom&&c.bottom>=d.bottom||c.top<=d.top&&c.bottom>=d.bottom||d.top<=c.top&&d.bottom>=c.bottom,l=function(a){return[e.isContinuous?e.verifyEdge(a[0]):a[0],f.isContinuous?f.verifyEdge(a[1]):a[1]]},m={orientation:g.DIAGONAL,theta:h,theta2:i};return j||k?j?(m.orientation=g.HORIZONTAL,m.a=c.top<d.top?["bottom","top"]:["top","bottom"]):(m.orientation=g.VERTICAL,m.a=c.left<d.left?["right","left"]:["left","right"]):d.left>c.left&&d.top>c.top?m.a=["right","top"]:d.left>c.left&&c.top>d.top?m.a=["top","left"]:d.left<c.left&&d.top<c.top?m.a=["top","right"]:d.left<c.left&&d.top>c.top&&(m.a=["left","top"]),m.a=l(m.a),m},n=function(a,b,c,d,e,f,g){for(var h=[],i=b[e?0:1]/(d.length+1),j=0;j<d.length;j++){var k=(j+1)*i,l=f*b[e?1:0];g&&(k=b[e?0:1]-k);var m=e?k:l,n=c[0]+m,o=m/b[0],p=e?l:k,q=c[1]+p,r=p/b[1];h.push([n,q,o,r,d[j][1],d[j][2]])}return h},o=function(a){return function(b,c){var d=!0;return d=a?b[0][0]<c[0][0]:b[0][0]>c[0][0],d===!1?-1:1}},p=function(a,b){var c=a[0][0]<0?-Math.PI-a[0][0]:Math.PI-a[0][0],d=b[0][0]<0?-Math.PI-b[0][0]:Math.PI-b[0][0];return c>d?1:a[0][1]>b[0][1]?1:-1},q={top:function(a,b){return a[0]>b[0]?1:-1},right:o(!0),bottom:o(!0),left:p},r=function(a,b){return a.sort(b)},s=function(a,b){var c=k.getCachedData(a),e=c.s,g=c.o,h=function(b,c,e,g,h,i,j){if(g.length>0)for(var k=r(g,q[b]),l="right"===b||"top"===b,m=n(b,c,e,k,h,i,l),o=function(a,b){d[a.id]=[b[0],b[1],b[2],b[3]],f[a.id]=j},p=0;p<m.length;p++){var s=m[p][4],t=s.endpoints[0].elementId===a,u=s.endpoints[1].elementId===a;t?o(s.endpoints[0],m[p]):u&&o(s.endpoints[1],m[p])}};h("bottom",e,[g.left,g.top],b.bottom,!0,1,[0,1]),h("top",e,[g.left,g.top],b.top,!0,0,[0,-1]),h("left",e,[g.left,g.top],b.left,!1,0,[-1,0]),h("right",e,[g.left,g.top],b.right,!1,1,[1,0])};this.reset=function(){b={},h={},j={}},this.addFloatingConnection=function(a,b){l[a]=b},this.removeFloatingConnection=function(a){delete l[a]},this.newConnection=function(a){var b=a.sourceId,c=a.targetId,d=a.endpoints,e=!0,f=function(f,g,i,j,k){b==c&&i.isContinuous&&(a._jsPlumb.instance.removeElement(d[1].canvas),e=!1),jsPlumbUtil.addToList(h,j,[k,g,i.constructor==jsPlumb.DynamicAnchor])};f(0,d[0],d[0].anchor,c,a),e&&f(1,d[1],d[1].anchor,b,a)};var t=function(a){!function(a,b){if(a){var c=function(a){return a[4]==b};jsPlumbUtil.removeWithFunction(a.top,c),jsPlumbUtil.removeWithFunction(a.left,c),jsPlumbUtil.removeWithFunction(a.bottom,c),jsPlumbUtil.removeWithFunction(a.right,c)}}(j[a.elementId],a.id)};this.connectionDetached=function(a){var b=a.connection||a,c=a.sourceId,d=a.targetId,e=b.endpoints,f=function(a,b,c,d,e){null!=c&&c.constructor==jsPlumb.FloatingAnchor||jsPlumbUtil.removeWithFunction(h[d],function(a){return a[0].id==e.id})};f(1,e[1],e[1].anchor,c,b),f(0,e[0],e[0].anchor,d,b),t(b.endpoints[0]),t(b.endpoints[1]),i.redraw(b.sourceId),i.redraw(b.targetId)},this.add=function(a,c){jsPlumbUtil.addToList(b,c,a)},this.changeId=function(a,c){h[c]=h[a],b[c]=b[a],delete h[a],delete b[a]},this.getConnectionsFor=function(a){return h[a]||[]},this.getEndpointsFor=function(a){return b[a]||[]},this.deleteEndpoint=function(a){jsPlumbUtil.removeWithFunction(b[a.elementId],function(b){return b.id==a.id
@@ -28541,7 +27814,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       var competition, currentRoute, routerState, short_name, title, _ref1;
       _ref1 = this.props, routerState = _ref1.routerState, competition = _ref1.competition, currentRoute = _ref1.currentRoute;
       title = competition.title, short_name = competition.short_name;
-      return nav({
+      return div({
         className: 'navbar navbar-default',
         role: 'navigation'
       }, div({

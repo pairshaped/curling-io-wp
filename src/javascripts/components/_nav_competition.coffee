@@ -6,7 +6,7 @@ CompetitionNavigation = React.createClass
     {routerState, competition, currentRoute} = @props
     {title, short_name} = competition
 
-    nav className: 'navbar navbar-default', role: 'navigation',
+    div className: 'navbar navbar-default', role: 'navigation',
       div className: 'navbar-header',
         button className: 'navbar-toggle', 'data-target': '#curlcast-navigation', 'data-toggle': 'collapse', type: 'button',
           span className: 'sr-only', 'Toggle navigation'
