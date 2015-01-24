@@ -64,11 +64,12 @@ CompetitionBox = React.createClass
 
   loadDataFromServer: () ->
     jQuery.ajax
-      url: @props.apiRoot + 'competitions.js'
+      url: "#{@props.apiRoot}competitions.js"
       type: 'GET'
       data: @state.search
       timeout: 10000
       dataType: 'jsonp'
+      cache: true
       jsonpCallback: 'curlcastCompetitionsJSONP'
       success: (results) =>
         @setState competitions: results.competitions, status: CURLCAST_LANG.common.ajax_loading

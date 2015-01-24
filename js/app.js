@@ -27959,6 +27959,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return jQuery.ajax({
         url: competition_url,
         dataType: 'jsonp',
+        cache: true,
         jsonpCallback: 'curlcastJSONP2',
         success: (function(_this) {
           return function(results) {
@@ -28001,6 +28002,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         url: url,
         dataType: 'jsonp',
         timeout: 10000,
+        cache: true,
         jsonpCallback: callbackName,
         success: (function(_this) {
           return function(results) {
@@ -29502,11 +29504,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     },
     loadDataFromServer: function() {
       return jQuery.ajax({
-        url: this.props.apiRoot + 'competitions.js',
+        url: "" + this.props.apiRoot + "competitions.js",
         type: 'GET',
         data: this.state.search,
         timeout: 10000,
         dataType: 'jsonp',
+        cache: true,
         jsonpCallback: 'curlcastCompetitionsJSONP',
         success: (function(_this) {
           return function(results) {
