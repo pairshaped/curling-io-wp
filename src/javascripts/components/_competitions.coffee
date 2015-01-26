@@ -82,11 +82,13 @@ CompetitionBox = React.createClass
 
   render: ->
     unless @state.competitions?
-      return div className: 'col-xs-12',
-        @state.status
+      return div className: 'row',
+        div className: 'col-xs-12',
+          @state.status
 
-    div className: 'col-xs-12',
-      CompetitionSearch changeFilter: @changeFilter
-      CompetitionList competitions: @state.competitions
+    div className: 'row',
+      div className: 'col-xs-12',
+        CompetitionSearch changeFilter: @changeFilter
+        CompetitionList competitions: @state.competitions
 
 window.CurlcastCompetitions = CompetitionBox

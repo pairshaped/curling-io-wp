@@ -29535,16 +29535,20 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     render: function() {
       if (this.state.competitions == null) {
         return div({
+          className: 'row'
+        }, div({
           className: 'col-xs-12'
-        }, this.state.status);
+        }, this.state.status));
       }
       return div({
+        className: 'row'
+      }, div({
         className: 'col-xs-12'
       }, CompetitionSearch({
         changeFilter: this.changeFilter
       }), CompetitionList({
         competitions: this.state.competitions
-      }));
+      })));
     }
   });
 
