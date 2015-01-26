@@ -44,7 +44,7 @@ EOS
   }
 
   define('WP_CURLCAST_WIDGET_URL', 'competitions/scoreboard_mini.js');
-  define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast-staging.ca/update.php');
+  define('WP_CURLCAST_UPDATE_URL', 'http://wordpress.curlcast.pairshaped.ca/update.php');
 
   defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
