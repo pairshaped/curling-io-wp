@@ -1,5 +1,5 @@
 <div class="curlcast" id="scoreboard">
-  <div class="container-fluid row" id="curlcast">
+  <div class="container-fluid" id="curlcast">
   </div>
 </div>
 <script type="text/javascript">
