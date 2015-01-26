@@ -3,11 +3,9 @@
   </div>
 </div>
 
-
 <script type="text/javascript">
   (function(){
     'use strict';
-
     var routes = React.createElement( ReactRouter.Route, { handler: CurlcastDummy, path: '/', name: 'root' },
       React.createElement( ReactRouter.DefaultRoute, { handler: CurlcastCompetitions, name: 'competitions' } ),
       React.createElement( ReactRouter.Route, { name: 'shell', path: 'competitions/:competition_id', handler: CurlcastShell },
@@ -25,14 +23,11 @@
         )
       )
     );
-
     ReactRouter.run(routes, function(Handler, state){
       React.renderComponent( React.createElement( Handler, {
         apiRoot: '{url}',
-        //prefix: '{path_prefix}',
         routerState: state
       }), document.getElementById('curlcast') );
     });
-
   })();
 </script>
