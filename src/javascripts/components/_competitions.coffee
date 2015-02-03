@@ -30,13 +30,24 @@ CompetitionItem = React.createClass
   render: ->
     competition = @props.competition
     competition_id = competition.to_param
+    competitionOccurs = competition.occurs.split(' - ')
+    # Occur format:
+    # MMM DD, YYYY
+    start = moment(competitionOccurs[0], 'MMM DD, YYYY').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY')
+    end = moment(competitionOccurs[1], 'MMM DD, YYYY').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY')
+
+    start = start.split('').map((char, idx) -> return if idx == 0 then char.toUpperCase() else char).join('')
+    end = end.split('').map((char, idx) -> return if idx == 0 then char.toUpperCase() else char).join('')
+
+    occurs = [start, end].join(' - ').replace(/\./g, '')
+
     tr {},
       td {},
         Link to: 'scoreboard', params: { competition_id: competition_id }, competition.title
       td {},
         competition.location
       td {},
-        competition.occurs
+        occurs
 
 CompetitionList = React.createClass
   render: ->

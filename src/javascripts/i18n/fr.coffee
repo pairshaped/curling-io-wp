@@ -1,5 +1,7 @@
 window.CURLCAST_LANG =
 
+  __locale: 'fr'
+
   common:
     lead: 'Premier'
     second: 'Deuxième'
@@ -85,6 +87,8 @@ window.CURLCAST_LANG =
     shooting_percentages: 'Pourcentages'
     delivery_left: 'Gauche'
     delivery_right: 'Droite'
+    sheet: 'CHANGEME(sheet)'
+    ice: 'CHANGEME(ice)'
 
   standings:
     instructions: 'Taper sur une partie ci-dessous pour voir les détails de la partie.'

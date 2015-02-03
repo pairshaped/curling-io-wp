@@ -1,5 +1,7 @@
 window.CURLCAST_LANG =
 
+  __locale: 'en'
+
   common:
     lead: 'Lead'
     second: 'Second'
@@ -82,6 +84,8 @@ window.CURLCAST_LANG =
     shooting_percentages: 'Shooting Percentages'
     delivery_left: 'Left'
     delivery_right: 'Right'
+    sheet: 'Sheet'
+    ice: 'Ice'
 
   standings:
     instructions: 'Mouse-over or tap on a game below to view game details.'

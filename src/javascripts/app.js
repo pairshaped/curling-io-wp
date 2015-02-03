@@ -11,6 +11,7 @@
 //= require lib/bootstrap/collapse
 //= require lib/bootstrap/transition
 //= require_tree ./lib/jsplumb
+//= require lib/moment-with-locales.min
 //= require ./components/_nav_organization
 //= require ./components/_nav_competition
 //= require ./components/_shell
