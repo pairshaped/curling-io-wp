@@ -28477,13 +28477,7 @@ return a+c}})}),function(a){a(vb)}(function(a){return a.defineLocale("en-gb",{mo
         active_class = ' active';
       }
       dayName = moment(day.day, 'ddd').locale(CURLCAST_LANG.__locale).format('ddd').replace(/\./g, '');
-      dayName = dayName.split('').map(function(char, idx) {
-        if (idx === 0) {
-          return char.toUpperCase();
-        } else {
-          return char;
-        }
-      }).join('');
+      dayName = dayName[0].toUpperCase() + dayName.substr(1);
       return li({
         className: "text-center" + active_class
       }, Link({
@@ -29492,20 +29486,8 @@ return a+c}})}),function(a){a(vb)}(function(a){return a.defineLocale("en-gb",{mo
       competitionOccurs = competition.occurs.split(' - ');
       start = moment(competitionOccurs[0], 'MMM DD, YYYY').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY');
       end = moment(competitionOccurs[1], 'MMM DD, YYYY').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY');
-      start = start.split('').map(function(char, idx) {
-        if (idx === 0) {
-          return char.toUpperCase();
-        } else {
-          return char;
-        }
-      }).join('');
-      end = end.split('').map(function(char, idx) {
-        if (idx === 0) {
-          return char.toUpperCase();
-        } else {
-          return char;
-        }
-      }).join('');
+      start = start[0].toUpperCase() + start.substr(1);
+      end = end[0].toUpperCase() + end.susbtr(1);
       occurs = [start, end].join(' - ').replace(/\./g, '');
       return tr({}, td({}, Link({
         to: 'scoreboard',
