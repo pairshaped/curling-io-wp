@@ -1,4 +1,4 @@
-{ div, span } = React.DOM
+{ div, span, p, strong } = React.DOM
 
 # Some server pinging data
 routes = []
@@ -43,14 +43,13 @@ Shell = React.createClass
 
     competition_url = @props.apiRoot + competition_parts.join('/') + '.js'
 
-    #console.log 'Shell.loadNavigationFromServer', competition_parts, competition_url
-
     jQuery.ajax
       url: competition_url
       dataType: 'jsonp'
       cache: true
       jsonpCallback: 'curlcastJSONP2'
       success: (results) =>
+        console.debug results
         @setState
           other_competitions: results.other_competitions
           competition: results.current_competition
@@ -199,5 +198,10 @@ Shell = React.createClass
           ReactRouter.RouteHandler routedProps
         else
           CURLCAST_LANG.common.ajax_loading
+      if competition.notes?
+        div className: 'col-xs-12',
+          p className: 'bg-info notes',
+            strong {}, 'Note: '
+            competition.notes
 
 window.CurlcastShell = Shell
