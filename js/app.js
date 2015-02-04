@@ -28308,7 +28308,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   Link = ReactRouter.Link;
 
   scoreboardUrl = function(prefix, url) {
-    return "" + prefix + "#" + url;
+    return [prefix, url].join('/#').replace('//', '/');
   };
 
   Scoreboard = React.createClass({
