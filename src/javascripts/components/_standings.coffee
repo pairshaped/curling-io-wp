@@ -52,8 +52,8 @@ StandingsBracketGame = React.createClass
       'data-group': game.group_id
       className: "game game-state-#{game.state}"
       style: {
-        left: Math.round(game.x * zoom_factor.x) + "px"
-        top: Math.round((game.y - group.y) * zoom_factor.y) + "px"
+        left: "#{Math.round(game.x * zoom_factor.x) + 10}px"
+        top: "#{Math.round((game.y - group.y) * zoom_factor.y)}px"
       }
       'data-top-connecting-input': game.top_connecting_input.id
       'data-top-connecting-input-group': game.top_connecting_input.group_id
