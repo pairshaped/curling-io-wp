@@ -28244,11 +28244,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     },
     teamToStr: function(team) {
       var name;
-      if (team.to_param != null) {
+      if ((team != null) && (team.to_param != null)) {
         return team.to_param;
       }
-      name = team.name.replace(',', '').replace(' ', '-').toLowerCase();
-      return "" + team.id + "-" + name;
+      if (team != null) {
+        name = team.name.replace(',', '').replace(' ', '-').toLowerCase();
+        return "" + team.id + "-" + name;
+      }
     },
     render: function() {
       var competition, other_competitions, rawServerData, routedProps, _ref1;
@@ -29046,9 +29048,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   BreadCrumbGame = React.createClass({
     render: function() {
-      var active_class;
+      var active, active_class, game, routerState, _ref4;
+      _ref4 = this.props, game = _ref4.game, active = _ref4.active, routerState = _ref4.routerState;
       active_class = '';
-      if (this.props.active === true) {
+      if (active === true) {
         active_class = 'active';
       }
       return li({
@@ -29057,12 +29060,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, Link({
         to: 'boxscore',
         params: {
-          competition_id: this.props.routerState.params.competition_id,
-          game_id: this.props.game.id
+          competition_id: routerState.params.competition_id,
+          game_id: game.id
         },
         href: '#',
         role: 'menuitem'
-      }, this.props.game.display_name));
+      }, game.display_name));
     }
   });
 
