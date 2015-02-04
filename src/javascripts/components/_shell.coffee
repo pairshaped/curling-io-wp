@@ -49,7 +49,6 @@ Shell = React.createClass
       cache: true
       jsonpCallback: 'curlcastJSONP2'
       success: (results) =>
-        # console.debug results
         @setState
           other_competitions: results.other_competitions
           competition: results.current_competition
@@ -190,14 +189,14 @@ Shell = React.createClass
         OrganizationNavigation key: 'org-nav', competitions: other_competitions, competitionChanged: @competitionChanged, routerState: @props.routerState, lang: @props.lang
       div className: 'col-sm-9 col-xs-12',
         CompetitionNavigation key: 'comp-nav', competition: competition, currentRoute: @state.currentRoute, lang: @props.lang
+        if competition.notes?
+          div className: 'row',
+            div className: 'col-xs-12',
+              p className: 'bg-info notes',
+                strong {}, 'Note: '
+                competition.notes
         if routedProps.data
           ReactRouter.RouteHandler routedProps
         else
           CURLCAST_LANG.common.ajax_loading
-      if competition.notes?
-        div className: 'col-xs-12',
-          p className: 'bg-info notes',
-            strong {}, 'Note: '
-            competition.notes
-
 window.CurlcastShell = Shell
