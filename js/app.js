@@ -28595,7 +28595,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       if (((routerState.params.day != null) && (routerState.params.day === dayString)) || ((routerState.params.day == null) && this.props.active)) {
         activeClass = ' active';
       }
-      dayName = moment(day.day, 'ddd').locale(CURLCAST_LANG.__locale).format('ddd').replace(/\./g, '');
+      dayName = moment(day.day, 'ddd', 'en').locale(CURLCAST_LANG.__locale).format('ddd').replace(/\./g, '');
       return li({
         className: "text-center" + activeClass
       }, Link({

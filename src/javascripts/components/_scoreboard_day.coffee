@@ -13,7 +13,7 @@ DayItem = React.createClass
     dayString = dayToStr day
     activeClass = ''
     activeClass = ' active' if (routerState.params.day? && ( routerState.params.day == dayString )) || (!routerState.params.day? && @props.active)
-    dayName = moment(day.day, 'ddd').locale(CURLCAST_LANG.__locale).format('ddd').replace(/\./g, '')
+    dayName = moment(day.day, 'ddd', 'en').locale(CURLCAST_LANG.__locale).format('ddd').replace(/\./g, '')
     li className: "text-center#{activeClass}",
       Link to: 'scoreboard-day', params: { competition_id: routerState.params.competition_id, day: dayToStr( day ) }, activeClassName: '', onClick: @changeToToday,
         day.date
