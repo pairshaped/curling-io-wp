@@ -80,7 +80,7 @@ DrawSheetPosition = React.createClass
         td key: key, className: 'end-score', end_scores[endscore].score
       td className: 'total', total
       if boxscore == true
-        td rowSpan: '2', className: 'hidden-xs',
+        td rowSpan: '2',
           strong {}, state_for_lang
           br {}
           Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: game.id }, onClick: @props.shellComponentChanged,
@@ -112,7 +112,7 @@ DrawSheetItem = React.createClass
                   span className: 'hidden-xs', CURLCAST_LANG.common.table.total
                   span className: 'visible-xs', CURLCAST_LANG.common.table.total_xs
                 if boxscore_display
-                  th className: 'hidden-xs', width: '10%', ''
+                  th width: '10%', ''
             tbody {},
               DrawSheetPosition position: sheet.game_positions[0], ends: number_of_ends, game: sheet.game, teamToStr: @props.teamToStr, routerState: @props.routerState, shellComponentChanged: @props.shellComponentChanged, boxscore: boxscore_display
               DrawSheetPosition position: sheet.game_positions[1], ends: number_of_ends, game: sheet.game, teamToStr: @props.teamToStr, routerState: @props.routerState, shellComponentChanged: @props.shellComponentChanged

@@ -28845,8 +28845,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }), td({
         className: 'total'
       }, total), boxscore === true ? td({
-        rowSpan: '2',
-        className: 'hidden-xs'
+        rowSpan: '2'
       }, strong({}, state_for_lang), br({}), Link({
         to: 'boxscore',
         params: {
@@ -28898,7 +28897,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, CURLCAST_LANG.common.table.total), span({
         className: 'visible-xs'
       }, CURLCAST_LANG.common.table.total_xs)), boxscore_display ? th({
-        className: 'hidden-xs',
         width: '10%'
       }, '') : void 0)), tbody({}, DrawSheetPosition({
         position: sheet.game_positions[0],
