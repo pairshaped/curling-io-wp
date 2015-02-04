@@ -33,11 +33,8 @@ CompetitionItem = React.createClass
     competitionOccurs = competition.occurs.split(' - ')
     # Occur format:
     # MMM DD, YYYY
-    start = moment(competitionOccurs[0], 'MMM DD, YYYY').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY')
-    end = moment(competitionOccurs[1], 'MMM DD, YYYY').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY')
-
-    start = start[0].toUpperCase() + start.substr(1)
-    end = end[0].toUpperCase() + end.susbtr(1)
+    start = moment(competitionOccurs[0], 'MMM DD, YYYY', 'en').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY')
+    end = moment(competitionOccurs[1], 'MMM DD, YYYY', 'en').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY')
 
     occurs = [start, end].join(' - ').replace(/\./g, '')
 

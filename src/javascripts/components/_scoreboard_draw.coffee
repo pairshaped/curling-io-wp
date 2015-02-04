@@ -92,10 +92,10 @@ DrawSheetItem = React.createClass
     number_of_ends = Math.max competition.number_of_ends || (sheet.game_positions[0].end_scores || []).length, (sheet.game_positions[1].end_scores || []).length
     game_state = sheet.game.state.toLowerCase()
     boxscore_display = (game_state == "final") || (game_state.substr(0,5) == "after")
-    sheet_name = sheet.name.replace(/Sheet/, CURLCAST_LANG.games.sheet).replace(/Ice/, CURLCAST_LANG.games.ice)
+    sheetName = sheet.name.replace(/Sheet/, CURLCAST_LANG.games.sheet).replace(/Ice/, CURLCAST_LANG.games.ice)
     if sheet.game.is_bracket == true
-      sheet_name += " : #{sheet.game.name}"
-      sheet_name = sheet_name.replace(/Final/, CURLCAST_LANG.common.state_final)
+      sheetName += " : #{sheet.game.name}"
+      sheetName = sheetName.replace(/Final/, CURLCAST_LANG.common.state_final)
     div className: 'row',
       div className: 'col-xs-12',
         div className: 'table-responsive',
@@ -103,7 +103,7 @@ DrawSheetItem = React.createClass
             thead {},
               tr {},
                 th {},
-                  strong {}, sheet_name
+                  strong {}, sheetName
                 th className: 'lsfe',
                   span className: 'hidden-xs', CURLCAST_LANG.common.table.lsfe
                 [1..number_of_ends].map (endscore, key) ->

@@ -10,7 +10,7 @@
       draw: 'Ronde',
       state_upcoming: 'À venir',
       state_live: 'En direct',
-      state_final: 'Final',
+      state_final: 'Finale',
       state_after: 'Après',
       legend_lsfe: 'Marteau au premier bout',
       event: 'Événement',
