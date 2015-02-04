@@ -1,5 +1,7 @@
 window.CURLCAST_LANG =
 
+  __locale: 'fr'
+
   common:
     lead: 'Premier'
     second: 'Deuxième'
@@ -9,7 +11,7 @@ window.CURLCAST_LANG =
     draw: 'Ronde'
     state_upcoming: 'À venir'
     state_live: 'En direct'
-    state_final: 'Final'
+    state_final: 'Finale'
     state_after: 'Après'
     legend_lsfe: 'Marteau au premier bout'
     event: 'Événement'
@@ -85,6 +87,8 @@ window.CURLCAST_LANG =
     shooting_percentages: 'Pourcentages'
     delivery_left: 'Gauche'
     delivery_right: 'Droite'
+    sheet: 'Glace'
+    ice: 'Glace'
 
   standings:
     instructions: 'Taper sur une partie ci-dessous pour voir les détails de la partie.'
