@@ -27996,9 +27996,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var Shell, div, routes, span, _pageTimeout, _ref;
+  var Shell, div, p, routes, span, strong, _pageTimeout, _ref;
 
-  _ref = React.DOM, div = _ref.div, span = _ref.span;
+  _ref = React.DOM, div = _ref.div, span = _ref.span, p = _ref.p, strong = _ref.strong;
 
   routes = [];
 
@@ -28097,7 +28097,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         error: (function(_this) {
           return function() {
             var newStatus, seconds;
-            console.debug('Shell.loadNavigationFromServer.ajax.error');
             seconds = _this.state.retryDelay / 1000;
             newStatus = CURLCAST_LANG.common.ajax_error;
             _this.setState({
@@ -28286,7 +28285,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         competition: competition,
         currentRoute: this.state.currentRoute,
         lang: this.props.lang
-      }), routedProps.data ? ReactRouter.RouteHandler(routedProps) : CURLCAST_LANG.common.ajax_loading));
+      }), routedProps.data ? ReactRouter.RouteHandler(routedProps) : CURLCAST_LANG.common.ajax_loading), competition.notes != null ? div({
+        className: 'col-xs-12'
+      }, p({
+        className: 'bg-info notes'
+      }, strong({}, 'Note: '), competition.notes)) : void 0);
     }
   });
 
@@ -29820,11 +29823,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       };
     },
     render: function() {
-      return div({
-        className: 'row'
-      }, div({
-        className: 'col-xs-12'
-      }, p({}, CURLCAST_LANG.standings.instructions), this.props.round.groups.map((function(_this) {
+      return div({}, p({}, CURLCAST_LANG.standings.instructions), this.props.round.groups.map((function(_this) {
         return function(group, idx) {
           return StandingsBracketGroup({
             key: idx,
@@ -29833,7 +29832,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             zoom_factor: _this.state.zoom_factor
           });
         };
-      })(this))));
+      })(this)));
     }
   });
 

@@ -39,6 +39,9 @@ body
     .navbar-brand
       font-size: 14px
 
+  .notes
+    padding: 15px
+
   table.table
     thead
       tr
@@ -101,8 +104,7 @@ body
       max-width: 300px
 
   .bracket
-    overflow: visible
-    padding-right: 25px
+    overflow-x: auto
 
     .bracket-group
       position: relative
@@ -114,7 +116,7 @@ body
       cursor: default
       position: absolute
       width: 170px
-      height: 44px
+      height: 47px
 
     .game-name
       display: table-cell
@@ -138,23 +140,25 @@ body
 
     .game-state-upcoming
       border: 1px solid #ccc
-      &:hover
-        background-color: #f6f6f6
-
-    .game-state-live
-      border: 1px solid #DB1F00
+      background-color: #f6f6f6
       &:hover
         background-color: #ccc
+
+    .game-state-live
+      border: 1px solid #db1f00
+      background-color: #db1f00
       .game-name, .game-team-name
-        background-color: #DB1F00
         color: white
+      &:hover
+        background-color: #fff
+        .game-name, .game-team-name
+          color: black
 
     .game-state-final
       border: 1px solid #ccc
+      background-color: #ccc
       &:hover
-        background-color: #ccc
-      .game-name, .game-team-name
-        background-color: #ccc
+        background-color: #f6f6f6
 
 .game-popover
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
@@ -199,22 +203,22 @@ body
       background: no-repeat 10px 7px
 
     .red-rock
-      background-image: url(asset-path("red_rock.png"))
+      background-image: url(../images/red_rock.png)
     .yellow-rock
-      background-image: url(asset-path("yellow_rock.png"))
+      background-image: url(../images/yellow_rock.png)
     .no-rock
-      background-image: url(asset-path("no_rock.png"))
+      background-image: url(../images/no_rock.png)
     .blue-rock
-      background-image: url(asset-path("blue_rock.png"))
+      background-image: url(../images/blue_rock.png)
     .green-rock
-      background-image: url(asset-path("green_rock.png"))
+      background-image: url(../images/green_rock.png)
     .black-rock
-      background-image: url(asset-path("black_rock.png"))
+      background-image: url(../images/black_rock.png)
     .white-rock
-      background-image: url(asset-path("white_rock.png"))
+      background-image: url(../images/white_rock.png)
 
     .game-position-result-won
-      background: url(asset-path("winner_flag.png")) no-repeat right center
+      background: url(../images/winner_flag.png) no-repeat right center
 
     .game-date, .game-moves-to
       clear: both

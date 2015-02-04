@@ -1,4 +1,4 @@
-{ div, span } = React.DOM
+{ div, span, p, strong } = React.DOM
 
 # Some server pinging data
 routes = []
@@ -43,20 +43,19 @@ Shell = React.createClass
 
     competition_url = @props.apiRoot + competition_parts.join('/') + '.js'
 
-    #console.log 'Shell.loadNavigationFromServer', competition_parts, competition_url
-
     jQuery.ajax
       url: competition_url
       dataType: 'jsonp'
       cache: true
       jsonpCallback: 'curlcastJSONP2'
       success: (results) =>
+        # console.debug results
         @setState
           other_competitions: results.other_competitions
           competition: results.current_competition
           retryDelay: 5000
       error: =>
-        console.debug 'Shell.loadNavigationFromServer.ajax.error'
+        # console.debug 'Shell.loadNavigationFromServer.ajax.error'
         seconds = @state.retryDelay / 1000
         newStatus = CURLCAST_LANG.common.ajax_error
         @setState status: newStatus, retryDelay: if (@state.retryDelay >= 30000) then @state.retryDelay else (@state.retryDelay + 5000)
@@ -104,11 +103,9 @@ Shell = React.createClass
       @setState lastPageDataUrl: url
 
   componentDidMount: ->
-    #console.log 'Shell.componentDidMount'
     @competitionChanged(null)
 
   componentWillUnmount: ->
-    #console.log 'Shell.componentWillUnmount'
     @setPageDataUrl null
 
   competitionChanged: (competition) ->
@@ -116,7 +113,6 @@ Shell = React.createClass
     @shellComponentUpdated(@props)
 
   shellComponentUpdated: (nextProps) ->
-    #console.log 'Shell.shellComponentUpdated'
     r = @getRoute nextProps.routerState.routes
     new_url = null
     interval = null
@@ -159,7 +155,6 @@ Shell = React.createClass
     { day: draw.starts_at_day, date: draw.starts_at_date, starts_on: draw.starts_on, starts_at_timestamp: draw.starts_at_timestamp }
 
   dayToStr: (day) ->
-    #console.log 'Shell.dayToStr', day
     "#{day.day}-#{day.date}"
 
   drawToStr: (draw) ->
@@ -199,5 +194,10 @@ Shell = React.createClass
           ReactRouter.RouteHandler routedProps
         else
           CURLCAST_LANG.common.ajax_loading
+      if competition.notes?
+        div className: 'col-xs-12',
+          p className: 'bg-info notes',
+            strong {}, 'Note: '
+            competition.notes
 
 window.CurlcastShell = Shell

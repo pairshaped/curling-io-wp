@@ -29,8 +29,8 @@ EOS
 
   switch(WP_CURLCAST_ENV) {
   case 'dev':
-    define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
-    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', '_2dJb1kmuto');
+    define('WP_CURLCAST_BASE_URL', 'http://localhost:3000/stats/organizations');
+    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', 'qw4LUsJ1_aQ');
     break;
   case 'staging':
     define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
@@ -243,7 +243,7 @@ EOS
       add_menu_page('Curlcast Options', 'Curlcast', 8, __FILE__, array(
         'curlcast',
         'settings'
-      ), plugins_url('settings.gif', __FILE__));
+      ), plugins_url('images/settings.gif', __FILE__));
     }
 
     /**

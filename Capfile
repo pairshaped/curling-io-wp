@@ -12,7 +12,6 @@ set :user, "deploy"
 server 'app1.curlcast.pairshaped.ca', :app, :web, :db, :primary => true
 server 'app2.curlcast.pairshaped.ca', :app, :web, :db, :primary => true
 server 'app3.curlcast.pairshaped.ca', :app, :web, :db, :primary => true
-server 'app4.curlcast.pairshaped.ca', :app, :web, :db, :primary => true
 
 # clean up old releases
 after "deploy:restart", "deploy:cleanup"

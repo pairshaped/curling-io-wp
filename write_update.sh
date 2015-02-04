@@ -4,7 +4,7 @@
 mkdir ./curlcast
 
 # If we need any files/directories, please add them here!
-files=( "curlcast.php" "settings.gif" "templates/" "js/" "css/" )
+files=( "curlcast.php" "images/" "templates/" "js/" "css/" )
 
 # Get the current version
 version=`cat .version`
