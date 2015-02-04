@@ -189,7 +189,7 @@ Shell = React.createClass
         OrganizationNavigation key: 'org-nav', competitions: other_competitions, competitionChanged: @competitionChanged, routerState: @props.routerState, lang: @props.lang
       div className: 'col-sm-9 col-xs-12',
         CompetitionNavigation key: 'comp-nav', competition: competition, currentRoute: @state.currentRoute, lang: @props.lang
-        if competition.notes?
+        if competition.notes? && competition.notes != ''
           div className: 'row',
             div className: 'col-xs-12',
               p className: 'bg-info notes',

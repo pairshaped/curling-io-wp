@@ -28285,13 +28285,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         competition: competition,
         currentRoute: this.state.currentRoute,
         lang: this.props.lang
-      }), competition.notes != null ? div({
+      }), (competition.notes != null) && competition.notes !== '' ? div({
         className: 'row'
       }, div({
         className: 'col-xs-12'
       }, p({
         className: 'bg-info notes'
-      }, strong({}, 'Note: '), competition.notes))) : void 0, routedProps.data ? ReactRouter.RouteHandler(routedProps) : CURLCAST_LANG.common.ajax_loading));
+      }, strong({}, 'Notes: '), competition.notes))) : void 0, routedProps.data ? ReactRouter.RouteHandler(routedProps) : CURLCAST_LANG.common.ajax_loading));
     }
   });
 
