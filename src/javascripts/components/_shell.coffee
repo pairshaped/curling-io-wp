@@ -193,7 +193,7 @@ Shell = React.createClass
           div className: 'row',
             div className: 'col-xs-12',
               p className: 'bg-info notes',
-                strong {}, 'Note: '
+                strong {}, 'Notes: '
                 competition.notes
         if routedProps.data
           ReactRouter.RouteHandler routedProps
