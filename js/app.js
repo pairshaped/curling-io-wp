@@ -27872,9 +27872,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var Shell, div, routes, span, _pageTimeout, _ref;
+  var Shell, div, p, routes, span, strong, _pageTimeout, _ref;
 
-  _ref = React.DOM, div = _ref.div, span = _ref.span;
+  _ref = React.DOM, div = _ref.div, span = _ref.span, p = _ref.p, strong = _ref.strong;
 
   routes = [];
 
@@ -27963,6 +27963,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         jsonpCallback: 'curlcastJSONP2',
         success: (function(_this) {
           return function(results) {
+            console.debug(results);
             return _this.setState({
               other_competitions: results.other_competitions,
               competition: results.current_competition,
@@ -28162,7 +28163,11 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         competition: competition,
         currentRoute: this.state.currentRoute,
         lang: this.props.lang
-      }), routedProps.data ? ReactRouter.RouteHandler(routedProps) : CURLCAST_LANG.common.ajax_loading));
+      }), routedProps.data ? ReactRouter.RouteHandler(routedProps) : CURLCAST_LANG.common.ajax_loading), competition.notes != null ? div({
+        className: 'col-xs-12'
+      }, p({
+        className: 'bg-info notes'
+      }, strong({}, 'Note: '), competition.notes)) : void 0);
     }
   });
 

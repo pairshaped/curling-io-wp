@@ -24,13 +24,13 @@ EOS
 
   # Set environment
   # Ideally, we should be setting/including this using a env.php file with the appropriate configuration
-  define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
-  #define('WP_CURLCAST_ENV', 'dev');
+  #define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
+  define('WP_CURLCAST_ENV', 'dev');
 
   switch(WP_CURLCAST_ENV) {
   case 'dev':
-    define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
-    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', '_2dJb1kmuto');
+    define('WP_CURLCAST_BASE_URL', 'http://localhost:3000/stats/organizations');
+    define('WP_CURLCAST_ACCESS_KEY_OVERRIDE', 'qw4LUsJ1_aQ');
     break;
   case 'staging':
     define('WP_CURLCAST_BASE_URL', 'http://curlcast.dev/stats/organizations');
