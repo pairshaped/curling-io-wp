@@ -24,8 +24,8 @@ EOS
 
   # Set environment
   # Ideally, we should be setting/including this using a env.php file with the appropriate configuration
-  #define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
-  define('WP_CURLCAST_ENV', 'dev');
+  define('WP_CURLCAST_ENV', 'production'); # or 'staging', 'dev'
+  #define('WP_CURLCAST_ENV', 'dev');
 
   switch(WP_CURLCAST_ENV) {
   case 'dev':
