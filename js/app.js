@@ -27963,7 +27963,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         jsonpCallback: 'curlcastJSONP2',
         success: (function(_this) {
           return function(results) {
-            console.debug(results);
             return _this.setState({
               other_competitions: results.other_competitions,
               competition: results.current_competition,
@@ -27974,7 +27973,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         error: (function(_this) {
           return function() {
             var newStatus, seconds;
-            console.debug('Shell.loadNavigationFromServer.ajax.error');
             seconds = _this.state.retryDelay / 1000;
             newStatus = CURLCAST_LANG.common.ajax_error;
             _this.setState({

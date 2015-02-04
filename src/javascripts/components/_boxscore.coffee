@@ -6,7 +6,6 @@ Link = ReactRouter.Link
 
 BreadCrumbDraw = React.createClass
   render: ->
-    #console.log 'Boxscore.BreadCrumbDraw', @props
     active_class = ''
     active_class = 'active' if @props.active == true
 
@@ -367,9 +366,6 @@ BoxScoreContent = React.createClass
     else
       return div className: 'row',
         div className: 'col-xs-12', CURLCAST_LANG.common.ajax_loading
-
-    #for i in [0..1]
-    #  console.log contentProps.game.positions[i].team, contentProps.game.positions[i].team.athletes
 
     div className: 'row',
       div className: 'col-xs-12',

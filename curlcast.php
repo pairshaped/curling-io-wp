@@ -243,7 +243,7 @@ EOS
       add_menu_page('Curlcast Options', 'Curlcast', 8, __FILE__, array(
         'curlcast',
         'settings'
-      ), plugins_url('settings.gif', __FILE__));
+      ), plugins_url('images/settings.gif', __FILE__));
     }
 
     /**
