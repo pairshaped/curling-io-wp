@@ -39,11 +39,14 @@ TeamShowScoresGame = React.createClass
     game_position_self = if game.game_positions[0].name == @props.team.name then 0 else 1
     game_position_opponent = if game_position_self == 0 then 1 else 0
     game_result = ''
+
+    startsAt = moment(game.draw.starts_at, 'MMM DD, YYYY h:mma', 'en').locale(CURLCAST_LANG.__locale).format('MMM DD, YYYY h:mma')
+
     if game.result?
       game_result = CURLCAST_LANG.common[game.result.toLowerCase()] || game.result
     tr {},
       td {}, game.draw.label
-      td {}, game.draw.starts_at
+      td {}, startsAt
       td {}, game_result
       td {},
         if !(game.game_positions[0].total? && game.game_positions[1].total?)
