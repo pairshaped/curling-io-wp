@@ -1,4 +1,4 @@
-{ div, ul, li, a, p } = React.DOM
+{ div, ul, li, a, p, br } = React.DOM
 { h4 }  = React.DOM
 { table, thead, tr, th, tbody, td } = React.DOM
 Link = ReactRouter.Link
@@ -21,7 +21,10 @@ StandingsBracketGame = React.createClass
 
     "<div class='game-positions'>" + \
       game.game_positions.map( (pos) ->
-        "<div class='game-position game-position-result-#{pos.result || ''}'><div class='game-position-name'>#{pos.team.short_name}</div></div>"
+        "<div class='game-position game-position-result-#{pos.result || ''}'>
+          <div class='game-position-name'>#{pos.team.short_name}</div>
+          <div class='game-position-total'>#{pos.total || 0}</div>
+        </div>"
       ).join("") + \
     "</div>" + \
     "<div class='game-date'>" + game_date + "</div>" + \
@@ -85,6 +88,8 @@ StandingsBracket = React.createClass
   render: ->
     div {},
       p {}, CURLCAST_LANG.standings.instructions
+      br {}
+      br {}
       # TODO: Might need to bring in a plugin to handle scrolling?
       #if @props.round.groups.length > 1
       #  ul className: 'pagination',

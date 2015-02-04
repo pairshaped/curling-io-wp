@@ -164,9 +164,10 @@ Shell = React.createClass
     "#{round.type}-#{round.id}"
 
   teamToStr: (team) ->
-    return team.to_param if team.to_param?
-    name = team.name.replace(',', '').replace(' ', '-').toLowerCase()
-    "#{team.id}-#{name}"
+    return team.to_param if team? && team.to_param?
+    if team?
+      name = team.name.replace(',', '').replace(' ', '-').toLowerCase()
+      return "#{team.id}-#{name}"
 
   render: ->
     unless @state.competition?

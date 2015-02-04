@@ -28244,11 +28244,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
     },
     teamToStr: function(team) {
       var name;
-      if (team.to_param != null) {
+      if ((team != null) && (team.to_param != null)) {
         return team.to_param;
       }
-      name = team.name.replace(',', '').replace(' ', '-').toLowerCase();
-      return "" + team.id + "-" + name;
+      if (team != null) {
+        name = team.name.replace(',', '').replace(' ', '-').toLowerCase();
+        return "" + team.id + "-" + name;
+      }
     },
     render: function() {
       var competition, other_competitions, rawServerData, routedProps, _ref1;
@@ -28306,7 +28308,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
   Link = ReactRouter.Link;
 
   scoreboardUrl = function(prefix, url) {
-    return "" + prefix + "#" + url;
+    return [prefix, url].join('/#').replace('//', '/');
   };
 
   Scoreboard = React.createClass({
@@ -28843,8 +28845,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }), td({
         className: 'total'
       }, total), boxscore === true ? td({
-        rowSpan: '2',
-        className: 'hidden-xs'
+        rowSpan: '2'
       }, strong({}, state_for_lang), br({}), Link({
         to: 'boxscore',
         params: {
@@ -28896,7 +28897,6 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, CURLCAST_LANG.common.table.total), span({
         className: 'visible-xs'
       }, CURLCAST_LANG.common.table.total_xs)), boxscore_display ? th({
-        className: 'hidden-xs',
         width: '10%'
       }, '') : void 0)), tbody({}, DrawSheetPosition({
         position: sheet.game_positions[0],
@@ -29046,9 +29046,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   BreadCrumbGame = React.createClass({
     render: function() {
-      var active_class;
+      var active, active_class, game, routerState, _ref4;
+      _ref4 = this.props, game = _ref4.game, active = _ref4.active, routerState = _ref4.routerState;
       active_class = '';
-      if (this.props.active === true) {
+      if (active === true) {
         active_class = 'active';
       }
       return li({
@@ -29057,12 +29058,12 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }, Link({
         to: 'boxscore',
         params: {
-          competition_id: this.props.routerState.params.competition_id,
-          game_id: this.props.game.id
+          competition_id: routerState.params.competition_id,
+          game_id: game.id
         },
         href: '#',
         role: 'menuitem'
-      }, this.props.game.display_name));
+      }, game.display_name));
     }
   });
 
@@ -29700,9 +29701,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var Link, Standings, StandingsBracket, StandingsBracketGame, StandingsBracketGameTeam, StandingsBracketGroup, StandingsPanel, StandingsRoundRobin, StandingsTab, StandingsTabContainer, a, div, h4, li, p, table, tbody, td, th, thead, tr, ul, _ref, _ref1;
+  var Link, Standings, StandingsBracket, StandingsBracketGame, StandingsBracketGameTeam, StandingsBracketGroup, StandingsPanel, StandingsRoundRobin, StandingsTab, StandingsTabContainer, a, br, div, h4, li, p, table, tbody, td, th, thead, tr, ul, _ref, _ref1;
 
-  _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, a = _ref.a, p = _ref.p;
+  _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, a = _ref.a, p = _ref.p, br = _ref.br;
 
   h4 = React.DOM.h4;
 
@@ -29737,7 +29738,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }
       game_moves_to = game_moves_to.join(", ");
       return "<div class='game-positions'>" + game.game_positions.map(function(pos) {
-        return "<div class='game-position game-position-result-" + (pos.result || '') + "'><div class='game-position-name'>" + pos.team.short_name + "</div></div>";
+        return "<div class='game-position game-position-result-" + (pos.result || '') + "'> <div class='game-position-name'>" + pos.team.short_name + "</div> <div class='game-position-total'>" + (pos.total || 0) + "</div> </div>";
       }).join("") + "</div>" + "<div class='game-date'>" + game_date + "</div>" + "<div class='game-moves-to'>" + game_moves_to + "</div>";
     },
     popOver: function() {
@@ -29825,7 +29826,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       };
     },
     render: function() {
-      return div({}, p({}, CURLCAST_LANG.standings.instructions), this.props.round.groups.map((function(_this) {
+      return div({}, p({}, CURLCAST_LANG.standings.instructions), br({}), br({}), this.props.round.groups.map((function(_this) {
         return function(group, idx) {
           return StandingsBracketGroup({
             key: idx,

@@ -6,7 +6,7 @@ Link = ReactRouter.Link
 #        should assume that we are always using hash urls
 scoreboardUrl = (prefix, url) ->
   #return "#{prefix}#{url}" if window.history.pushState?
-  "#{prefix}##{url}"
+  [prefix, url].join('/#').replace('//', '/')
 
 Scoreboard = React.createClass
   getInitialState: ->

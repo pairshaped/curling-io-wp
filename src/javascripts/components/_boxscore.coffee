@@ -18,11 +18,12 @@ BreadCrumbDraw = React.createClass
 
 BreadCrumbGame = React.createClass
   render: ->
+    { game, active, routerState } = @props
     active_class = ''
-    active_class = 'active' if @props.active == true
+    active_class = 'active' if active == true
     li className: active_class, role: 'presentation',
-      Link to: 'boxscore', params: { competition_id: @props.routerState.params.competition_id, game_id: @props.game.id }, href: '#', role: 'menuitem',
-        @props.game.display_name
+      Link to: 'boxscore', params: { competition_id: routerState.params.competition_id, game_id: game.id }, href: '#', role: 'menuitem',
+        game.display_name
 
 BreadCrumbNavigation = React.createClass
   render: ->
