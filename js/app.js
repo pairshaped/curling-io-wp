@@ -29686,11 +29686,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       };
     },
     render: function() {
-      return div({
-        className: 'row'
-      }, div({
-        className: 'col-xs-12'
-      }, p({}, CURLCAST_LANG.standings.instructions), this.props.round.groups.map((function(_this) {
+      return div({}, p({}, CURLCAST_LANG.standings.instructions), this.props.round.groups.map((function(_this) {
         return function(group, idx) {
           return StandingsBracketGroup({
             key: idx,
@@ -29699,7 +29695,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
             zoom_factor: _this.state.zoom_factor
           });
         };
-      })(this))));
+      })(this)));
     }
   });
 

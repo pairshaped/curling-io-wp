@@ -77,9 +77,6 @@ body
       a
         margin: 0
 
-  .tab-pane-bracket
-    overflow: auto
-
   ul.dropdown-menu
     li
       list-style: none
@@ -107,8 +104,7 @@ body
       max-width: 300px
 
   .bracket
-    overflow: visible
-    padding-right: 25px
+    overflow-x: auto
 
     .bracket-group
       position: relative
@@ -120,7 +116,7 @@ body
       cursor: default
       position: absolute
       width: 170px
-      height: 44px
+      height: 47px
 
     .game-name
       display: table-cell
@@ -144,23 +140,25 @@ body
 
     .game-state-upcoming
       border: 1px solid #ccc
-      &:hover
-        background-color: #f6f6f6
-
-    .game-state-live
-      border: 1px solid #DB1F00
+      background-color: #f6f6f6
       &:hover
         background-color: #ccc
+
+    .game-state-live
+      border: 1px solid #db1f00
+      background-color: #db1f00
       .game-name, .game-team-name
-        background-color: #DB1F00
         color: white
+      &:hover
+        background-color: #fff
+        .game-name, .game-team-name
+          color: black
 
     .game-state-final
       border: 1px solid #ccc
+      background-color: #ccc
       &:hover
-        background-color: #ccc
-      .game-name, .game-team-name
-        background-color: #ccc
+        background-color: #f6f6f6
 
 .game-popover
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif

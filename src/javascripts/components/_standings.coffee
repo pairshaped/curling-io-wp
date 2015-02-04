@@ -83,17 +83,16 @@ StandingsBracket = React.createClass
     { zoom_factor: { x: 0.8, y: 0.55 } }
 
   render: ->
-    div className: 'row',
-      div className: 'col-xs-12',
-        p {}, CURLCAST_LANG.standings.instructions
-        # TODO: Might need to bring in a plugin to handle scrolling?
-        #if @props.round.groups.length > 1
-        #  ul className: 'pagination',
-        #    @props.round.groups.map (group, idx) ->
-        #      li key: idx,
-        #        a href: "##{group.id}", group.name || "A #{CURLCAST_LANG.common.event}"
-        @props.round.groups.map (group, idx) =>
-          StandingsBracketGroup key: idx, bracket: @props.round, group: group, zoom_factor: @state.zoom_factor
+    div {},
+      p {}, CURLCAST_LANG.standings.instructions
+      # TODO: Might need to bring in a plugin to handle scrolling?
+      #if @props.round.groups.length > 1
+      #  ul className: 'pagination',
+      #    @props.round.groups.map (group, idx) ->
+      #      li key: idx,
+      #        a href: "##{group.id}", group.name || "A #{CURLCAST_LANG.common.event}"
+      @props.round.groups.map (group, idx) =>
+        StandingsBracketGroup key: idx, bracket: @props.round, group: group, zoom_factor: @state.zoom_factor
 
 
 StandingsRoundRobin = React.createClass
