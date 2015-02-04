@@ -86,8 +86,8 @@
       shooting_percentages: 'Pourcentages',
       delivery_left: 'Gauche',
       delivery_right: 'Droite',
-      sheet: 'CHANGEME(sheet)',
-      ice: 'CHANGEME(ice)'
+      sheet: 'Glace',
+      ice: 'Glace'
     },
     standings: {
       instructions: 'Taper sur une partie ci-dessous pour voir les détails de la partie.',
