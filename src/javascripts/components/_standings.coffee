@@ -6,7 +6,7 @@ Link = ReactRouter.Link
 StandingsBracketGameTeam = React.createClass
   render: ->
     {position} = @props
-    div className: 'game-team-name', position.team.short_name.substr(0,10)
+    div className: 'game-team-name', position.team.short_name
 
 StandingsBracketGame = React.createClass
   popoverHtml: ->
@@ -21,7 +21,7 @@ StandingsBracketGame = React.createClass
 
     "<div class='game-positions'>" + \
       game.game_positions.map( (pos) ->
-        "<div class='game-position game-position-result-" + (pos.result || '') + "'><div class='game-position-name'>" + pos.team.short_name + "</div></div>"
+        "<div class='game-position game-position-result-#{pos.result || ''}'><div class='game-position-name'>#{pos.team.short_name}</div></div>"
       ).join("") + \
     "</div>" + \
     "<div class='game-date'>" + game_date + "</div>" + \

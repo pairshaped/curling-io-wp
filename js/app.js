@@ -29575,7 +29575,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       position = this.props.position;
       return div({
         className: 'game-team-name'
-      }, position.team.short_name.substr(0, 10));
+      }, position.team.short_name);
     }
   });
 
