@@ -29700,9 +29700,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
 }).call(this);
 (function() {
-  var Link, Standings, StandingsBracket, StandingsBracketGame, StandingsBracketGameTeam, StandingsBracketGroup, StandingsPanel, StandingsRoundRobin, StandingsTab, StandingsTabContainer, a, div, h4, li, p, table, tbody, td, th, thead, tr, ul, _ref, _ref1;
+  var Link, Standings, StandingsBracket, StandingsBracketGame, StandingsBracketGameTeam, StandingsBracketGroup, StandingsPanel, StandingsRoundRobin, StandingsTab, StandingsTabContainer, a, br, div, h4, li, p, table, tbody, td, th, thead, tr, ul, _ref, _ref1;
 
-  _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, a = _ref.a, p = _ref.p;
+  _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, a = _ref.a, p = _ref.p, br = _ref.br;
 
   h4 = React.DOM.h4;
 
@@ -29737,7 +29737,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }
       game_moves_to = game_moves_to.join(", ");
       return "<div class='game-positions'>" + game.game_positions.map(function(pos) {
-        return "<div class='game-position game-position-result-" + (pos.result || '') + "'><div class='game-position-name'>" + pos.team.short_name + "</div></div>";
+        return "<div class='game-position game-position-result-" + (pos.result || '') + "'> <div class='game-position-name'>" + pos.team.short_name + "</div> <div class='game-position-total'>" + (pos.total || 0) + "</div> </div>";
       }).join("") + "</div>" + "<div class='game-date'>" + game_date + "</div>" + "<div class='game-moves-to'>" + game_moves_to + "</div>";
     },
     popOver: function() {
@@ -29825,7 +29825,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       };
     },
     render: function() {
-      return div({}, p({}, CURLCAST_LANG.standings.instructions), this.props.round.groups.map((function(_this) {
+      return div({}, p({}, CURLCAST_LANG.standings.instructions), br({}), br({}), this.props.round.groups.map((function(_this) {
         return function(group, idx) {
           return StandingsBracketGroup({
             key: idx,
