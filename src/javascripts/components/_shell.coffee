@@ -166,7 +166,7 @@ Shell = React.createClass
   teamToStr: (team) ->
     return team.to_param if team? && team.to_param?
     if team?
-      name = team.name.replace(',', '').replace(' ', '-').toLowerCase()
+      name = team.name.replace(/[,\.]/g, '').replace(' ', '-').toLowerCase()
       return "#{team.id}-#{name}"
 
   render: ->
