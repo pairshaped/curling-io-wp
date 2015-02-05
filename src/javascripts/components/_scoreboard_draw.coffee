@@ -13,11 +13,13 @@ DrawListItem = React.createClass
     dayParam = @props.dayToStr day
     drawParam = @props.drawToStr draw
 
+    startsAt = moment(draw.starts_at, 'h:mma', 'en').locale(CURLCAST_LANG.__locale).format('LT')
+
     li className: active_class,
       Link to: 'scoreboard-draw', params: { competition_id: @props.routerState.params.competition_id, day: dayParam, draw: drawParam }, activeClassName: 'router-active',
         "#{CURLCAST_LANG.common.draw} #{draw.label}"
         br {}
-        draw.starts_at
+        startsAt
 
 DrawList = React.createClass
   render: ->
