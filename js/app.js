@@ -27826,8 +27826,8 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         weekdaysShort : 'dim._lun._mar._mer._jeu._ven._sam.'.split('_'),
         weekdaysMin : 'Di_Lu_Ma_Me_Je_Ve_Sa'.split('_'),
         longDateFormat : {
-            LT : 'HH:mm',
-            LTS : 'LT:ss',
+            LT : 'H[h]mm',
+            LTS : 'LT[s]ss',
             L : 'YYYY-MM-DD',
             LL : 'D MMMM YYYY',
             LLL : 'D MMMM YYYY LT',
@@ -28672,7 +28672,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       return this.changeDay(this.getSelectedDay());
     },
     render: function() {
-      var competition, day, days, drawProps, location_str, scoreboard, _ref4;
+      var competition, day, days, drawProps, location_str, scoreboard, startsOn, timeNow, tz, _ref4;
       _ref4 = this.props, competition = _ref4.competition, days = _ref4.days, scoreboard = _ref4.scoreboard;
       day = this.state.day;
       if (day == null) {
@@ -28688,6 +28688,9 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }
       drawProps = this.props;
       drawProps.day = day;
+      tz = scoreboard.time_now.split(" ");
+      timeNow = moment(tz[0], 'h:mma', 'en').locale(CURLCAST_LANG.__locale).format('LT') + " " + tz[1];
+      startsOn = moment(day.starts_on, 'dddd MMM D, YYYY', 'en').locale(CURLCAST_LANG.__locale).format('dddd MMM D, YYYY');
       return div({
         className: 'row'
       }, div({
@@ -28700,13 +28703,13 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         changeDay: this.changeDay
       }), h3({
         className: 'hidden-xs'
-      }, day.starts_on), h4({
+      }, startsOn), h4({
         className: 'visible-xs'
-      }, day.starts_on)), div({
+      }, startsOn)), div({
         className: 'col-sm-2 hidden-xs'
       }, h6({
         className: 'text-right'
-      }, CURLCAST_LANG.common.current_time, br({}), scoreboard.time_now)), div({
+      }, CURLCAST_LANG.common.current_time, br({}), timeNow)), div({
         className: 'col-xs-12'
       }, this.props.routerState.params.draw != null ? ReactRouter.RouteHandler(drawProps) : CurlcastScoreboardDraw(drawProps)));
     }
@@ -28730,7 +28733,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   DrawListItem = React.createClass({
     render: function() {
-      var active_class, day, dayParam, draw, drawParam, _ref4;
+      var active_class, day, dayParam, draw, drawParam, startsAt, _ref4;
       _ref4 = this.props, day = _ref4.day, draw = _ref4.draw;
       active_class = '';
       if (this.props.active === true) {
@@ -28738,6 +28741,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }
       dayParam = this.props.dayToStr(day);
       drawParam = this.props.drawToStr(draw);
+      startsAt = moment(draw.starts_at, 'h:mma', 'en').locale(CURLCAST_LANG.__locale).format('LT');
       return li({
         className: active_class
       }, Link({
@@ -28748,7 +28752,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
           draw: drawParam
         },
         activeClassName: 'router-active'
-      }, "" + CURLCAST_LANG.common.draw + " " + draw.label, br({}), draw.starts_at));
+      }, "" + CURLCAST_LANG.common.draw + " " + draw.label, br({}), startsAt));
     }
   });
 
@@ -29621,7 +29625,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'table-responsive'
       }, table({
         className: 'table table-bordered table-striped'
-      }, thead({}, tr({}, th({}, CURLCAST_LANG.common.table.competition), th({}, CURLCAST_LANG.common.table.location), th({}, CURLCAST_LANG.common.table.occurs_at))), tbody({}, this.props.competitions.map(function(competition) {
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.common.table.competition), th({}, CURLCAST_LANG.common.table.location), th({}, CURLCAST_LANG.common.table.dates))), tbody({}, this.props.competitions.map(function(competition) {
         return CompetitionItem({
           key: competition.id,
           competition: competition

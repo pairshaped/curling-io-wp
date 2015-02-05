@@ -64,16 +64,22 @@ ScoreboardDay = React.createClass
     drawProps = @props
     drawProps.day = day
 
+    # Dayname Mon 1, YEAR
+    tz = scoreboard.time_now.split " "
+    timeNow = moment(tz[0], 'h:mma', 'en').locale(CURLCAST_LANG.__locale).format('LT') + " " + tz[1]
+
+    startsOn = moment(day.starts_on, 'dddd MMM D, YYYY', 'en').locale(CURLCAST_LANG.__locale).format('dddd MMM D, YYYY')
+
     div className: 'row',
       div className: 'col-xs-12 col-sm-10',
         DayList days: days, day: day, routerState: @props.routerState, dayToStr: @props.dayToStr, changeDay: @changeDay
-        h3 className: 'hidden-xs', day.starts_on
-        h4 className: 'visible-xs', day.starts_on
+        h3 className: 'hidden-xs', startsOn
+        h4 className: 'visible-xs', startsOn
       div className: 'col-sm-2 hidden-xs',
         h6 className: 'text-right',
           CURLCAST_LANG.common.current_time
           br {}
-          scoreboard.time_now
+          timeNow
       div className: 'col-xs-12',
         if @props.routerState.params.draw?
           ReactRouter.RouteHandler drawProps
