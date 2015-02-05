@@ -65,7 +65,7 @@ ScoreboardDay = React.createClass
     drawProps.day = day
 
     # Dayname Mon 1, YEAR
-    tz = scoreboard.time_now.split " "
+    tz = scoreboard.time_now.trim().split " "
     timeNow = moment(tz[0], 'h:mma', 'en').locale(CURLCAST_LANG.__locale).format('LT') + " " + tz[1]
 
     startsOn = moment(day.starts_on, 'dddd MMM D, YYYY', 'en').locale(CURLCAST_LANG.__locale).format('dddd MMM D, YYYY')

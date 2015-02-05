@@ -28688,7 +28688,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       }
       drawProps = this.props;
       drawProps.day = day;
-      tz = scoreboard.time_now.split(" ");
+      tz = scoreboard.time_now.trim().split(" ");
       timeNow = moment(tz[0], 'h:mma', 'en').locale(CURLCAST_LANG.__locale).format('LT') + " " + tz[1];
       startsOn = moment(day.starts_on, 'dddd MMM D, YYYY', 'en').locale(CURLCAST_LANG.__locale).format('dddd MMM D, YYYY');
       return div({

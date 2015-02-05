@@ -58,7 +58,6 @@
         opponent: 'Opponent',
         competition: 'Competition',
         location: 'Location',
-        occurs_at: 'Occurs',
         athlete: 'Athlete',
         position: 'Position',
         delivery: 'Delivery',
