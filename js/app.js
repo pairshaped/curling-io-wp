@@ -28248,7 +28248,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         return team.to_param;
       }
       if (team != null) {
-        name = team.name.replace(',', '').replace(' ', '-').toLowerCase();
+        name = team.name.replace(/[,\.]/g, '').replace(' ', '-').toLowerCase();
         return "" + team.id + "-" + name;
       }
     },
@@ -30318,6 +30318,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
       var passedProps;
       passedProps = this.props;
       passedProps.absoluteUrl = this.absoluteUrl;
+      console.log('Teams.render', (this.state.team === null ? 'index' : 'show'), this.props);
       if (this.state.team === null) {
         passedProps.teams = this.state.teams;
         return TeamList(passedProps);
