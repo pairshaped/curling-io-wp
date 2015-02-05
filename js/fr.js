@@ -58,7 +58,6 @@
         opponent: 'Opposition',
         competition: 'Compétition',
         location: 'Endroit',
-        occurs_at: 'Survenir',
         athlete: 'Athlète',
         position: 'Position',
         delivery: 'Lâcher',
