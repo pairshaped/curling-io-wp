@@ -65,7 +65,8 @@
         shots: 'Shots',
         point: 'Pt',
         points: 'Pts',
-        team_total: 'Team Total'
+        team_total: 'Team Total',
+        dates: 'Dates'
       }
     },
     competitions: {

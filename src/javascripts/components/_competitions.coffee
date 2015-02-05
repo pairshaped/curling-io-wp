@@ -54,7 +54,7 @@ CompetitionList = React.createClass
           tr {},
             th {}, CURLCAST_LANG.common.table.competition
             th {}, CURLCAST_LANG.common.table.location
-            th {}, CURLCAST_LANG.common.table.occurs_at
+            th {}, CURLCAST_LANG.common.table.dates
         tbody {},
           @props.competitions.map (competition) ->
             CompetitionItem key: competition.id, competition: competition

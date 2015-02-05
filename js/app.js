@@ -27826,7 +27826,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         weekdaysShort : 'dim._lun._mar._mer._jeu._ven._sam.'.split('_'),
         weekdaysMin : 'Di_Lu_Ma_Me_Je_Ve_Sa'.split('_'),
         longDateFormat : {
-            LT : 'h[h]mm',
+            LT : 'H[h]mm',
             LTS : 'LT[s]ss',
             L : 'YYYY-MM-DD',
             LL : 'D MMMM YYYY',
@@ -29625,7 +29625,7 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
         className: 'table-responsive'
       }, table({
         className: 'table table-bordered table-striped'
-      }, thead({}, tr({}, th({}, CURLCAST_LANG.common.table.competition), th({}, CURLCAST_LANG.common.table.location), th({}, CURLCAST_LANG.common.table.occurs_at))), tbody({}, this.props.competitions.map(function(competition) {
+      }, thead({}, tr({}, th({}, CURLCAST_LANG.common.table.competition), th({}, CURLCAST_LANG.common.table.location), th({}, CURLCAST_LANG.common.table.dates))), tbody({}, this.props.competitions.map(function(competition) {
         return CompetitionItem({
           key: competition.id,
           competition: competition

@@ -60,7 +60,6 @@ window.CURLCAST_LANG =
       opponent: 'Opposition'
       competition: 'Compétition'
       location: 'Endroit'
-      occurs_at: 'Survenir'
       athlete: 'Athlète'
       position: 'Position'
       delivery: 'Lâcher'
@@ -68,6 +67,7 @@ window.CURLCAST_LANG =
       point: 'Pt'
       points: 'Pts'
       team_total: 'Total de l’équipe'
+      dates: 'Dates'
 
   competitions:
     search_placeholder: 'Recherchez compétitions'
