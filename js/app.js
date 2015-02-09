@@ -30338,30 +30338,30 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 (function() {
   var Dummy;
 
+  window.curlcastTrackPageView = function() {
+    if (window.ga != null) {
+      return window.ga('send', 'pageview', {
+        'page': location.pathname + location.search + location.hash
+      });
+    }
+  };
+
+  jQuery(document).ready(function() {
+    return jQuery(window).on('hashchange', function() {
+      return curlcastTrackPageView();
+    });
+  });
+
   Dummy = React.createClass({
     render: function() {
       return ReactRouter.RouteHandler(this.props);
+    },
+    componentDidMount: function() {
+      return window.curlcastTrackPageView();
     }
   });
 
   window.CurlcastDummy = Dummy;
-
-  trackPageView(function() {
-    if (window.ga != null) {
-      return window.ga('send', 'pageview', function() {
-        return {
-          'page': location.pathname + location.search + location.hash
-        };
-      });
-    }
-  });
-
-  jQuery(document).ready(function() {
-    return $(window).on('hashchange', function() {
-      console.log('hash', location.hash);
-      return trackPageView();
-    });
-  });
 
 }).call(this);
 
