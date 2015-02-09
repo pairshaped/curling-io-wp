@@ -136,9 +136,9 @@ BoxScoreBoard = React.createClass
 BoxScoreTeamRosterAthlete = React.createClass
   render: ->
     tr {},
-      td {}, @props.athlete.name
-      td {}, CURLCAST_LANG.common[@props.athlete.position.toLowerCase()]
-      td className: 'hidden-xs', CURLCAST_LANG.games["delivery_#{@props.athlete.delivery.toLowerCase()}"]
+      td {}, @props.athlete?.name || ''
+      td {}, CURLCAST_LANG.common[@props.athlete?.position?.toLowerCase()] || ''
+      td className: 'hidden-xs', CURLCAST_LANG.games["delivery_#{@props.athlete?.delivery?.toLowerCase()}"] || ''
 
 BoxScoreTeamRoster = React.createClass
   render: ->

@@ -29265,9 +29265,10 @@ f=f/2*Math.cos(d);return[{x:b.point.x+f,y:b.point.y+a},{x:b.point.x-f,y:b.point.
 
   BoxScoreTeamRosterAthlete = React.createClass({
     render: function() {
-      return tr({}, td({}, this.props.athlete.name), td({}, CURLCAST_LANG.common[this.props.athlete.position.toLowerCase()]), td({
+      var _ref4, _ref5, _ref6, _ref7, _ref8;
+      return tr({}, td({}, ((_ref4 = this.props.athlete) != null ? _ref4.name : void 0) || ''), td({}, CURLCAST_LANG.common[(_ref5 = this.props.athlete) != null ? (_ref6 = _ref5.position) != null ? _ref6.toLowerCase() : void 0 : void 0] || ''), td({
         className: 'hidden-xs'
-      }, CURLCAST_LANG.games["delivery_" + (this.props.athlete.delivery.toLowerCase())]));
+      }, CURLCAST_LANG.games["delivery_" + ((_ref7 = this.props.athlete) != null ? (_ref8 = _ref7.delivery) != null ? _ref8.toLowerCase() : void 0 : void 0)] || ''));
     }
   });
 
