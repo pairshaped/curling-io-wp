@@ -12,7 +12,11 @@
  * @subpackage Curlcast/admin/partials
  */
 
-$curlcast_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'http://widgets.curlcast.ca');
+$curlcast_widgets_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'http://widgets.curlcast.ca');
+$curlcast_api_host = get_option($this->curlcast_setting_prefix . '_api_host', 'http://widgets.curlcast.ca');
+$curlcast_api_key = get_option($this->curlcast_setting_prefix . '_api_key', 'http://widgets.curlcast.ca');
+
+$base_url = '/scoreboard';
 
 ?>
 
@@ -29,7 +33,7 @@ $curlcast_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'htt
             ?>
         </form>
       </td>
-      <td id="curlcast__summary" data-widgets-location="<?php echo $curlcast_api; ?>">
+      <td id="curlcast__summary" data-widgets-location="<?php echo $curlcast_widgets_api; ?>">
         <h2>Summary</h2>
         <h3>Short Codes</h3>
         <p>Copy and Paste to embed full widget</p>
@@ -50,52 +54,79 @@ $curlcast_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'htt
   </table>
 
   <h3>Widget Sample</h3>
-  <table>
+  <table class="widget-sample__table">
     <tr>
-      <td width="75%">
+      <td class="widget-sample__full">
         <div class="test-container">
-          <div id='curlcastFull' class="curlcast" ></div>
-
+          <div id='curlcast-full' class="curlcast">Attempting to mount the Full Widget....</div>
         </div>
       </td>
-      <td>
-        TODO: Mini Widget
+      <td class="widget-sample__mini">
+          <div id='curlcast-mini' class="curlcast">Attempting to mount the Mini Widget...</div>
       </td>
     </tr>
   </table>
 </div>
+
 <script type="text/javascript">
-  (function(ajaxGet){
+  (function(window, ajaxGet){
     'use strict';
 
-    var injectScript;
+    var createScript,
+        loadScripts,
+        widgets_api = "<?php echo $curlcast_widgets_api; ?>",
+        api_host = "<?php echo $curlcast_api_host; ?>",
+        api_key = "<?php echo $curlcast_api_key; ?>";
 
-    injectScript = function(scriptUrl) {
+    createScript = function(scriptUrl) {
       var scriptTag = document.createElement('script');
       scriptTag.type = 'text/javascript';
       scriptTag.src = scriptUrl;
-      document.body.appendChild(scriptTag);
+      return scriptTag;
     };
 
+    loadScripts = function(scripts, afterAll) {
+      var script;
+      script = scripts.shift();
+      document.body.appendChild(script);
+      script.onload = function() {
+        if (scripts.length > 0) {
+          loadScripts(scripts, afterAll);
+        } else {
+          if (afterAll) afterAll();
+        }
+      }
+    }
+
     addEventListener('DOMContentLoaded', function() {
-      ajaxGet("<?php echo $curlcast_api; ?>/manifest.json", {
+      ajaxGet(widgets_api + "/manifest.json", {
         success: function(response) {
-          var loadIndexes = [0, 1],
-              scriptIndex,
-              scriptFile,
-              index;
-          for(index=0; index < loadIndexes.length; index++) {
-            scriptIndex = loadIndexes[index]
-            scriptFile = response[scriptIndex]
-            injectScript("<?php echo $curlcast_api; ?>/" + scriptFile);
-          }
+          var scriptFile,
+              index,
+              scriptTags = [];
+          scriptTags = response.map(function(scriptFile) {
+            return createScript(widgets_api + "/" + scriptFile)
+          });
+          loadScripts(scriptTags, function() {
+            window.CurlCastWidgets.mountMini({
+              apiKey: api_key,
+              apiHost: api_host,
+              basePath: "<?php echo $base_url ?>"
+            }, document.getElementById('curlcast-mini'));
+
+            window.CurlCastWidgets.mountFull({
+              history: false,
+              apiKey: api_key,
+              apiHost: api_host
+            }, document.getElementById('curlcast-full'));
+          });
         },
         error: function(request) {
           log('Something bad happened', request);
         }
       });
-    }, true);
+    }, true)
 
-
-  })(ajaxGet);
+  })(window, ajaxGet);
 </script>
+
