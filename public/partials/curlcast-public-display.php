@@ -11,37 +11,66 @@
  * @package    Curlcast
  * @subpackage Curlcast/public/partials
  */
-$curlcast_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'http://widgets.curlcast.ca');
+$curlcast_widgets_api = get_option('curlcast_widgets_api', 'http://widgets.curlcast.ca');
+$curlcast_api_host = get_option('curlcast_api_host', 'http://curlcast.ca');
+$curlcast_api_key = get_option('curlcast_api_key', 'abc123');
+
+$base_url = '/scoreboard';
 
 ?>
 
-<div id='curlcastFull' class="curlcast"></div>
+<div id='curlcast-full' class="curlcast"></div>
 
 <script type="text/javascript">
-  (function(ajaxGet){
+  (function(window, ajaxGet){
     'use strict';
 
-    var injectScript;
+    var createScript,
+        loadScripts,
+        widgets_api = "<?php echo $curlcast_widgets_api; ?>",
+        api_host = "<?php echo $curlcast_api_host; ?>",
+        api_key = "<?php echo $curlcast_api_key; ?>";
 
-    injectScript = function(scriptUrl) {
+    createScript = function(scriptUrl) {
       var scriptTag = document.createElement('script');
       scriptTag.type = 'text/javascript';
       scriptTag.src = scriptUrl;
-      document.body.appendChild(scriptTag);
+      return scriptTag;
     };
 
+    loadScripts = function(scripts, afterAll) {
+      var script;
+      script = scripts.shift();
+      document.body.appendChild(script);
+      script.onload = function() {
+        if (scripts.length > 0) {
+          loadScripts(scripts, afterAll);
+        } else {
+          if (afterAll) afterAll();
+        }
+      }
+    }
+
     addEventListener('DOMContentLoaded', function() {
-      ajaxGet("<?php echo $curlcast_api; ?>/manifest.json", {
+      ajaxGet(widgets_api + "/manifest.json", {
         success: function(response) {
-          var loadIndexes = [0, 1],
-              scriptIndex,
-              scriptFile,
-              index;
-          for(index=0; index < loadIndexes.length; index++) {
-            scriptIndex = loadIndexes[index]
-            scriptFile = response[scriptIndex]
-            injectScript("<?php echo $curlcast_api; ?>/" + scriptFile);
-          }
+          var scriptFile,
+              index,
+              scriptTags = [];
+          scriptTags = response.map(function(scriptFile) {
+            return createScript(widgets_api + "/" + scriptFile)
+          });
+          loadScripts(scriptTags, function() {
+            var props;
+
+            props = {
+              history: false,
+              apiKey: api_key,
+              apiHost: api_host
+            };
+
+            window.CurlCastWidgets.mountFull(props, document.getElementById('curlcast-full'));
+          });
         },
         error: function(request) {
           log('Something bad happened', request);
@@ -49,7 +78,6 @@ $curlcast_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'htt
       });
     }, true)
 
-
-  })(ajaxGet);
+  })(window, ajaxGet);
 </script>
 

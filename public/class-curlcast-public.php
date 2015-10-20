@@ -104,6 +104,34 @@ class Curlcast_Public {
   }
 
     public function add_shortcode( $args ) {
-      include_once 'partials/curlcast-public-display.php';
+        include_once 'partials/curlcast-public-display.php';
+    }
+
+    public function add_widget( $args ) {
+        include_once 'partials/curlcast-public-mini-display.php';
+    }
+
+    public function get_full_widget_page() {
+        $args = array(
+            'sort_order' => 'asc',
+            'sort_column' => 'menu_order',
+            'hierarchical' => 0,
+            'child_of' => 0,
+            'parent' => -1,
+            'number' => '',
+            'offset' => 0,
+            'post_type' => 'page',
+            'post_status' => 'publish'
+        );
+
+        $pages = get_pages($args);
+        $curlcast_full_widget_page = NULL;
+
+        foreach($pages as $page) {
+            if (has_shortcode($page->post_content, 'curlcast'))
+                return $page;
+        }
+
+        return NULL;
     }
 }
