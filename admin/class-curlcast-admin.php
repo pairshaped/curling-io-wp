@@ -157,6 +157,7 @@ class Curlcast_Admin {
 
         $this->create_settings_field('widgets_api', 'Curlcast Widgets API Host', 'general', array($this, 'curlcast_sanitize_default'));
         $this->create_settings_field('api_key', 'Access Key', 'general', array($this, 'curlcast_sanitize_default'));
+        $this->create_settings_field('api_host', 'API Host URL', 'general', array($this, 'curlcast_sanitize_default'));
 
         register_setting( $this->plugin_name, $this->curlcast_setting_prefix . '_manifest_json');
         //
@@ -188,29 +189,22 @@ class Curlcast_Admin {
         $default_widgets_api = "http://widgets.curlcast.ca";
         $html_name = $this->curlcast_setting_prefix . '_widgets_api';
         $value = get_option($html_name, $default_widgets_api);
-?>
-        <input type="text" name="<?php echo $html_name; ?>" id="<?php echo $html_name; ?>" value="<?php echo $value; ?>" length="128" />
-<?php
+        echo "<input type='text' name='$html_name' id='$html_name' value='$value' length='128' />";
         echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to {$default_widgets_api}</em>\r\n";
-  }
+    }
 
     public function curlcast_api_key_render() {
         $html_name = $this->curlcast_setting_prefix . '_api_key';
         $value = get_option($html_name);
-?>
-        <input type="text" name="<?php echo $html_name; ?>" id="<?php echo $html_name; ?>" value="<?php echo $value; ?>" length="64" />
-<?php
+        echo "<input type='text' name='$html_name' id='$html_name' value='$value' length='128' />";
         echo "<br /><em>The organization key from curlcast.ca</em>\r\n";
-  }
-
-    public function curlcast_page_prefix_render() {
-        $html_name = $this->curlcast_setting_prefix . '_page_prefix';
-        $value = get_option($html_name);
-?>
-        <input type="text" name="<?php echo $html_name; ?>" id="<?php echo $html_name; ?>" value="<?php echo $value; ?>" />
-<?php
-        echo "<br /><em>The name of the page that gets statistics embedded</em>\r\n";
     }
 
+    public function curlcast_api_host_render() {
+        $html_name = $this->curlcast_setting_prefix . '_api_host';
+        $value = get_option($html_name, 'http://curlcast.ca/');
+        echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px' />";
+    }
 
 }
+?>
