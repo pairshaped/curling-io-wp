@@ -155,9 +155,11 @@ class Curlcast_Admin {
     public function register_setting() {
         $this->create_settings_section( 'general', 'General' );
 
-        $this->create_settings_field('widgets_api', 'Curlcast Widgets API Host', 'general', array($this, 'curlcast_sanitize_default'));
         $this->create_settings_field('api_key', 'Access Key', 'general', array($this, 'curlcast_sanitize_default'));
-        $this->create_settings_field('api_host', 'API Host URL', 'general', array($this, 'curlcast_sanitize_default'));
+
+        $this->create_settings_section( 'developer', 'Developer Settings' );
+        $this->create_settings_field('widgets_api', 'Curlcast Widgets API Host', 'developer', array($this, 'curlcast_sanitize_default'));
+        $this->create_settings_field('api_host', 'API Host URL', 'developer', array($this, 'curlcast_sanitize_default'));
 
         register_setting( $this->plugin_name, $this->curlcast_setting_prefix . '_manifest_json');
         //
@@ -191,6 +193,10 @@ class Curlcast_Admin {
         $value = get_option($html_name, $default_widgets_api);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' length='128' />";
         echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to {$default_widgets_api}</em>\r\n";
+    }
+
+    public function curlcast_developer_render($args) {
+        echo "<p>" . __('Please <strong><u>do not change</u></strong> these unless you know what you are doing!', 'curlcast') . "</p>";
     }
 
     public function curlcast_api_key_render() {

@@ -7,8 +7,7 @@
   background-color: #fff;
   border: 1px #000 solid;
   padding: 15px;
-  overflow-y: auto;
-  height: 300px;
+  height: auto;
 }
 
 #curlcast__settings,

@@ -12,9 +12,9 @@
  * @subpackage Curlcast/admin/partials
  */
 
-$curlcast_widgets_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'http://widgets.curlcast.ca');
-$curlcast_api_host = get_option($this->curlcast_setting_prefix . '_api_host', 'http://widgets.curlcast.ca');
-$curlcast_api_key = get_option($this->curlcast_setting_prefix . '_api_key', 'http://widgets.curlcast.ca');
+// $curlcast_widgets_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'http://widgets.curlcast.ca');
+// $curlcast_api_host = get_option($this->curlcast_setting_prefix . '_api_host', 'http://widgets.curlcast.ca');
+// $curlcast_api_key = get_option($this->curlcast_setting_prefix . '_api_key', 'http://widgets.curlcast.ca');
 
 $base_url = '/scoreboard';
 
@@ -53,19 +53,12 @@ $base_url = '/scoreboard';
     </tr>
   </table>
 
-  <h3>Widget Sample</h3>
-  <table class="widget-sample__table">
-    <tr>
-      <td class="widget-sample__full">
-        <div class="test-container">
-          <div id='curlcast-full' class="curlcast">Attempting to mount the Full Widget....</div>
-        </div>
-      </td>
-      <td class="widget-sample__mini">
-          <div id='curlcast-mini' class="curlcast">Attempting to mount the Mini Widget...</div>
-      </td>
-    </tr>
-  </table>
+  <h3>Previews</h3>
+
+  <a class="button button-primary" id="curlcast-preview-full" href="#">Preview Full-Page Widget</a>
+  <a class="button button-primary" id="curlcast-preview-sidebar" href="#">Preview Side-Bar Widget</a>
+
+  <div id='curlcast-preview' class="curlcast"></div>
 </div>
 
 <script type="text/javascript">
@@ -73,10 +66,7 @@ $base_url = '/scoreboard';
     'use strict';
 
     var createScript,
-        loadScripts,
-        widgets_api = "<?php echo $curlcast_widgets_api; ?>",
-        api_host = "<?php echo $curlcast_api_host; ?>",
-        api_key = "<?php echo $curlcast_api_key; ?>";
+        loadScripts;
 
     createScript = function(scriptUrl) {
       var scriptTag = document.createElement('script');
@@ -98,35 +88,69 @@ $base_url = '/scoreboard';
       }
     }
 
-    addEventListener('DOMContentLoaded', function() {
-      ajaxGet(widgets_api + "/manifest.json", {
-        success: function(response) {
-          var scriptFile,
-              index,
-              scriptTags = [];
-          scriptTags = response.map(function(scriptFile) {
-            return createScript(widgets_api + "/" + scriptFile)
-          });
-          loadScripts(scriptTags, function() {
-            window.CurlCastWidgets.mountMini({
-              apiKey: api_key,
-              apiHost: api_host,
-              basePath: "<?php echo $base_url ?>"
-            }, document.getElementById('curlcast-mini'));
+    var fullPreview = document.getElementById('curlcast-preview-full');
+    fullPreview.addEventListener('click', function(e) {
+      e.preventDefault();
 
-            window.CurlCastWidgets.mountFull({
-              history: false,
-              apiKey: api_key,
-              apiHost: api_host
-            }, document.getElementById('curlcast-full'));
-          });
-        },
-        error: function(request) {
-          log('Something bad happened', request);
-        }
-      });
-    }, true)
+      var widgets_api = document.getElementById('curlcast_widgets_api').value,
+          api_host = document.getElementById('curlcast_api_host').value,
+          api_key = document.getElementById('curlcast_api_key').value;
+
+       ajaxGet(widgets_api + "/manifest.json", {
+         success: function(response) {
+           var scriptFile,
+               index,
+               scriptTags = [];
+
+           scriptTags = response.map(function(scriptFile) {
+             return createScript(widgets_api + "/" + scriptFile)
+           });
+           loadScripts(scriptTags, function() {
+             window.CurlCastWidgets.mountFull({
+               history: false,
+               apiKey: api_key,
+               apiHost: api_host
+             }, document.getElementById('curlcast-preview'));
+           });
+         },
+         error: function(request) {
+           log('Something bad happened', request);
+         }
+       });
+    });
+
+    sidebarPreview = document.getElementById('curlcast-preview-sidebar');
+    sidebarPreview.addEventListener('click', function(e) {
+      // TODO: mountMini is broken.... fix it please!
+      e.preventDefault();
+
+      var widgets_api = document.getElementById('curlcast_widgets_api').value,
+          api_host = document.getElementById('curlcast_api_host').value,
+          api_key = document.getElementById('curlcast_api_key').value;
+
+       ajaxGet(widgets_api + "/manifest.json", {
+         success: function(response) {
+           var scriptFile,
+               index,
+               scriptTags = [];
+
+           scriptTags = response.map(function(scriptFile) {
+             return createScript(widgets_api + "/" + scriptFile)
+           });
+           loadScripts(scriptTags, function() {
+             window.CurlCastWidgets.mountMini({
+               history: false,
+               apiKey: api_key,
+               apiHost: api_host,
+              basePath: ''
+             }, document.getElementById('curlcast-preview'));
+           });
+         },
+         error: function(request) {
+           log('Something bad happened', request);
+         }
+       });
+    });
 
   })(window, ajaxGet);
 </script>
-
