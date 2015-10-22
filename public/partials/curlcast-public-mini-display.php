@@ -16,8 +16,8 @@ $curlcast_widgets_api = get_option('curlcast_widgets_api', 'http://widgets.curlc
 $curlcast_api_host = get_option('curlcast_api_host', 'http://curlcast.ca');
 $curlcast_api_key = get_option('curlcast_api_key', '');
 
-$page = $this->get_full_widget_page();
-$base_url = get_page_link($page->ID);
+$page_id = $this->get_full_widget_page();
+$base_url = get_page_link($page_id);
 
 ?>
 
