@@ -153,34 +153,20 @@ class Curlcast_Admin {
 
 
     public function register_setting() {
-        $this->create_settings_section( 'general', 'General' );
-
+        $this->create_settings_section('general', 'General');
         $this->create_settings_field('api_key', 'Access Key', 'general', array($this, 'curlcast_sanitize_default'));
+        $this->create_settings_field('scoreboard_page', 'Scoreboard Page', 'general', array($this, 'curlcast_sanitize_default'));
 
-        $this->create_settings_section( 'developer', 'Developer Settings' );
+        $this->create_settings_section('developer', 'Developer Settings');
         $this->create_settings_field('widgets_api', 'Curlcast Widgets API Host', 'developer', array($this, 'curlcast_sanitize_default'));
         $this->create_settings_field('api_host', 'API Host URL', 'developer', array($this, 'curlcast_sanitize_default'));
 
         register_setting( $this->plugin_name, $this->curlcast_setting_prefix . '_manifest_json');
-        //
-        // register_setting('widgets_manifest_json', 'Manifest JSON', 'general');
-        //
-        // [ http://widgets.curlcast.ca/      ]
-        //
-        // ( Save   )
-        //
-        // Current Widget Manifest Cache
-        // Created At:     2440274028
-        // Full Path:      full.entry.sdkfbsdfgb.js
-        // Mini Path:      mini.entry.sdkfbsdfgb.js
-        // Icon Path:      icon.entry.sdkfbsdfgb.js
-        // Last Retrieved: 48743y820247
-        //
     }
 
 
     public function curlcast_sanitize_default( $value ) {
-      return addslashes(strip_tags($value));
+        return addslashes(strip_tags($value));
     }
 
     public function curlcast_general_render($args) {
@@ -192,6 +178,24 @@ class Curlcast_Admin {
         $value = get_option($html_name);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
         echo "<br /><em>The organization key from curlcast.ca</em>\r\n";
+    }
+
+    public function curlcast_scoreboard_page_render() {
+        $html_name = $this->curlcast_setting_prefix . '_scoreboard_page';
+        $value = get_option($html_name);
+        $args = array(
+            'depth' => 0,
+            'child_of' => 0,
+            'selected' => $value,
+            'echo' => 0,
+            'name' => $html_name,
+            'id' => $html_name,
+            'show_option_none' => '',
+            'show_option_no_change' => '',
+            'option_none_value' => ''
+        );
+        echo wp_dropdown_pages($args);
+        echo "<br /><em>This is the page that you added the shortcode to.  This <strong><u>will not</u></strong> automatically create the shortcode page for you!</em>\r\n";
     }
 
     public function curlcast_developer_render($args) {
@@ -207,9 +211,11 @@ class Curlcast_Admin {
     }
 
     public function curlcast_api_host_render() {
+        $default_api_host = "http://curlcast.ca";
         $html_name = $this->curlcast_setting_prefix . '_api_host';
         $value = get_option($html_name, 'http://curlcast.ca/');
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
+        echo "<br /><em>Where the curlcast json data is hosted.  Defaults to {$default_api_host}</em>\r\n";
     }
 
 }
