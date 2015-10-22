@@ -1,7 +1,11 @@
 <?php
-$version = trim( file_get_contents("./.version") );
+$entry_php = file_get_contents("./curlcast.php");
+$lines = explode("\n", $entry_php);
+$version_line = explode(' ', $lines[18]);
+
+$version = array_pop($version_line);
+
 $description = 'Latest stable version of the Curlcast statistics plugin';
-$changelog = '';
 
 if (isset($_POST['action'])) {
   switch ($_POST['action']) {
@@ -15,13 +19,12 @@ if (isset($_POST['action'])) {
       $obj->plugin_name = 'curlcast.php';
       $obj->new_version = $version;
       $obj->requires = '3.0';
-      $obj->tested = '3.9.2';
+      $obj->tested = '4.3.1';
       $obj->downloaded = 1;
       $time = filemtime('update.zip');
       $obj->last_updated = date('Y-d-m', $time);
       $obj->sections = array(
-        'description' => $description,
-        'changelog' => $changelog
+        'description' => $description
       );
       $obj->download_link = 'http'.(!empty($_SERVER['HTTPS'])?'s':'').'://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
       echo serialize($obj);
