@@ -51,98 +51,79 @@ $base_url = '/scoreboard';
   (function(window, ajaxGet){
     'use strict';
 
-    var createScript,
-        loadScripts;
-
-    createScript = function(scriptUrl) {
-      var scriptTag = document.createElement('script');
-      scriptTag.type = 'text/javascript';
-      scriptTag.src = scriptUrl;
-      return scriptTag;
-    };
-
-    loadScripts = function(scripts, afterAll) {
-      var script;
-      script = scripts.shift();
-      document.body.appendChild(script);
-      script.onload = function() {
-        if (scripts.length > 0) {
-          loadScripts(scripts, afterAll);
-        } else {
-          if (afterAll) afterAll();
-        }
-      }
-    }
-
     var revealWidgetArea = function() {
       var element = document.getElementById('curlcast-widget-area');
       element.style.display = 'block';
     }
 
     var fullPreview = document.getElementById('curlcast-preview-full');
-    fullPreview.addEventListener('click', function(e) {
-      e.preventDefault();
-      revealWidgetArea()
+    if (fullPreview) {
+      fullPreview.addEventListener('click', function(e) {
+        e.preventDefault();
+        revealWidgetArea()
 
-      var widgets_api = document.getElementById('curlcast_widgets_api').value,
-          api_host = document.getElementById('curlcast_api_host').value,
-          api_key = document.getElementById('curlcast_api_key').value;
+        var widgets_api = document.getElementById('curlcast_widgets_api').value,
+            api_host = document.getElementById('curlcast_api_host').value,
+            api_key = document.getElementById('curlcast_api_key').value;
 
-       ajaxGet(widgets_api + "/manifest.json", {
-         success: function(response) {
-           var scriptFile,
-               index,
-               scriptTags = [];
+         ajaxGet(widgets_api + "/manifest.json", {
+           success: function(response) {
+             var scriptFile,
+                 index,
+                 scriptTags = [];
 
-           scriptTags = response.map(function(scriptFile) {
-             return createScript(widgets_api + "/" + scriptFile)
-           });
-           loadScripts(scriptTags, function() {
-             window.CurlCastWidgets.mountFull({
-               history: false,
-               apiKey: api_key,
-               apiHost: api_host
-             }, document.getElementById('curlcast-preview'));
-           });
-         },
-         error: function(request) {
-           log('Something bad happened', request);
-         }
-       });
-    });
+             scriptTags = response.map(function(scriptFile) {
+               return createScript(widgets_api + "/" + scriptFile)
+             });
+             loadScripts(scriptTags, function() {
+               window.CurlCastWidgets.mountFull({
+                 history: false,
+                 apiKey: api_key,
+                 apiHost: api_host
+               }, document.getElementById('curlcast-preview'));
+             });
+           },
+           error: function(request) {
+             log('Something bad happened', request);
+           }
+         });
+      });
+    }
 
     var sidebarPreview = document.getElementById('curlcast-preview-sidebar');
-    sidebarPreview.addEventListener('click', function(e) {
-      e.preventDefault();
-      revealWidgetArea()
+    if (sidebarPreview) {
+      sidebarPreview.addEventListener('click', function(e) {
+        e.preventDefault();
+        revealWidgetArea()
 
-      var widgets_api = document.getElementById('curlcast_widgets_api').value,
-          api_host = document.getElementById('curlcast_api_host').value,
-          api_key = document.getElementById('curlcast_api_key').value;
+        var widgets_api = document.getElementById('curlcast_widgets_api').value,
+            api_host = document.getElementById('curlcast_api_host').value,
+            api_key = document.getElementById('curlcast_api_key').value;
 
-       ajaxGet(widgets_api + "/manifest.json", {
-         success: function(response) {
-           var scriptFile,
-               index,
-               scriptTags = [];
+         ajaxGet(widgets_api + "/manifest.json", {
+           success: function(response) {
+             var scriptFile,
+                 index,
+                 scriptTags = [];
 
-           scriptTags = response.map(function(scriptFile) {
-             return createScript(widgets_api + "/" + scriptFile)
-           });
-           loadScripts(scriptTags, function() {
-             window.CurlCastWidgets.mountMini({
-               history: false,
-               apiKey: api_key,
-               apiHost: api_host,
-              basePath: ''
-             }, document.getElementById('curlcast-preview'));
-           });
-         },
-         error: function(request) {
-           log('Something bad happened', request);
-         }
-       });
-    });
+             scriptTags = response.map(function(scriptFile) {
+               return createScript(widgets_api + "/" + scriptFile)
+             });
+             loadScripts(scriptTags, function() {
+               window.CurlCastWidgets.mountMini({
+                 history: false,
+                 apiKey: api_key,
+                 apiHost: api_host,
+                basePath: ''
+               }, document.getElementById('curlcast-preview'));
+             });
+           },
+           error: function(request) {
+             log('Something bad happened', request);
+           }
+         });
+      });
+    }
 
   })(window, ajaxGet);
 </script>

@@ -19,7 +19,8 @@ class Curlcast_Public {
         $plugins_root = plugin_dir_url(dirname(__FILE__));
 
         wp_enqueue_script( $this->plugin_name, $plugins_root . '/public/js/curlcast-public.js', array(), $this->version, false );
-        wp_enqueue_script( $this->plugin_name . '_common', $plugins_root . '/common/js/ajaxGet.js', array(), $this->version, false );
+        wp_enqueue_script( $this->plugin_name . '_public_ajax_get', $plugins_root . '/common/js/ajaxGet.js', array(), $this->version, false );
+        wp_enqueue_script( $this->plugin_name . '_public_scripts', $plugins_root . '/common/js/script.js', array(), $this->version, false );
     }
 
     public function add_shortcode( $args ) {

@@ -14,31 +14,9 @@ $base_url = '/scoreboard';
   (function(window, ajaxGet){
     'use strict';
 
-    var createScript,
-        loadScripts,
-        widgets_api = "<?php echo $curlcast_widgets_api; ?>",
+    var widgets_api = "<?php echo $curlcast_widgets_api; ?>",
         api_host = "<?php echo $curlcast_api_host; ?>",
         api_key = "<?php echo $curlcast_api_key; ?>";
-
-    createScript = function(scriptUrl) {
-      var scriptTag = document.createElement('script');
-      scriptTag.type = 'text/javascript';
-      scriptTag.src = scriptUrl;
-      return scriptTag;
-    };
-
-    loadScripts = function(scripts, afterAll) {
-      var script;
-      script = scripts.shift();
-      document.body.appendChild(script);
-      script.onload = function() {
-        if (scripts.length > 0) {
-          loadScripts(scripts, afterAll);
-        } else {
-          if (afterAll) afterAll();
-        }
-      }
-    }
 
     addEventListener('DOMContentLoaded', function() {
       ajaxGet(widgets_api + "/manifest.json", {
