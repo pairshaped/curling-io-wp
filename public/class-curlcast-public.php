@@ -112,26 +112,6 @@ class Curlcast_Public {
     }
 
     public function get_full_widget_page() {
-        $args = array(
-            'sort_order' => 'asc',
-            'sort_column' => 'menu_order',
-            'hierarchical' => 0,
-            'child_of' => 0,
-            'parent' => -1,
-            'number' => '',
-            'offset' => 0,
-            'post_type' => 'page',
-            'post_status' => 'publish'
-        );
-
-        $pages = get_pages($args);
-        $curlcast_full_widget_page = NULL;
-
-        foreach($pages as $page) {
-            if (has_shortcode($page->post_content, 'curlcast'))
-                return $page;
-        }
-
-        return NULL;
+        return get_option('curlcast_scoreboard_page');
     }
 }
