@@ -1,6 +1,6 @@
 require 'mina/git'
 
-set :deploy_to, '/var/www/curlcast-wordpress'
+set :deploy_to, '/var/www/temp-curlcast-wordpress'
 set :repository, 'git@github.com:pairshaped/curlcast-wordpress.git'
 set :user, 'deploy'
 set :forward_agent, true

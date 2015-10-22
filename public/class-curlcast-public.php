@@ -12,13 +12,12 @@ class Curlcast_Public {
     }
 
     public function enqueue_styles() {
-        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/curlcast-public.css', array(), $this->version, 'all' );
+      // --
     }
 
     public function enqueue_scripts() {
         $plugins_root = plugin_dir_url(dirname(__FILE__));
 
-        wp_enqueue_script( $this->plugin_name, $plugins_root . '/public/js/curlcast-public.js', array(), $this->version, false );
         wp_enqueue_script( $this->plugin_name . '_public_ajax_get', $plugins_root . '/common/js/ajaxGet.js', array(), $this->version, false );
         wp_enqueue_script( $this->plugin_name . '_public_scripts', $plugins_root . '/common/js/script.js', array(), $this->version, false );
     }
