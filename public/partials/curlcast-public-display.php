@@ -2,9 +2,7 @@
 
 $curlcast_widgets_api = get_option('curlcast_widgets_api', 'http://widgets.curlcast.ca');
 $curlcast_api_host = get_option('curlcast_api_host', 'http://curlcast.ca');
-$curlcast_api_key = get_option('curlcast_api_key', 'abc123');
-
-$base_url = '/scoreboard';
+$curlcast_api_key = get_option('curlcast_api_key', '');
 
 ?>
 

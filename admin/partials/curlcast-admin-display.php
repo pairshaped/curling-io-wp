@@ -1,9 +1,3 @@
-<?php
-
-$base_url = '/scoreboard';
-
-?>
-
 <div class="wrap">
   <table>
     <tr>
