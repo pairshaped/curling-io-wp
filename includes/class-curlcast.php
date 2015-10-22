@@ -173,6 +173,15 @@ class Curlcast {
     $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
     add_shortcode( 'curlcast', array( $plugin_public, 'add_shortcode') );
+    wp_register_sidebar_widget(
+      'curlcast-sidebar-widget',
+      'Curlcast Sidebar Widget',
+      array( $plugin_public, 'add_widget' ),
+      array(
+        'description' => 'Curlcast live scores widget'
+      ),
+      array()
+    );
 
   }
 
