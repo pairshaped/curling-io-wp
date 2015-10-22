@@ -27,17 +27,17 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-  die;
+    die;
 }
 
 function activate_plugin_name() {
-  require_once plugin_dir_path( __FILE__ ) . 'includes/class-curlcast-activator.php';
-  Curlcast_Activator::activate();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-curlcast-activator.php';
+    Curlcast_Activator::activate();
 }
 
 function deactivate_plugin_name() {
-  require_once plugin_dir_path( __FILE__ ) . 'includes/class-curlcast-deactivator.php';
-  Curlcast_Deactivator::deactivate();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-curlcast-deactivator.php';
+    Curlcast_Deactivator::deactivate();
 }
 
 register_activation_hook( __FILE__, 'activate_plugin_name' );
@@ -46,9 +46,8 @@ register_deactivation_hook( __FILE__, 'deactivate_plugin_name' );
 require plugin_dir_path( __FILE__ ) . 'includes/class-curlcast.php';
 
 function run_plugin_name() {
-
-  $plugin = new Curlcast();
-  $plugin->run();
-
+    $plugin = new Curlcast();
+    $plugin->run();
 }
+
 run_plugin_name();

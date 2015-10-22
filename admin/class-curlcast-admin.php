@@ -2,77 +2,75 @@
 
 class Curlcast_Admin {
 
-  private $plugin_name;
+    private $plugin_name;
 
-  private $version;
+    private $version;
 
-  private $curlcast_setting_prefix = 'curlcast';
+    private $curlcast_setting_prefix = 'curlcast';
 
-  public function __construct( $plugin_name, $version ) {
+    public function __construct( $plugin_name, $version ) {
 
-    $this->plugin_name = $plugin_name;
-    $this->version = $version;
+        $this->plugin_name = $plugin_name;
+        $this->version = $version;
 
-  }
+    }
 
-  public function enqueue_styles() {
-    wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/curlcast-admin.css', array(), $this->version, 'all' );
+    public function enqueue_styles() {
+        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/curlcast-admin.css', array(), $this->version, 'all' );
+    }
 
-  }
+    public function enqueue_scripts() {
+        $plugins_root = plugin_dir_url(dirname(__FILE__));
 
-  public function enqueue_scripts() {
-    $plugins_root = plugin_dir_url(dirname(__FILE__));
+        wp_enqueue_script( $this->plugin_name, $plugins_root . '/admin/js/curlcast-admin.js', array(), $this->version, false );
+        wp_enqueue_script( $this->plugin_name . '_common', $plugins_root . '/common/js/ajaxGet.js', array(), $this->version, false );
+    }
 
-    wp_enqueue_script( $this->plugin_name, $plugins_root . '/admin/js/curlcast-admin.js', array(), $this->version, false );
-    wp_enqueue_script( $this->plugin_name . '_common', $plugins_root . '/common/js/ajaxGet.js', array(), $this->version, false );
+    public function add_options_page() {
+        $this->plugin_screen_hook_suffix = add_options_page(
+            __('Curlcast Settings', 'curlcast'),
+            __('Curlcast', 'curlcast'),
+            'manage_options',
+            $this->plugin_name,
+            array($this, 'display_options_page')
+        );
+    }
 
-  }
+    public function display_options_page() {
+        include_once 'partials/curlcast-admin-display.php';
+    }
 
-  public function add_options_page() {
-      $this->plugin_screen_hook_suffix = add_options_page(
-          __('Curlcast Settings', 'curlcast'),
-          __('Curlcast', 'curlcast'),
-          'manage_options',
-          $this->plugin_name,
-          array($this, 'display_options_page')
-      );
-  }
+    private function create_settings_section( $section, $title ) {
+        $section_id = $this->curlcast_setting_prefix . '_' . $section;
+        $section_title = __( $title, 'curlcast' );
+        $section_render_method = array( $this, $section_id . '_render' );
 
-  public function display_options_page() {
-      include_once 'partials/curlcast-admin-display.php';
-  }
+        add_settings_section(
+            $section_id,
+            $section_title,
+            $section_render_method,
+            $this->plugin_name
+        );
+    }
 
-  private function create_settings_section( $section, $title ) {
-      $section_id = $this->curlcast_setting_prefix . '_' . $section;
-      $section_title = __( $title, 'curlcast' );
-      $section_render_method = array( $this, $section_id . '_render' );
+    private function create_settings_field($id, $label, $section = 'general', $sanitize_callback = NULL) {
+        $option_id = $this->curlcast_setting_prefix . '_' . $id;
+        $option_render_method = array( $this, $option_id . '_render' );
+        $option_label = __( $label, 'curlcast' );
+        $option_section = $this->curlcast_setting_prefix . '_' . $section;
+        $option_args = array( 'label_for' => $option_id );
 
-      add_settings_section(
-          $section_id,
-          $section_title,
-          $section_render_method,
-          $this->plugin_name
-      );
-  }
+        add_settings_field(
+            $option_id,
+            $option_label,
+            $option_render_method,
+            $this->plugin_name,
+            $option_section,
+            $option_args
+        );
 
-  private function create_settings_field($id, $label, $section = 'general', $sanitize_callback = NULL) {
-      $option_id = $this->curlcast_setting_prefix . '_' . $id;
-      $option_render_method = array( $this, $option_id . '_render' );
-      $option_label = __( $label, 'curlcast' );
-      $option_section = $this->curlcast_setting_prefix . '_' . $section;
-      $option_args = array( 'label_for' => $option_id );
-
-      add_settings_field(
-          $option_id,
-          $option_label,
-          $option_render_method,
-          $this->plugin_name,
-          $option_section,
-          $option_args
-      );
-
-      register_setting( $this->plugin_name, $option_id, $sanitize_callback );
-  }
+        register_setting( $this->plugin_name, $option_id, $sanitize_callback );
+    }
 
 
     public function register_setting() {

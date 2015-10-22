@@ -2,106 +2,97 @@
 
 class Curlcast {
 
-  protected $loader;
+    protected $loader;
 
-  protected $plugin_name;
+    protected $plugin_name;
 
-  protected $version;
+    protected $version;
 
-  public function __construct() {
+    public function __construct() {
+        $this->plugin_name = 'curlcast';
+        $this->version = '0.1.1';
 
-    $this->plugin_name = 'curlcast';
-    $this->version = '0.1.1';
+        $this->load_dependencies();
+        $this->set_locale();
+        $this->define_admin_hooks();
+        $this->define_public_hooks();
+    }
 
-    $this->load_dependencies();
-    $this->set_locale();
-    $this->define_admin_hooks();
-    $this->define_public_hooks();
+    private function load_dependencies() {
+        /**
+         * The class responsible for orchestrating the actions and filters of the
+         * core plugin.
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-loader.php';
 
-  }
+        /**
+         * The class responsible for defining internationalization functionality
+         * of the plugin.
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-i18n.php';
 
-  private function load_dependencies() {
+        /**
+         * The class responsible for defining all actions that occur in the admin area.
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-curlcast-admin.php';
 
-    /**
-     * The class responsible for orchestrating the actions and filters of the
-     * core plugin.
-     */
-    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-loader.php';
+        /**
+         * The class responsible for defining all actions that occur in the public-facing
+         * side of the site.
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-public.php';
 
-    /**
-     * The class responsible for defining internationalization functionality
-     * of the plugin.
-     */
-    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-i18n.php';
+        $this->loader = new Curlcast_Loader();
+    }
 
-    /**
-     * The class responsible for defining all actions that occur in the admin area.
-     */
-    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-curlcast-admin.php';
+    private function set_locale() {
+        $plugin_i18n = new Curlcast_i18n();
+        $plugin_i18n->set_domain( $this->get_plugin_name() );
 
-    /**
-     * The class responsible for defining all actions that occur in the public-facing
-     * side of the site.
-     */
-    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-public.php';
+        $this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+    }
 
-    $this->loader = new Curlcast_Loader();
+    private function define_admin_hooks() {
+        $plugin_admin = new Curlcast_Admin( $this->get_plugin_name(), $this->get_version() );
 
-  }
+        $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
+        $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+        $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
+        $this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
+    }
 
-  private function set_locale() {
+    private function define_public_hooks() {
+        $plugin_public = new Curlcast_Public( $this->get_plugin_name(), $this->get_version() );
 
-    $plugin_i18n = new Curlcast_i18n();
-    $plugin_i18n->set_domain( $this->get_plugin_name() );
+        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
+        $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-    $this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+        add_shortcode( 'curlcast', array( $plugin_public, 'add_shortcode') );
+        wp_register_sidebar_widget(
+            'curlcast-sidebar-widget',
+            'Curlcast Sidebar Widget',
+            array( $plugin_public, 'add_widget' ),
+            array(
+                'description' => 'Curlcast live scores widget'
+            ),
+            array()
+        );
+    }
 
-  }
+    public function run() {
+        $this->loader->run();
+    }
 
-  private function define_admin_hooks() {
+    public function get_plugin_name() {
+        return $this->plugin_name;
+    }
 
-    $plugin_admin = new Curlcast_Admin( $this->get_plugin_name(), $this->get_version() );
+    public function get_loader() {
+        return $this->loader;
+    }
 
-    $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-    $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-    $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
-    $this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
-  }
-
-  private function define_public_hooks() {
-
-    $plugin_public = new Curlcast_Public( $this->get_plugin_name(), $this->get_version() );
-
-    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
-    add_shortcode( 'curlcast', array( $plugin_public, 'add_shortcode') );
-    wp_register_sidebar_widget(
-      'curlcast-sidebar-widget',
-      'Curlcast Sidebar Widget',
-      array( $plugin_public, 'add_widget' ),
-      array(
-        'description' => 'Curlcast live scores widget'
-      ),
-      array()
-    );
-
-  }
-
-  public function run() {
-    $this->loader->run();
-  }
-
-  public function get_plugin_name() {
-    return $this->plugin_name;
-  }
-
-  public function get_loader() {
-    return $this->loader;
-  }
-
-  public function get_version() {
-    return $this->version;
-  }
+    public function get_version() {
+        return $this->version;
+    }
 
 }
