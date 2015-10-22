@@ -1,17 +1,5 @@
 <?php
 
-/**
- * Provide a public-facing view for the plugin
- *
- * This file is used to markup the public-facing aspects of the plugin.
- *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    Curlcast
- * @subpackage Curlcast/public/partials
- */
-
 $curlcast_widgets_api = get_option('curlcast_widgets_api', 'http://widgets.curlcast.ca');
 $curlcast_api_host = get_option('curlcast_api_host', 'http://curlcast.ca');
 $curlcast_api_key = get_option('curlcast_api_key', '');

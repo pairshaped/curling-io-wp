@@ -1,36 +1,11 @@
 <?php
 
-/**
- * Register all actions and filters for the plugin
- *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    Curlcast
- * @subpackage Curlcast/includes
- */
-
-/**
- * Register all actions and filters for the plugin.
- * Maintain a list of all hooks that are registered throughout
- * the plugin, and register them with the WordPress API. Call the
- * run function to execute the list of actions and filters.
- *
- * @package    Curlcast
- * @subpackage Curlcast/includes
- * @author     Your Name <email@example.com>
- */
 class Curlcast_Loader {
 
   // Arrays for handling Wordpress API Arrays
   protected $actions;
   protected $filters;
 
-  /**
-   * Initialize the collections used to maintain the actions and filters.
-   *
-   * @since    1.0.0
-   */
   public function __construct() {
 
     $this->actions = array();
@@ -39,9 +14,6 @@ class Curlcast_Loader {
   }
 
   /**
-   * Add a new action/filter to the collection to be registered with WordPress.
-   *
-   * @since    1.0.0
    * @param      string               $hook             The name of the WordPress action that is being registered.
    * @param      object               $component        A reference to the instance of the object on which the action is defined.
    * @param      string               $callback         The name of the function definition on the $component.
@@ -57,11 +29,6 @@ class Curlcast_Loader {
   }
 
   /**
-   * A utility function that is used to register the actions and hooks into a single
-   * collection.
-   *
-   * @since    1.0.0
-   * @access   private
    * @param      array                $hooks            The collection of hooks that is being registered (that is, actions or filters).
    * @param      string               $hook             The name of the WordPress filter that is being registered.
    * @param      object               $component        A reference to the instance of the object on which the filter is defined.
@@ -84,11 +51,6 @@ class Curlcast_Loader {
 
   }
 
-  /**
-   * Register the filters and actions with WordPress.
-   *
-   * @since    1.0.0
-   */
   public function run() {
 
     $this->run_collection( $this->filters, 'add_filter' );

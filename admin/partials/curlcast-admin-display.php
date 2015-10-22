@@ -1,21 +1,5 @@
 <?php
 
-/**
- * Provide a admin area view for the plugin
- *
- * This file is used to markup the admin-facing aspects of the plugin.
- *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    Curlcast
- * @subpackage Curlcast/admin/partials
- */
-
-// $curlcast_widgets_api = get_option($this->curlcast_setting_prefix . '_widgets_api', 'http://widgets.curlcast.ca');
-// $curlcast_api_host = get_option($this->curlcast_setting_prefix . '_api_host', 'http://widgets.curlcast.ca');
-// $curlcast_api_key = get_option($this->curlcast_setting_prefix . '_api_key', 'http://widgets.curlcast.ca');
-
 $base_url = '/scoreboard';
 
 ?>
