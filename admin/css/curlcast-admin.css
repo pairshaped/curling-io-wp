@@ -3,12 +3,15 @@
  * included in this file.
  */
 
-.test-container {
+#curlcast-widget-area {
   background-color: #fff;
   border: 1px #000 solid;
   padding: 15px;
   height: auto;
+  margin-top: 25px;
+  display: none;
 }
+
 
 #curlcast__settings,
 #curlcast__summary {

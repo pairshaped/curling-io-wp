@@ -3,8 +3,7 @@
   window.onload = function() {
     var dom, host, url;
 
-    dom = document.getElementById('curlcast__summary');
-    host = dom.getAttribute('data-widgets-location');
+    host = document.getElementById('curlcast_widgets_api').value
     url = host + '/manifest.json';
 
     ajaxGet(

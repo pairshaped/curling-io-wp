@@ -53,12 +53,14 @@ $base_url = '/scoreboard';
     </tr>
   </table>
 
-  <h3>Previews</h3>
-
-  <a class="button button-primary" id="curlcast-preview-full" href="#">Preview Full-Page Widget</a>
-  <a class="button button-primary" id="curlcast-preview-sidebar" href="#">Preview Side-Bar Widget</a>
-
-  <div id='curlcast-preview' class="curlcast"></div>
+  <!-- <h3>Previews</h3> -->
+  <!--  -->
+  <!-- <a class="button button&#45;primary" id="curlcast&#45;preview&#45;full" href="#">Preview Full&#45;Page Widget</a> -->
+  <!-- <a class="button button&#45;primary" id="curlcast&#45;preview&#45;sidebar" href="#">Preview Side&#45;Bar Widget</a> -->
+  <!--  -->
+  <!-- <div id='curlcast&#45;widget&#45;area'> -->
+  <!--   <div id='curlcast&#45;preview' class="curlcast"></div> -->
+  <!-- </div> -->
 </div>
 
 <script type="text/javascript">
@@ -88,9 +90,15 @@ $base_url = '/scoreboard';
       }
     }
 
+    var revealWidgetArea = function() {
+      var element = document.getElementById('curlcast-widget-area');
+      element.style.display = 'block';
+    }
+
     var fullPreview = document.getElementById('curlcast-preview-full');
     fullPreview.addEventListener('click', function(e) {
       e.preventDefault();
+      revealWidgetArea()
 
       var widgets_api = document.getElementById('curlcast_widgets_api').value,
           api_host = document.getElementById('curlcast_api_host').value,
@@ -119,10 +127,10 @@ $base_url = '/scoreboard';
        });
     });
 
-    sidebarPreview = document.getElementById('curlcast-preview-sidebar');
+    var sidebarPreview = document.getElementById('curlcast-preview-sidebar');
     sidebarPreview.addEventListener('click', function(e) {
-      // TODO: mountMini is broken.... fix it please!
       e.preventDefault();
+      revealWidgetArea()
 
       var widgets_api = document.getElementById('curlcast_widgets_api').value,
           api_host = document.getElementById('curlcast_api_host').value,
