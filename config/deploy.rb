@@ -13,6 +13,12 @@ end
 
 set :domains, %w[app1.curlcast.pairshaped.ca app2.curlcast.pairshaped.ca]
 
+desc "Create update.zip"
+task :create_update do
+  sh "rm -f ./update.zip"
+  sh "zip -r ./update.zip ./ -x \*.git* update.zip \*.sh"
+end
+
 desc "Setup all servers"
 task :setup_all do
   isolate do
@@ -50,14 +56,9 @@ task :deploy => :environment do
     invoke :'git:clone'
     invoke :'deploy:cleanup'
 
+
     to :launch do
-      %w[rb sh md markdown txt zip].each do |ext|
-        queue "rm -f #{deploy_to}/#{current_path}/*.#{ext}"
-      end
-      queue "rm -f #{deploy_to}/#{current_path}/config"
-      queue "cd #{deploy_to}"
-      queue "zip -r update.zip #{current_path}"
-      queue "mv update.zip #{current_path}/"
+      queue "rm -r #{deploy_to}/#{current_path}/local_deploy.sh"
     end
   end
 end
