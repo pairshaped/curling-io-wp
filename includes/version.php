@@ -1,3 +1,3 @@
 <?php
 
-define('CURLCAST_V2_RELEASE', '2.0.1');
+define('CURLCAST_V2_RELEASE', '2.0.0');
