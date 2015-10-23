@@ -1,5 +1,4 @@
 require 'mina/git'
-require 'zip'
 
 set :deploy_to, '/var/www/temp-curlcast-wordpress'
 set :repository, 'git@github.com:pairshaped/curlcast-wordpress.git'
