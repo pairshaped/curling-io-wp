@@ -1,3 +1,10 @@
+<?php
+
+global $curlcast_v2_shortcode_full;
+global $curlcast_v2_shortcode_sidebar;
+
+?>
+
 <div class="wrap">
   <table>
     <tr>
@@ -17,7 +24,10 @@
         <p>Copy and Paste to embed full widget</p>
 
         <h4>Full Scoreboard</h4>
-        <input type="text" readonly="readonly" length="24" value="[curlcast]" />
+        <input type="text" readonly="readonly" length="24" value="[<?php echo $curlcast_v2_shortcode_full; ?>]" />
+
+        <h4>Sidebar Scoreboard</h4>
+        <input type="text" readonly="readonly" length="24" value="[<?php echo $curlcast_v2_shortcode_sidebar; ?>]" />
 
         <h3>Widgets Debug</h3>
         <p>When reporting a bug, please copy and paste these values to us</p>
@@ -56,9 +66,9 @@
         e.preventDefault();
         revealWidgetArea()
 
-        var widgets_api = document.getElementById('curlcast_widgets_api').value,
-            api_host = document.getElementById('curlcast_api_host').value,
-            api_key = document.getElementById('curlcast_api_key').value;
+        var widgets_api = document.getElementById('curlcast_v2_widgets_api').value,
+            api_host = document.getElementById('curlcast_v2_api_host').value,
+            api_key = document.getElementById('curlcast_v2_api_key').value;
 
          ajaxGet(widgets_api + "/manifest.json", {
            success: function(response) {
@@ -90,9 +100,9 @@
         e.preventDefault();
         revealWidgetArea()
 
-        var widgets_api = document.getElementById('curlcast_widgets_api').value,
-            api_host = document.getElementById('curlcast_api_host').value,
-            api_key = document.getElementById('curlcast_api_key').value;
+        var widgets_api = document.getElementById('curlcast_v2_widgets_api').value,
+            api_host = document.getElementById('curlcast_v2_api_host').value,
+            api_key = document.getElementById('curlcast_v2_api_key').value;
 
          ajaxGet(widgets_api + "/manifest.json", {
            success: function(response) {

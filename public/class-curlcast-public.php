@@ -31,6 +31,6 @@ class Curlcast_Public {
     }
 
     public function get_full_widget_page() {
-        return get_option('curlcast_scoreboard_page');
+        return get_option('curlcast_v2_scoreboard_page');
     }
 }

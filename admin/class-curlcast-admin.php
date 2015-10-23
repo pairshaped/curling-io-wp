@@ -6,7 +6,7 @@ class Curlcast_Admin {
 
     private $version;
 
-    private $curlcast_setting_prefix = 'curlcast';
+    private $curlcast_setting_prefix = 'curlcast_v2';
 
     public function __construct( $plugin_name, $version ) {
 
@@ -91,18 +91,18 @@ class Curlcast_Admin {
         return addslashes(strip_tags($value));
     }
 
-    public function curlcast_general_render($args) {
-        echo "<p>" . __('Please change the settings accordingly', 'curlcast') . "</p>";
+    public function curlcast_v2_general_render($args) {
+        echo "<p>" . __('Please change the settings accordingly', 'curlcast_v2') . "</p>";
     }
 
-    public function curlcast_api_key_render() {
+    public function curlcast_v2_api_key_render() {
         $html_name = $this->curlcast_setting_prefix . '_api_key';
         $value = get_option($html_name);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
         echo "<br /><em>The organization key from curlcast.ca</em>\r\n";
     }
 
-    public function curlcast_scoreboard_page_render() {
+    public function curlcast_v2_scoreboard_page_render() {
         $html_name = $this->curlcast_setting_prefix . '_scoreboard_page';
         $value = get_option($html_name);
         $args = array(
@@ -120,11 +120,11 @@ class Curlcast_Admin {
         echo "<br /><em>This is the page that you added the shortcode to.  This <strong><u>will not</u></strong> automatically create the shortcode page for you!</em>\r\n";
     }
 
-    public function curlcast_developer_render($args) {
-        echo "<p>" . __('Please <strong><u>do not change</u></strong> these unless you know what you are doing!', 'curlcast') . "</p>";
+    public function curlcast_v2_developer_render($args) {
+        echo "<p>" . __('Please <strong><u>do not change</u></strong> these unless you know what you are doing!', 'curlcast_v2') . "</p>";
     }
 
-    public function curlcast_widgets_api_render() {
+    public function curlcast_v2_widgets_api_render() {
         $default_widgets_api = "http://widgets.curlcast.ca";
         $html_name = $this->curlcast_setting_prefix . '_widgets_api';
         $value = get_option($html_name, $default_widgets_api);
@@ -132,7 +132,7 @@ class Curlcast_Admin {
         echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to {$default_widgets_api}</em>\r\n";
     }
 
-    public function curlcast_api_host_render() {
+    public function curlcast_v2_api_host_render() {
         $default_api_host = "http://curlcast.ca";
         $html_name = $this->curlcast_setting_prefix . '_api_host';
         $value = get_option($html_name, 'http://curlcast.ca/');
