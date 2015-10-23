@@ -10,15 +10,22 @@ class CurlcastV2 {
 
     protected $version;
 
+    protected $plugin_path;
+
+    protected $plugin_update_uri;
+
     public function __construct() {
-        $this->plugin_name = 'curlcast_v2';
-        $this->version = '0.1.1';
+        $this->plugin_name = 'curlcast-v2';
+        $this->version = CURLCAST_V2_RELEASE;
+
+        $this->plugin_path = plugin_dir_path( dirname( __FILE__ ) );
+
+        $this->plugin_update_uri = 'http://temp-wordpress.curlcast.pairshaped.ca/update.php';
 
         $this->load_dependencies();
         $this->set_locale();
         $this->define_admin_hooks();
         $this->define_public_hooks();
-        add_filter('auto_update_plugin', '__return_true');
     }
 
     private function load_dependencies() {
@@ -44,6 +51,14 @@ class CurlcastV2 {
          * side of the site.
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-public.php';
+
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-auto-update.php';
+
+        new CurlcastAutoUpdate(
+          $this->version,
+          $this->plugin_update_uri,
+          $this->plugin_path . $this->plugin_name . '.php'
+        );
 
         $this->loader = new Curlcast_Loader();
     }
