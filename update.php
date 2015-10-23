@@ -1,9 +1,5 @@
 <?php
-$entry_php = file_get_contents("./curlcast.php");
-$lines = explode("\n", $entry_php);
-$version_line = explode(' ', $lines[18]);
-
-$version = array_pop($version_line);
+include_once(dirname( __FILE__ ) . 'includes/version.php');
 
 $description = 'Latest stable version of the Curlcast statistics plugin';
 
@@ -17,7 +13,7 @@ if (isset($_POST['action'])) {
           $obj = new stdClass();
           $obj->slug = 'curlcast.php';
           $obj->plugin_name = 'curlcast.php';
-          $obj->new_version = $version;
+          $obj->new_version = CURLCAST_V2_RELEASE;
           $obj->requires = '3.0';
           $obj->tested = '4.3.1';
           $obj->downloaded = 1;

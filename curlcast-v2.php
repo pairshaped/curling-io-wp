@@ -14,13 +14,10 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Curlcast V2 Wordpress Plugin
- * Plugin URI:        http://temp-wordpress.curlcast.ca/
  * Description:       Curlcast Live Curling Statistics
- * Version:           2.0.1
+ * Version:           2.x
  * Author:            PairShaped
  * Author URI:        http://pairshaped.ca
- * License:
- * License URI:
  * Text Domain:       curlcast
  * Domain Path:       /languages
  */
@@ -29,6 +26,8 @@
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
+
+include_once(plugin_dir_path( __FILE__ ) . 'includes/version.php');
 
 function activate_plugin_name() {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-curlcast-activator.php';
