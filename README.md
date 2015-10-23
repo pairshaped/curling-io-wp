@@ -4,7 +4,7 @@
 
 ## Specification
 
-The plugin will provide the ```[curlcast_full]``` shortcode and ```[curlcast_sidebar]`` for the full widget and a sidebar widget respectively. Administrators can specify an API key and select the page that the widget is embedded in.
+The plugin will provide the `[curlcast_full]` shortcode and `[curlcast_sidebar]` for the full widget and a sidebar widget respectively. Administrators can specify an API key and select the page that the widget is embedded in.
 
 The routes / pages will be:
 * /stats/
