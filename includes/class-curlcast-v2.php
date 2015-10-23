@@ -2,7 +2,7 @@
 
 include 'class-curlcast-shortcodes.php';
 
-class Curlcast {
+class CurlcastV2 {
 
     protected $loader;
 
