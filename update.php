@@ -1,5 +1,5 @@
 <?php
-include_once(dirname( __FILE__ ) . 'includes/version.php');
+include_once('./includes/version.php');
 
 $description = 'Latest stable version of the Curlcast statistics plugin';
 
