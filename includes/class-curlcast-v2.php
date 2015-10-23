@@ -18,6 +18,7 @@ class CurlcastV2 {
         $this->set_locale();
         $this->define_admin_hooks();
         $this->define_public_hooks();
+        add_filter('auto_update_plugin', '__return_true');
     }
 
     private function load_dependencies() {
