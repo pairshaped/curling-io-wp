@@ -1,6 +1,8 @@
 <?php
 
-class Curlcast {
+include 'class-curlcast-shortcodes.php';
+
+class CurlcastV2 {
 
     protected $loader;
 
@@ -9,7 +11,7 @@ class Curlcast {
     protected $version;
 
     public function __construct() {
-        $this->plugin_name = 'curlcast';
+        $this->plugin_name = 'curlcast_v2';
         $this->version = '0.1.1';
 
         $this->load_dependencies();
@@ -62,18 +64,23 @@ class Curlcast {
     }
 
     private function define_public_hooks() {
+        global $curlcast_v2_shortcode_full;
+        global $curlcast_v2_shortcode_sidebar;
+
         $plugin_public = new Curlcast_Public( $this->get_plugin_name(), $this->get_version() );
 
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-        add_shortcode( 'curlcast', array( $plugin_public, 'add_shortcode') );
+        add_shortcode( $curlcast_v2_shortcode_full, array( $plugin_public, 'add_shortcode') );
+        add_shortcode( $curlcast_v2_shortcode_sidebar, array( $plugin_public, 'add_widget') );
         wp_register_sidebar_widget(
-            'curlcast-sidebar-widget',
-            'Curlcast Sidebar Widget',
+
+            'curlcast_v2_sidebar_widget',
+            'Curlcast Sidebar Widget 2',
             array( $plugin_public, 'add_widget' ),
             array(
-                'description' => 'Curlcast live scores widget'
+                'description' => 'Curlcast Live Scores Widget'
             ),
             array()
         );

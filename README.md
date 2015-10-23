@@ -4,7 +4,7 @@
 
 ## Specification
 
-The plugin will provide the ```[curlcast]``` shortcode for the full widget and a sidebar widget. Administrators can specify an API key and select the page that the widget is embedded in.
+The plugin will provide the `[curlcast_full]` shortcode and `[curlcast_sidebar]` for the full widget and a sidebar widget respectively. Administrators can specify an API key and select the page that the widget is embedded in.
 
 The routes / pages will be:
 * /stats/
@@ -40,7 +40,7 @@ git clone git@github.com:pairshaped/curlcast-wordpress.git
 1. Log into your wordpress admin panel.
 2. Go to "Settings" > "Permalinks"
 3. Select any of the common settings options and save. It doesn't matter which you select. This just ensures the creation of an .htaccess file which we need in order to handle the custom routes.
-4. Create a new page for your stats/scoreboard to be embedded.  You can use the shortcode ```[curlcast]``` on the page.  You may want to set the page's url to /scoreboard/ or /stats/ depending on your desired setup.
+4. Create a new page for your stats/scoreboard to be embedded.  You can use the shortcode ```[curlcast_full]``` on the page.  You may want to set the page's url to /scoreboard/ or /stats/ depending on your desired setup.
 5. Go to "Plugins"
 6. Click "Activate" next to "Curlcast Wordpress Plugin"
 7. Go to "Settings" > "Curlcast"
