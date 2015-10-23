@@ -6,7 +6,7 @@ $description = 'Latest stable version of the Curlcast statistics plugin';
 if (isset($_POST['action'])) {
     switch ($_POST['action']) {
       case 'version':
-          echo $version;
+          echo CURLCAST_V2_RELEASE;
           break;
 
       case 'info':
