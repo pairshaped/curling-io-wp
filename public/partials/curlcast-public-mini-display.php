@@ -7,9 +7,15 @@ $curlcast_api_key = get_option('curlcast_v2_api_key', '');
 $page_id = $this->get_full_widget_page();
 $base_url = get_page_link($page_id);
 
+$uuid = uniqid();
+
 ?>
 
-<div id='curlcast-mini' class="curlcast"></div>
+<aside class="curlcast-mini__container widget">
+  <h3 class="widget-title">Scoreboard mini</h3>
+  <div id='curlcast-mini-<?php echo $uuid; ?>' class="curlcast"></div>
+</aside>
+
 
 <script type="text/javascript">
   (function(window, ajaxGet){
@@ -37,7 +43,7 @@ $base_url = get_page_link($page_id);
               basePath: '<?php echo $base_url; ?>'
             };
 
-            window.CurlCastWidgets.mountMini(props, document.getElementById('curlcast-mini'));
+            window.CurlCastWidgets.mountMini(props, document.getElementById('curlcast-mini-<?php echo $uuid; ?>'));
           });
         },
         error: function(request) {

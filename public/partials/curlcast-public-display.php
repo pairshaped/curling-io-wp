@@ -4,9 +4,11 @@ $curlcast_widgets_api = get_option('curlcast_v2_widgets_api', 'http://widgets.cu
 $curlcast_api_host = get_option('curlcast_v2_api_host', 'http://curlcast.ca');
 $curlcast_api_key = get_option('curlcast_v2_api_key', '');
 
+$uuid = uniqid();
+
 ?>
 
-<div id='curlcast-full' class="curlcast"></div>
+  <div id='curlcast-full-<?php echo $uuid; ?>' class="curlcast"></div>
 
 <script type="text/javascript">
   (function(window, ajaxGet){
@@ -34,7 +36,7 @@ $curlcast_api_key = get_option('curlcast_v2_api_key', '');
               apiHost: api_host
             };
 
-            window.CurlCastWidgets.mountFull(props, document.getElementById('curlcast-full'));
+            window.CurlCastWidgets.mountFull(props, document.getElementById('curlcast-full-<?php echo $uuid; ?>'));
           });
         },
         error: function(request) {
