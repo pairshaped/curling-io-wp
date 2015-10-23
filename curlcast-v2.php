@@ -14,9 +14,9 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Curlcast V2 Wordpress Plugin
- * Plugin URI:        http://curlcast.ca/plugin
+ * Plugin URI:        http://temp-wordpress.curlcast.ca/
  * Description:       Curlcast Live Curling Statistics
- * Version:           2.0.0
+ * Version:           2.0.1
  * Author:            PairShaped
  * Author URI:        http://pairshaped.ca
  * License:
