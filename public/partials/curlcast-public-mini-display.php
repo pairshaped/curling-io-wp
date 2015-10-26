@@ -15,7 +15,7 @@ $uuid = uniqid();
   <?php if ($title) { ?>
     <h3 class="widget-title"><?php echo $title; ?></h3>
   <?php } ?>
-    <div id='curlcast-mini-<?php echo $uuid; ?>' class="curlcast"></div>
+    <div id='curlcast-mini-<?php echo $uuid; ?>' class="curlcast-v2 curlcast-mini"></div>
 </aside>
 
 
