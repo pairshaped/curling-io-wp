@@ -30,7 +30,7 @@ class Curlcast_Public {
         include_once 'partials/curlcast-public-mini-display.php';
     }
 
-    public function get_full_widget_page() {
-        return get_option('curlcast_v2_scoreboard_page');
+    public function register_widget() {
+        register_widget('CurlcastSidebarWidget');
     }
 }
