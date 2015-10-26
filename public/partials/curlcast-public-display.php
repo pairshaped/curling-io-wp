@@ -8,7 +8,7 @@ $uuid = uniqid();
 
 ?>
 
-  <div id='curlcast-full-<?php echo $uuid; ?>' class="curlcast"></div>
+  <div id='curlcast-full-<?php echo $uuid; ?>' class="curlcast-v2 curlcast-full"></div>
 
 <script type="text/javascript">
   (function(window, ajaxGet){
