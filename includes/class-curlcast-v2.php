@@ -53,13 +53,6 @@ class CurlcastV2 {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-public.php';
 
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-sidebar-widget.php';
-        // require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-auto-update.php';
-        //
-        // new CurlcastAutoUpdate(
-        //   $this->version,
-        //   $this->plugin_update_uri,
-        //   $this->plugin_path . $this->plugin_name . '.php'
-        // );
 
         $this->loader = new Curlcast_Loader();
     }
