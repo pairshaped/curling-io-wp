@@ -52,13 +52,7 @@ class CurlcastV2 {
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-public.php';
 
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-auto-update.php';
-
-        new CurlcastAutoUpdate(
-          $this->version,
-          $this->plugin_update_uri,
-          $this->plugin_path . $this->plugin_name . '.php'
-        );
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-sidebar-widget.php';
 
         $this->loader = new Curlcast_Loader();
     }
@@ -90,16 +84,8 @@ class CurlcastV2 {
 
         add_shortcode( $curlcast_v2_shortcode_full, array( $plugin_public, 'add_shortcode') );
         add_shortcode( $curlcast_v2_shortcode_sidebar, array( $plugin_public, 'add_widget') );
-        wp_register_sidebar_widget(
 
-            'curlcast_v2_sidebar_widget',
-            'Curlcast Sidebar Widget 2',
-            array( $plugin_public, 'add_widget' ),
-            array(
-                'description' => 'Curlcast Live Scores Widget'
-            ),
-            array()
-        );
+        $this->loader->add_action( 'widgets_init', $plugin_public, 'register_widget');
     }
 
     public function run() {

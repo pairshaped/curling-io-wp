@@ -4,7 +4,7 @@ $curlcast_widgets_api = get_option('curlcast_v2_widgets_api', 'http://widgets.cu
 $curlcast_api_host = get_option('curlcast_v2_api_host', 'http://curlcast.ca');
 $curlcast_api_key = get_option('curlcast_v2_api_key', '');
 
-$page_id = $this->get_full_widget_page();
+$page_id = get_option('curlcast_v2_scoreboard_page');
 $base_url = get_page_link($page_id);
 
 $uuid = uniqid();
@@ -12,8 +12,10 @@ $uuid = uniqid();
 ?>
 
 <aside class="curlcast-mini__container widget">
-  <h3 class="widget-title">Scoreboard mini</h3>
-  <div id='curlcast-mini-<?php echo $uuid; ?>' class="curlcast"></div>
+  <?php if ($title) { ?>
+    <h3 class="widget-title"><?php echo $title; ?></h3>
+  <?php } ?>
+    <div id='curlcast-mini-<?php echo $uuid; ?>' class="curlcast"></div>
 </aside>
 
 
