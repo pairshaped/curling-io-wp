@@ -23,11 +23,15 @@ class Curlcast_Public {
     }
 
     public function add_shortcode( $args ) {
+        ob_start();
         include_once 'partials/curlcast-public-display.php';
+        return ob_get_clean();
     }
 
     public function add_widget( $args ) {
+        ob_start();
         include_once 'partials/curlcast-public-mini-display.php';
+        return ob_get_clean();
     }
 
     public function register_widget() {
