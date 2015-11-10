@@ -13,8 +13,10 @@ $uuid = uniqid();
 
 <aside class="curlcast-mini__container widget">
   <?php if ($title) { ?>
-    <h4><?php echo $title; ?></h4>
-    <div class="stripe-line"></div>
+    <div class="widget-top">
+      <h4><?php echo $title; ?></h4>
+      <div class="stripe-line"></div>
+    </div>
   <?php } ?>
     <div id='curlcast-mini-<?php echo $uuid; ?>' class="curlcast-v2 curlcast-mini"></div>
 </aside>
