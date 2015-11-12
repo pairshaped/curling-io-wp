@@ -5,7 +5,8 @@
     var props = {
       history: false,
       apiKey: window.CurlcastV2.mini.api_key,
-      apiHost: window.CurlcastV2.mini.api_host
+      apiHost: window.CurlcastV2.mini.api_host,
+      basePath: window.CurlcastV2.mini.baseUrl
     };
 
     window.CurlCastWidgets.mountMini(props, target);
