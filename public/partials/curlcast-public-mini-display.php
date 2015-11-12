@@ -15,7 +15,10 @@ $div_id = "curlcast-mini-{$uuid}";
 
 <aside class="curlcast-mini__container widget">
   <?php if ($title) { ?>
-    <h3 class="widget-title"><?php echo $title; ?></h3>
+    <div class="widget-top">
+      <h4><?php echo $title; ?></h4>
+      <div class="stripe-line"></div>
+    </div>
   <?php } ?>
     <div id='<?php echo $div_id; ?>' class="curlcast-v2 curlcast-mini"></div>
 </aside>
