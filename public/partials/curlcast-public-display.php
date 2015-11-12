@@ -6,45 +6,10 @@ $curlcast_api_key = get_option('curlcast_v2_api_key', '');
 
 $uuid = uniqid();
 
+$div_id = "curlcast-full-{$uuid}";
 ?>
 
-  <div id='curlcast-full-<?php echo $uuid; ?>' class="curlcast-v2 curlcast-full"></div>
+<div id='<?php echo $div_id; ?>' class="curlcast-v2 curlcast-full"></div>
 
-<script type="text/javascript">
-  (function(window, ajaxGet){
-    'use strict';
-
-    var widgets_api = "<?php echo $curlcast_widgets_api; ?>",
-        api_host = "<?php echo $curlcast_api_host; ?>",
-        api_key = "<?php echo $curlcast_api_key; ?>";
-
-    addEventListener('DOMContentLoaded', function() {
-      ajaxGet(widgets_api + "/manifest.json", {
-        success: function(response) {
-          var scriptFile,
-              index,
-              scriptTags = [];
-          scriptTags = response.map(function(scriptFile) {
-            return createScript(widgets_api + "/" + scriptFile)
-          });
-          loadScripts(scriptTags, function() {
-            var props;
-
-            props = {
-              history: false,
-              apiKey: api_key,
-              apiHost: api_host
-            };
-
-            window.CurlCastWidgets.mountFull(props, document.getElementById('curlcast-full-<?php echo $uuid; ?>'));
-          });
-        },
-        error: function(request) {
-          log('Something bad happened', request);
-        }
-      });
-    }, true)
-
-  })(window, ajaxGet);
-</script>
+<script type="text/javascript">window.CurlcastV2 = window.CurlcastV2 || {mini: {}, full: {}}; CurlcastV2.full.widgets_api = "<?php echo $curlcast_widgets_api; ?>"; CurlcastV2.full.api_host = "<?php echo $curlcast_api_host; ?>"; CurlcastV2.full.api_key = "<?php echo $curlcast_api_key; ?>"; CurlcastV2.full.domTarget = "<?php echo $div_id; ?>";</script>
 
