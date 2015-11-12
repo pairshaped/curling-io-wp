@@ -1,14 +1,14 @@
 (function(window, ajaxGet){
   'use strict';
 
-  function mountFullWidget(target){
+  function mountMiniWidget(target){
     var props = {
       history: false,
       apiKey: window.CurlcastV2.mini.api_key,
       apiHost: window.CurlcastV2.mini.api_host
     };
 
-    window.CurlCastWidgets.mountFull(props, target);
+    window.CurlCastWidgets.mountMini(props, target);
   };
 
   document.addEventListener("DOMContentLoaded", function(){
