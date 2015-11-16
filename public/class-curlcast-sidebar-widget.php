@@ -13,7 +13,16 @@ class CurlcastSidebarWidget extends WP_Widget {
 
     public function widget($args, $instance) {
       $title = $instance['title'];
+      echo $args['before_widget'];
+      if (!empty($title)) {
+          echo $args['before_title'] . $title . $args['after_title'];
+      }
+
+      ob_start();
       include_once 'partials/curlcast-public-mini-display.php';
+      echo ob_get_clean();
+
+      echo $args['after_widget'];
     }
 
     public function form($instance) {
