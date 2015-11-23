@@ -10,7 +10,6 @@ function log() {
   alert(JSON.stringify(arguments));
 }
 
-
 function ajaxGet(url, callbacks) {
   var dataReady, request;
 
@@ -24,13 +23,12 @@ function ajaxGet(url, callbacks) {
     }
   };
 
+
+  useXDomainRequest = false;
   request = new XMLHttpRequest();
-  if ("withCredentials" in request) {
-    request.withCredentials = false; //true;
-  } else if (typeof XDomainRequest != "undefined") {
+  if (typeof XDomainRequest != "undefined") {
+    useXDomainRequest = true
     request = new XDomainRequest();
-  } else {
-    log("CORS NOT SUPPORTED BY THE BROWSER.");
   }
 
   if (!request) {
@@ -38,13 +36,23 @@ function ajaxGet(url, callbacks) {
     return request;
   }
 
-  request.onreadystatechange = function() {
-    if (request.readyState == XMLHttpRequest.DONE) {
-      dataReady(request, callbacks);
-    }
-  };
-
   request.open('GET', url, true);
+
+  if (useXDomainRequest) {
+    request.onload = function() {
+      if (callbacks.success) callbacks.success(JSON.parse(request.responseText))
+    };
+    request.onerror = function() {
+      if (callbacks.error) callbacks.error(request)
+    };
+  } else {
+    request.onreadystatechange = function() {
+      if (request.readyState == XMLHttpRequest.DONE) {
+        dataReady(request, callbacks);
+      }
+    };
+  }
+
   request.send(null);
 
   return request;
