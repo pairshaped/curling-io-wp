@@ -26,17 +26,34 @@ class Curlcast_Public {
 
     public function add_shortcode( $args ) {
         ob_start();
+        $curlcast_language = $this->guess_language();
         include_once 'partials/curlcast-public-display.php';
         return ob_get_clean();
     }
 
     public function add_widget( $args ) {
         ob_start();
+        $curlcast_language = $this->guess_language();
         include_once 'partials/curlcast-public-mini-display.php';
         return ob_get_clean();
     }
 
     public function register_widget() {
         register_widget('CurlcastSidebarWidget');
+    }
+
+    private function guess_language() {
+      $language_setting = substr( get_bloginfo('language'), 0, 2 );
+
+      $supported_languages = ['en', 'fr'];
+
+      foreach( $supported_languages as $lang )
+      {
+        if ( $lang == $language_setting ) {
+          return $lang;
+        }
+      }
+
+      return $supported_languages[0];
     }
 }
