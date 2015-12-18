@@ -18,10 +18,19 @@ class Curlcast_Public {
     public function enqueue_scripts() {
         $plugins_root = plugin_dir_url(dirname(__FILE__));
 
-        wp_enqueue_script( $this->plugin_name . '_public_ajax_get', $plugins_root . 'common/js/ajaxGet.js', array(), $this->version, false );
-        wp_enqueue_script( $this->plugin_name . '_public_scripts', $plugins_root . 'common/js/script.js', array(), $this->version, false );
-        wp_enqueue_script( $this->plugin_name . '_public_full', $plugins_root . 'common/js/load_full.js', array(), $this->version, false );
-        wp_enqueue_script( $this->plugin_name . '_public_mini', $plugins_root . 'common/js/load_mini.js', array(), $this->version, false );
+        $jsonManifest = wp_remote_retrieve_body( wp_remote_get('http://widgets.curlcast.ca/manifest.json') );
+
+        $manifest = json_decode($jsonManifest);
+
+        foreach($manifest as $idx => $remoteScript) {
+            wp_enqueue_script(
+                $this->plugin_name . '_remote_' . $idx,
+                'http://widgets.curlcast.ca/' . $remoteScript,
+                array(),
+                $this->version,
+                false
+            );
+        }
     }
 
     public function add_shortcode( $args ) {
