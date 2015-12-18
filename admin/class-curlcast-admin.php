@@ -21,10 +21,6 @@ class Curlcast_Admin {
 
     public function enqueue_scripts() {
         $plugins_root = plugin_dir_url(dirname(__FILE__));
-
-        wp_enqueue_script( $this->plugin_name, $plugins_root . '/admin/js/curlcast-admin.js', array(), $this->version, false );
-        wp_enqueue_script( $this->plugin_name . '_admin_ajax_get', $plugins_root . '/common/js/ajaxGet.js', array(), $this->version, false );
-        wp_enqueue_script( $this->plugin_name . '_admin_scripts', $plugins_root . '/common/js/script.js', array(), $this->version, false );
     }
 
     public function add_options_page() {
