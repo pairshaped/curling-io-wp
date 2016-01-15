@@ -54,7 +54,7 @@ class Curlcast_Public {
     private function guess_language() {
       $language_setting = substr( get_bloginfo('language'), 0, 2 );
 
-      $supported_languages = ['en', 'fr'];
+      $supported_languages = array('en', 'fr');
 
       foreach( $supported_languages as $lang )
       {
