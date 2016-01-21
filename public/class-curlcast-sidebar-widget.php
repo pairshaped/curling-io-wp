@@ -19,7 +19,7 @@ class CurlcastSidebarWidget extends WP_Widget {
       }
 
       ob_start();
-      $curlcast_language = $this->guess_language();
+      $curlcast_language = Curlcast_i18n::guess_language();
       include_once 'partials/curlcast-public-mini-display.php';
       echo ob_get_clean();
 
@@ -53,20 +53,5 @@ EOS;
         $instance['title'] = strip_tags($new_instance['title']);
 
         return $instance;
-    }
-
-    private function guess_language() {
-      $language_setting = substr( get_bloginfo('language'), 0, 2 );
-
-      $supported_languages = ['en', 'fr'];
-
-      foreach( $supported_languages as $lang )
-      {
-        if ( $lang == $language_setting ) {
-          return $lang;
-        }
-      }
-
-      return $supported_languages[0];
     }
 }
