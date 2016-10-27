@@ -7,9 +7,7 @@ $curlcast_api_key = get_option('curlcast_v2_api_key', '');
 $page_id = get_option('curlcast_v2_scoreboard_page');
 $base_url = get_page_link($page_id);
 
-$uuid = uniqid();
-
-$div_id = "curlcast-full-{$uuid}";
+$div_id = "curlcast-full";
 ?>
 
 <div id='<?php echo $div_id; ?>' class="curlcast-v2 curlcast-full"></div>
