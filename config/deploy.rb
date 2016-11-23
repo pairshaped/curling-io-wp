@@ -11,7 +11,7 @@ else
   set :branch, 'master'
 end
 
-set :domains, %w[app1.curlcast.pairshaped.ca app2.curlcast.pairshaped.ca]
+set :domains, %w[app2.curling.io app3.curling.io]
 
 desc "Create update.zip"
 task :create_update do
