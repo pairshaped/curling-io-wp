@@ -121,7 +121,7 @@ class Curlcast_Admin {
     }
 
     public function curlcast_v2_widgets_api_render() {
-        $default_widgets_api = "http://widgets.curlcast.ca";
+        $default_widgets_api = "http://widgets.curling.io";
         $html_name = $this->curlcast_setting_prefix . '_widgets_api';
         $value = get_option($html_name, $default_widgets_api);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";

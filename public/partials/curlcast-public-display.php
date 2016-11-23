@@ -1,7 +1,7 @@
 <?php
 
-$curlcast_widgets_api = get_option('curlcast_v2_widgets_api', 'http://widgets.curlcast.ca');
-$curlcast_api_host = get_option('curlcast_v2_api_host', 'http://curlcast.ca');
+$curlcast_widgets_api = get_option('curlcast_v2_widgets_api', 'http://widgets.curling.io');
+$curlcast_api_host = get_option('curlcast_v2_api_host', 'http://curling.io');
 $curlcast_api_key = get_option('curlcast_v2_api_key', '');
 
 $page_id = get_option('curlcast_v2_scoreboard_page');
