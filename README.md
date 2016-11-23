@@ -22,12 +22,14 @@ The scoreboard_mini is an embeddable widget with a minmum size of 350px.
 ## Installation
 
 ### Using Git (Recommended)
+
 ```
 cd [wp-install-dir]/wp-content/plugins
 git clone git@github.com:pairshaped/curlcast-wordpress.git
 ```
 
 ### From zip archive
+
 1. Download the latest release archive from: [https://github.com/pairshaped/curlcast-wordpress/releases](https://github.com/pairshaped/curlcast-wordpress/releases)
 2. Log into your wordpress admin panel
 3. Click "Add New" then "Upload"
@@ -35,6 +37,7 @@ git clone git@github.com:pairshaped/curlcast-wordpress.git
 
 
 ### After install
+
 1. Log into your wordpress admin panel.
 2. Go to "Settings" > "Permalinks"
 3. Select any of the common settings options and save. It doesn't matter which you select. This just ensures the creation of an .htaccess file which we need in order to handle the custom routes.
