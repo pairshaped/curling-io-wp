@@ -18,16 +18,17 @@ class Curlcast_Public {
     public function enqueue_scripts() {
         $plugins_root = plugin_dir_url(dirname(__FILE__));
 
-        $widgetsHost = 'http://widgets.curling.io';
+        $widgetsHost = get_option('curlcast_v2_widgets_api', 'http://widgets.curling.io');
 
         $jsonManifest = wp_remote_retrieve_body( wp_remote_get($widgetsHost . '/manifest.json') );
 
         $manifest = json_decode($jsonManifest);
 
         foreach($manifest as $idx => $remoteScript) {
+            $url = join('/', array($widgetsHost, $remoteScript));
             wp_enqueue_script(
                 $this->plugin_name . '_remote_' . $idx,
-                $widgetsHost . $remoteScript,
+                $url,
                 array(),
                 $this->version,
                 false

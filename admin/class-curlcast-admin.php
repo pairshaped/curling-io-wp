@@ -95,7 +95,7 @@ class Curlcast_Admin {
         $html_name = $this->curlcast_setting_prefix . '_api_key';
         $value = get_option($html_name);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>The organization key from curlcast.ca</em>\r\n";
+        echo "<br /><em>The organization key from curling.io</em>\r\n";
     }
 
     public function curlcast_v2_scoreboard_page_render() {
@@ -129,9 +129,9 @@ class Curlcast_Admin {
     }
 
     public function curlcast_v2_api_host_render() {
-        $default_api_host = "http://curlcast.ca";
+        $default_api_host = "http://curling.io";
         $html_name = $this->curlcast_setting_prefix . '_api_host';
-        $value = get_option($html_name, 'http://curlcast.ca/');
+        $value = get_option($html_name, 'http://curling.io/');
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
         echo "<br /><em>Where the curlcast json data is hosted.  Defaults to {$default_api_host}</em>\r\n";
     }
