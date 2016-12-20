@@ -121,17 +121,19 @@ class Curlcast_Admin {
     }
 
     public function curlcast_v2_widgets_api_render() {
+        $default = CURLCAST_V2_DEFAULT_WIDGETS;
         $html_name = $this->curlcast_setting_prefix . '_widgets_api';
-        $value = get_option($html_name, CURLCAST_V2_DEFAULT_WIDGETS);
+        $value = get_option($html_name, $default);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to ${CURLCAST_V2_DEFAULT_WIDGETS}</em>\r\n";
+        echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to {$default}</em>\r\n";
     }
 
     public function curlcast_v2_api_host_render() {
+        $default = CURLCAST_V2_DEFAULT_API;
         $html_name = $this->curlcast_setting_prefix . '_api_host';
-        $value = get_option($html_name, CURLCAST_V2_DEFAULT_API);
+        $value = get_option($html_name, $default);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>Where the curlcast json data is hosted.  Defaults to ${CURLCAST_V2_DEFAULT_API}</em>\r\n";
+        echo "<br /><em>Where the curlcast json data is hosted.  Defaults to {$default}</em>\r\n";
     }
 
 }
