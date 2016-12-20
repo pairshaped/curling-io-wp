@@ -121,19 +121,17 @@ class Curlcast_Admin {
     }
 
     public function curlcast_v2_widgets_api_render() {
-        $default_widgets_api = "http://widgets.curling.io";
         $html_name = $this->curlcast_setting_prefix . '_widgets_api';
-        $value = get_option($html_name, $default_widgets_api);
+        $value = get_option($html_name, CURLCAST_V2_DEFAULT_WIDGETS);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to {$default_widgets_api}</em>\r\n";
+        echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to ${CURLCAST_V2_DEFAULT_WIDGETS}</em>\r\n";
     }
 
     public function curlcast_v2_api_host_render() {
-        $default_api_host = "http://curling.io";
         $html_name = $this->curlcast_setting_prefix . '_api_host';
-        $value = get_option($html_name, 'http://curling.io/');
+        $value = get_option($html_name, CURLCAST_V2_DEFAULT_API);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>Where the curlcast json data is hosted.  Defaults to {$default_api_host}</em>\r\n";
+        echo "<br /><em>Where the curlcast json data is hosted.  Defaults to ${CURLCAST_V2_DEFAULT_API}</em>\r\n";
     }
 
 }
