@@ -1,5 +1,5 @@
 <?php
-include_once('./includes/version.php');
+include_once('./includes/constants.php');
 
 $description = 'Latest stable version of the Curlcast statistics plugin';
 

@@ -18,16 +18,18 @@ class Curlcast_Public {
     public function enqueue_scripts() {
         $plugins_root = plugin_dir_url(dirname(__FILE__));
 
-        $widgetsHost = 'http://widgets.curling.io';
+        $widgetsHost = get_option('curlcast_v2_widgets_api', CURLCAST_V2_DEFAULT_WIDGETS);
 
-        $jsonManifest = wp_remote_retrieve_body( wp_remote_get($widgetsHost . '/manifest.json') );
+        $manifest = $this->join_url( array($widgetsHost, 'manifest.json') );
+        $jsonManifest = wp_remote_retrieve_body( wp_remote_get($manifest) );
 
         $manifest = json_decode($jsonManifest);
 
         foreach($manifest as $idx => $remoteScript) {
+            $url = $this->join_url( array($widgetsHost, $remoteScript) );
             wp_enqueue_script(
                 $this->plugin_name . '_remote_' . $idx,
-                $widgetsHost . $remoteScript,
+                $url,
                 array(),
                 $this->version,
                 false
@@ -51,5 +53,16 @@ class Curlcast_Public {
 
     public function register_widget() {
         register_widget('CurlcastSidebarWidget');
+    }
+
+    // -----------
+
+    private function join_url($pieces = array()) {
+        $stripped_pieces = array_map($this->strip_trailing_slash, $pieces);
+        return implode('/', $stripped_pieces);
+    }
+
+    private function strip_trailing_slash($str) {
+        return rtrim($str, '/');
     }
 }

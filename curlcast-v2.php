@@ -8,14 +8,14 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              http://curlcast.ca
+ * @link              http://curling.io
  * @since             1.0.0
  * @package           CurlcastV2
  *
  * @wordpress-plugin
  * Plugin Name:       Curlcast V2 Wordpress Plugin
  * Description:       Curlcast Live Curling Statistics
- * Version:           2.1.5
+ * Version:           2.1.6
  * Author:            PairShaped
  * Author URI:        http://pairshaped.ca
  * Text Domain:       curlcast
@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-include_once(plugin_dir_path( __FILE__ ) . 'includes/version.php');
+include_once(plugin_dir_path( __FILE__ ) . 'includes/constants.php');
 
 function activate_plugin_name() {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-curlcast-activator.php';
