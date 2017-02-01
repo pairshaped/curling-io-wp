@@ -81,9 +81,9 @@ class Curlcast_Admin {
         $this->create_settings_field('api_key', 'Access Key', 'general', array($this, 'curlcast_sanitize_default'));
         $this->create_settings_field('scoreboard_page', 'Scoreboard Page', 'general', array($this, 'curlcast_sanitize_default'));
 
-        $this->create_settings_section('developer', 'Developer Settings');
-        $this->create_settings_field('widgets_api', 'Curlcast Widgets API Host', 'developer', array($this, 'curlcast_sanitize_url'));
-        $this->create_settings_field('api_host', 'API Host URL', 'developer', array($this, 'curlcast_sanitize_url'));
+        // $this->create_settings_section('developer', 'Developer Settings');
+        // $this->create_settings_field('widgets_api', 'Curlcast Widgets API Host', 'developer', array($this, 'curlcast_sanitize_url'));
+        // $this->create_settings_field('api_host', 'API Host URL', 'developer', array($this, 'curlcast_sanitize_url'));
 
         register_setting( $this->plugin_name, $this->curlcast_setting_prefix . '_manifest_json');
     }
@@ -93,9 +93,9 @@ class Curlcast_Admin {
         return addslashes(strip_tags($value));
     }
 
-    public function curlcast_sanitize_url( $value ) {
-        return $this->curlcast_sanitize_default(rtrim($value, '/'));
-    }
+    // public function curlcast_sanitize_url( $value ) {
+    //     return $this->curlcast_sanitize_default(rtrim($value, '/'));
+    // }
 
     public function curlcast_v2_general_render($args) {
         echo "<p>" . __('Please change the settings accordingly', 'curlcast_v2') . "</p>";
@@ -124,26 +124,6 @@ class Curlcast_Admin {
         );
         echo wp_dropdown_pages($args);
         echo "<br /><em>This is the page that you added the shortcode to.  This <strong><u>will not</u></strong> automatically create the shortcode page for you!</em>\r\n";
-    }
-
-    public function curlcast_v2_developer_render($args) {
-        echo "<p>" . __('Please <strong><u>do not change</u></strong> these unless you know what you are doing!', 'curlcast_v2') . "</p>";
-    }
-
-    public function curlcast_v2_widgets_api_render() {
-        $default = CURLCAST_V2_DEFAULT_WIDGETS;
-        $html_name = $this->curlcast_setting_prefix . '_widgets_api';
-        $value = get_option($html_name, $default);
-        echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>Where the curlcast widgets are hosted.  Defaults to {$default}</em>\r\n";
-    }
-
-    public function curlcast_v2_api_host_render() {
-        $default = CURLCAST_V2_DEFAULT_API;
-        $html_name = $this->curlcast_setting_prefix . '_api_host';
-        $value = get_option($html_name, $default);
-        echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>Where the curlcast json data is hosted.  Defaults to {$default}</em>\r\n";
     }
 
 }

@@ -18,7 +18,7 @@ class Curlcast_Public {
     public function enqueue_scripts() {
         $plugins_root = plugin_dir_url(dirname(__FILE__));
 
-        $widgetsHost = get_option('curlcast_v2_widgets_api', CURLCAST_V2_DEFAULT_WIDGETS);
+        $widgetsHost = CURLCAST_V2_DEFAULT_WIDGETS;
 
         $manifest = $this->join_url( array($widgetsHost, 'manifest.json') );
         $jsonManifest = wp_remote_retrieve_body( wp_remote_get($manifest) );

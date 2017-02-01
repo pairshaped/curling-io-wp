@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       Curlcast V2 Wordpress Plugin
  * Description:       Curlcast Live Curling Statistics
- * Version:           2.1.6
+ * Version:           2.2.0
  * Author:            PairShaped
  * Author URI:        http://pairshaped.ca
  * Text Domain:       curlcast
