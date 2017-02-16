@@ -81,10 +81,6 @@ class Curlcast_Admin {
         $this->create_settings_field('api_key', 'Access Key', 'general', array($this, 'curlcast_sanitize_default'));
         $this->create_settings_field('scoreboard_page', 'Scoreboard Page', 'general', array($this, 'curlcast_sanitize_default'));
 
-        // $this->create_settings_section('developer', 'Developer Settings');
-        // $this->create_settings_field('widgets_api', 'Curlcast Widgets API Host', 'developer', array($this, 'curlcast_sanitize_url'));
-        // $this->create_settings_field('api_host', 'API Host URL', 'developer', array($this, 'curlcast_sanitize_url'));
-
         register_setting( $this->plugin_name, $this->curlcast_setting_prefix . '_manifest_json');
     }
 
@@ -92,10 +88,6 @@ class Curlcast_Admin {
     public function curlcast_sanitize_default( $value ) {
         return addslashes(strip_tags($value));
     }
-
-    // public function curlcast_sanitize_url( $value ) {
-    //     return $this->curlcast_sanitize_default(rtrim($value, '/'));
-    // }
 
     public function curlcast_v2_general_render($args) {
         echo "<p>" . __('Please change the settings accordingly', 'curlcast_v2') . "</p>";
