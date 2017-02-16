@@ -12,15 +12,11 @@ class CurlcastV2 {
 
     protected $plugin_path;
 
-    protected $plugin_update_uri;
-
     public function __construct() {
-        $this->plugin_name = 'curlcast-v2';
+        $this->plugin_name = 'curling-io';
         $this->version = CURLCAST_V2_RELEASE;
 
         $this->plugin_path = plugin_dir_path( dirname( __FILE__ ) );
-
-        $this->plugin_update_uri = 'http://temp-wordpress.curlcast.pairshaped.ca/update.php';
 
         $this->load_dependencies();
         $this->set_locale();
