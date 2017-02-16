@@ -1,4 +1,4 @@
-# Wordpress Plugin for Curlcast Stats
+# Wordpress Plugin for Curling I/O Stats
 
 ## Specification
 

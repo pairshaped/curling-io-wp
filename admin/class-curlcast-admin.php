@@ -25,8 +25,8 @@ class Curlcast_Admin {
 
     public function add_options_page() {
         $this->plugin_screen_hook_suffix = add_options_page(
-            __('Curlcast Settings', 'curlcast'),
-            __('Curlcast', 'curlcast'),
+            __('Curling I/O Settings', 'curlcast'),
+            __('Curling I/O', 'curlcast'),
             'manage_options',
             $this->plugin_name,
             array($this, 'display_options_page')
