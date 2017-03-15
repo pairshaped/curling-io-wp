@@ -1,0 +1,10 @@
+#curling-io__settings,
+#curling-io__summary {
+  vertical-align: top;
+}
+
+#curling-io__summary {
+  padding-left: 20px;
+  width: 25%;
+  border-left: 1px #dedede solid;
+}

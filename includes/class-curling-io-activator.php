@@ -1,6 +1,6 @@
 <?php
 
-class Curlcast_Activator {
+class CurlingIO_Activator {
 
     public static function activate() {
 
