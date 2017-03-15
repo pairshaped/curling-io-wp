@@ -71,7 +71,7 @@ class CurlingIO {
 
     private function define_public_hooks() {
         global $curling_io_shortcode_full;
-        global $curling_io_shortcode_sidebar;
+        global $curling_io_legacy_shortcode_full;
 
         $plugin_public = new CurlingIO_Public( $this->get_plugin_name(), $this->get_version() );
 
