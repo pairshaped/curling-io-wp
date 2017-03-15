@@ -1,8 +1,8 @@
 <?php
 
-include 'class-curlcast-shortcodes.php';
+include 'class-curling-io-shortcodes.php';
 
-class CurlcastV2 {
+class CurlingIO {
 
     protected $loader;
 
@@ -12,14 +12,13 @@ class CurlcastV2 {
 
     protected $plugin_path;
 
-    public function __construct() {
-        $this->plugin_name = 'curling-io';
-        $this->version = CURLCAST_V2_RELEASE;
+    public function __construct( $plugin_name, $plugin_Version ) {
+        $this->plugin_name = $plugin_name;
+        $this->version = $plugin_version;
 
         $this->plugin_path = plugin_dir_path( dirname( __FILE__ ) );
 
         $this->load_dependencies();
-        $this->set_locale();
         $this->define_admin_hooks();
         $this->define_public_hooks();
     }
@@ -29,39 +28,40 @@ class CurlcastV2 {
          * The class responsible for orchestrating the actions and filters of the
          * core plugin.
          */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-loader.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curling-io-loader.php';
 
         /**
          * The class responsible for defining internationalization functionality
          * of the plugin.
          */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curlcast-i18n.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curling-io-i18n.php';
 
         /**
          * The class responsible for defining all actions that occur in the admin area.
          */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-curlcast-admin.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-curling-io-admin.php';
 
         /**
          * The class responsible for defining all actions that occur in the public-facing
          * side of the site.
          */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-public.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curling-io-public.php';
 
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curlcast-sidebar-widget.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-curling-io-sidebar-widget.php';
 
-        $this->loader = new Curlcast_Loader();
-    }
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-curling-io-updater.php';
 
-    private function set_locale() {
-        $plugin_i18n = new Curlcast_i18n();
-        $plugin_i18n->set_domain( $this->get_plugin_name() );
+        new CurlingIOUpdater(
+          $this->plugin_path . $this->plugin_name . '.php',
+          'pairshaped',
+          'curling-io-wp'
+        );
 
-        $this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+        $this->loader = new CurlingIO_Loader();
     }
 
     private function define_admin_hooks() {
-        $plugin_admin = new Curlcast_Admin( $this->get_plugin_name(), $this->get_version() );
+        $plugin_admin = new CurlingIO_Admin( $this->get_plugin_name(), $this->get_version() );
 
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
         $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -70,16 +70,16 @@ class CurlcastV2 {
     }
 
     private function define_public_hooks() {
-        global $curlcast_v2_shortcode_full;
-        global $curlcast_v2_shortcode_sidebar;
+        global $curling_io_shortcode_full;
+        global $curling_io_shortcode_sidebar;
 
-        $plugin_public = new Curlcast_Public( $this->get_plugin_name(), $this->get_version() );
+        $plugin_public = new CurlingIO_Public( $this->get_plugin_name(), $this->get_version() );
 
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-        add_shortcode( $curlcast_v2_shortcode_full, array( $plugin_public, 'add_shortcode') );
-        add_shortcode( $curlcast_v2_shortcode_sidebar, array( $plugin_public, 'add_widget') );
+        add_shortcode( $curling_io_shortcode_full, array( $plugin_public, 'add_full_widget') );
+        add_shortcode( $curling_io_legacy_shortcode_full, array( $plugin_public, 'add_full_widget') );
 
         $this->loader->add_action( 'widgets_init', $plugin_public, 'register_widget');
     }
@@ -99,5 +99,4 @@ class CurlcastV2 {
     public function get_version() {
         return $this->version;
     }
-
 }

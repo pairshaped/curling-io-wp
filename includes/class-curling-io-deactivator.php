@@ -1,6 +1,6 @@
 <?php
 
-class Curlcast_Deactivator {
+class CurlingIO_Deactivator {
 
     public static function deactivate() {
 

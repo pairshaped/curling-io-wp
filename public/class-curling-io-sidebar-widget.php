@@ -1,12 +1,12 @@
 <?php
 
-class CurlcastSidebarWidget extends WP_Widget {
+class CurlingIOSidebarWidget extends WP_Widget {
     public function __construct() {
         parent::__construct(
-            'curlcast_sidebar_widget',
-            __( 'Curlcast V2 Sidebar Widget', 'curlcast' ),
+            'curling_io_sidebar_widget',
+            __( 'Curling.IO Sidebar Widget', 'curling-io' ),
             array(
-                  'description' => __( 'Curlcast Sidebar Scoreboard', 'curlcast' )
+                  'description' => __( 'Curling.IO Sidebar Scoreboard', 'curling-io' )
             )
         );
     }
@@ -19,15 +19,15 @@ class CurlcastSidebarWidget extends WP_Widget {
       }
 
       ob_start();
-      $curlcast_language = Curlcast_i18n::guess_language();
-      include_once 'partials/curlcast-public-mini-display.php';
+      $language = CurlingIO_i18n::guess_language();
+      include_once 'partials/curling-io-public-mini-display.php';
       echo ob_get_clean();
 
       echo $args['after_widget'];
     }
 
     public function form($instance) {
-        $title  = __('Scoreboard Mini', 'curlcast');
+        $title  = __('Scoreboard Mini', 'curling-io');
         if ($instance) $title  = $instance['title'];
 
         $this->render_form(

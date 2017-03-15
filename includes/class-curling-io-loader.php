@@ -1,6 +1,6 @@
 <?php
 
-class Curlcast_Loader {
+class CurlingIO_Loader {
 
     // Arrays for handling Wordpress API Arrays
     protected $actions;
