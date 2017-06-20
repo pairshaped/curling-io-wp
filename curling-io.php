@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       Curling I/O
  * Description:       Curling I/O Live Curling Statistics
- * Version:           3.0.1
+ * Version:           3.0.2
  * Author:            PairShaped
  * Author URI:        http://pairshaped.ca
  */
@@ -31,7 +31,7 @@ register_deactivation_hook( __FILE__, 'deactivate_plugin_name' );
 require plugin_dir_path( __FILE__ ) . 'includes/class-curling-io.php';
 
 function run_plugin_name() {
-    $plugin = new CurlingIO( 'curling-io', '3.0.1' );
+    $plugin = new CurlingIO( 'curling-io', '3.0.2' );
     $plugin->run();
 }
 
