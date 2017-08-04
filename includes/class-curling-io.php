@@ -12,7 +12,7 @@ class CurlingIO {
 
     protected $plugin_path;
 
-    public function __construct( $plugin_name, $plugin_Version ) {
+    public function __construct( $plugin_name, $plugin_version ) {
         $this->plugin_name = $plugin_name;
         $this->version = $plugin_version;
 
