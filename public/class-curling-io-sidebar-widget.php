@@ -12,7 +12,7 @@ class CurlingIOSidebarWidget extends WP_Widget {
     }
 
     public function widget($args, $instance) {
-      $title = $instance['title'];
+      $title = isset($instance['title']) ? $instance['title'] : NULL;
       echo $args['before_widget'];
       if (!empty($title)) {
           echo $args['before_title'] . $title . $args['after_title'];

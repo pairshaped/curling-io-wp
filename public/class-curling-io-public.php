@@ -52,11 +52,10 @@ class CurlingIO_Public {
     // -----------
 
     private function join_url($pieces = array()) {
-        $stripped_pieces = array_map($this->strip_trailing_slash, $pieces);
+        $stripped_pieces = $pieces;
+        foreach($stripped_pieces as $piece) {
+          $piece = rtrim($piece, '/');
+        }
         return implode('/', $stripped_pieces);
-    }
-
-    private function strip_trailing_slash($str) {
-        return rtrim($str, '/');
     }
 }
