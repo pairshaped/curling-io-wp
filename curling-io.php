@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-include_once(plugin_dir_path( __FILE__ ) . 'includes/constants.php');
+require_once(plugin_dir_path( __FILE__ ) . 'includes/constants.php');
 
 function activate_plugin_name() {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-curling-io-activator.php';

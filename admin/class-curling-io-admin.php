@@ -35,6 +35,7 @@ class CurlingIO_Admin {
 
     public function display_options_page() {
         $plugin_version = $this->version;
+
         include_once 'partials/curling-io-admin-display.php';
     }
 

@@ -1,7 +1,5 @@
 <?php
 
-include 'class-curling-io-shortcodes.php';
-
 class CurlingIO {
 
     protected $loader;
@@ -70,16 +68,13 @@ class CurlingIO {
     }
 
     private function define_public_hooks() {
-        global $curling_io_shortcode_full;
-        global $curling_io_legacy_shortcode_full;
-
         $plugin_public = new CurlingIO_Public( $this->get_plugin_name(), $this->get_version() );
 
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-        add_shortcode( $curling_io_shortcode_full, array( $plugin_public, 'add_full_widget') );
-        add_shortcode( $curling_io_legacy_shortcode_full, array( $plugin_public, 'add_full_widget') );
+        add_shortcode( CURLING_IO_SHORTCODE, array( $plugin_public, 'add_full_widget') );
+        add_shortcode( CURLING_IO_SHORTCODE_LEGACY, array( $plugin_public, 'add_full_widget') );
 
         $this->loader->add_action( 'widgets_init', $plugin_public, 'register_widget');
     }
