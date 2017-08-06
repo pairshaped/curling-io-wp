@@ -41,7 +41,7 @@ class CurlingIO_Public {
         ob_start();
         $language = CurlingIO_i18n::guess_language();
         $plugin_version = $this->version;
-        include_once 'partials/curling-io-public-display.php';
+        require_once 'partials/curling-io-public-display.php';
         return ob_get_clean();
     }
 
