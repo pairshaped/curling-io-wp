@@ -11,7 +11,7 @@ $div_id = "curling-io-mini";
 
 $javascript = <<<JS
 <script type="text/javascript">
-  window.CurlcastWidgetsV2 = window.CurlcastWidgetsV2 || { LANGUAGE: "$language" }
+  window.CurlcastWidgetsV2 = window.CurlcastWidgetsV2 || { LANGUAGE: "$language" };
   window.CurlCastWidgets.mountMini({
     widgetsApi: "$curling_io_widgets_api",
     apiHost: "$curling_io_api_host",
