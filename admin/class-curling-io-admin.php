@@ -99,7 +99,7 @@ class CurlingIO_Admin {
         $html_name = $this->settings_prefix . '_api_key';
         $value = get_option($html_name);
         echo "<input type='text' name='$html_name' id='$html_name' value='$value' style='width: 450px;' />";
-        echo "<br /><em>The organization key from curling.io</em>\r\n";
+        echo "<br /><em>The organization key from legacy.curling.io</em>\r\n";
     }
 
     public function curling_io_scoreboard_page_render() {

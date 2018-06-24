@@ -4,9 +4,9 @@ class CurlingIOSidebarWidget extends WP_Widget {
     public function __construct() {
         parent::__construct(
             'curling_io_sidebar_widget',
-            __( 'Curling.IO Sidebar Widget', 'curling-io' ),
+            __( 'Curling I/O Sidebar Widget', 'curling-io' ),
             array(
-                  'description' => __( 'Curling.IO Sidebar Scoreboard', 'curling-io' )
+                  'description' => __( 'Curling I/O Sidebar Scoreboard', 'curling-io' )
             )
         );
     }
